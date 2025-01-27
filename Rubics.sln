@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rubics", "Rubics\Rubics.csproj", "{43937580-C0C0-4B54-B943-CF75A9EB2C75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repl", "Repl\Repl.csproj", "{01D2F8F9-B2D1-4FD8-86E0-42E505453487}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{43937580-C0C0-4B54-B943-CF75A9EB2C75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43937580-C0C0-4B54-B943-CF75A9EB2C75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43937580-C0C0-4B54-B943-CF75A9EB2C75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43937580-C0C0-4B54-B943-CF75A9EB2C75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01D2F8F9-B2D1-4FD8-86E0-42E505453487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01D2F8F9-B2D1-4FD8-86E0-42E505453487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01D2F8F9-B2D1-4FD8-86E0-42E505453487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01D2F8F9-B2D1-4FD8-86E0-42E505453487}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
