@@ -16,7 +16,6 @@ internal sealed class Parser {
         while (token.Kind != SyntaxKind.EndOfFileToken);
         
         this.tokens = [..tokens];
-        diagnostics.AddRange(lexer.Diagnostics);
     }
 
     public SyntaxTree Parse() {
@@ -25,7 +24,7 @@ internal sealed class Parser {
         return new SyntaxTree(expression, endOfFileToken, diagnostics);
     }
 
-    public IEnumerable<string> Diagnostics => diagnostics;
+    public Diagnostics Diagnostics => diagnostics;
 
     private SyntaxExpression ParseExpression(int parentPrecedence = 0) {
         SyntaxExpression left;
@@ -99,11 +98,11 @@ internal sealed class Parser {
         if (Current.Kind == kind)
             return NextToken();
         
-        diagnostics.Add($"ERROR (at {position}): Unexpected token <{Current.Kind}>, expected <{kind}>");
+        diagnostics.ReportUnexpectedToken(Current.Span, Current.Kind, kind);
         return new Token(kind, Current.Position, "\0");
     }
 
     private readonly Token[] tokens = [];
-    private readonly List<string> diagnostics = [];
+    private readonly Diagnostics diagnostics = [];
     private int position;
 };

@@ -7,6 +7,7 @@ public sealed class Token(SyntaxKind kind, int position, string literal, object?
     public int Position { get; } = position;
     public string Literal { get; } = literal;
     public object? Value { get; } = value;
+    public TextSpan Span => new(Position, Literal.Length);
 
     public override SyntaxKind Kind { get; } = kind;
     public override IEnumerable<SyntaxNode> Children() => [];

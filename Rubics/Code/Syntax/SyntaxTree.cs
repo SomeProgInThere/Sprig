@@ -6,7 +6,7 @@ public abstract class SyntaxNode {
     public abstract IEnumerable<SyntaxNode> Children();
 }
 
-public sealed class SyntaxTree(SyntaxExpression root, Token endOfFileToken, IEnumerable<string> diagnostics) {
+public sealed class SyntaxTree(SyntaxExpression root, Token endOfFileToken, Diagnostics diagnostics) {
     
     public static SyntaxTree Parse(string source) {
         var parser = new Parser(source);
@@ -15,5 +15,5 @@ public sealed class SyntaxTree(SyntaxExpression root, Token endOfFileToken, IEnu
     
     public SyntaxExpression Root { get; } = root;
     public Token EndOfFileToken { get; } = endOfFileToken;
-    public IReadOnlyList<string> Diagnostics { get; } = [..diagnostics];
+    public Diagnostics Diagnostics { get; } = diagnostics;
 }

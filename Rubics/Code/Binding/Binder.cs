@@ -15,7 +15,7 @@ internal sealed class Binder {
         };
     }
     
-    public IEnumerable<string> Diagnostics => diagnostics;
+    public Diagnostics Diagnostics => diagnostics;
 
     private static BoundExpression BindLiteralExpression(LiteralExpression syntax) {
         var value = syntax.Value ?? 0;
@@ -27,7 +27,7 @@ internal sealed class Binder {
         var op = UnaryOperator.Bind(syntax.OperatorToken.Kind, operand.Type);
 
         if (op == null) {
-            diagnostics.Add($"Unary operator '{syntax.OperatorToken.Literal}' is not defined for type '{operand.Type}'");
+            diagnostics.ReportUndefinedUnaryOp(syntax.OperatorToken.Span, syntax.OperatorToken.Literal, operand.Type);
             return operand;
         }
 
@@ -40,7 +40,7 @@ internal sealed class Binder {
         var op = BinaryOperator.Bind(syntax.OperatorToken.Kind, left.Type, right.Type);
         
         if (op == null) {
-            diagnostics.Add($"Binary operator '{syntax.OperatorToken.Literal}' is not defined for type '{left.Type}' and '{right.Type}'");
+            diagnostics.ReportUndefinedBinaryOp(syntax.OperatorToken.Span, syntax.OperatorToken.Literal, left.Type, right.Type);
             return left;
         }
 
@@ -85,5 +85,5 @@ internal sealed class Binder {
         return null;
     }
 
-    private readonly List<string> diagnostics = [];
+    private readonly Diagnostics diagnostics = [];
 }

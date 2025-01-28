@@ -17,8 +17,7 @@ internal sealed class Lexer(string source) {
             var literal = source.Substring(start, length);
             
             if (!int.TryParse(literal, out var value))
-                diagnostics.Add($"WARN (at {position}): Parsing failed for integer '{literal}'");
-
+                diagnostics.ReportInvalidNumber(new TextSpan(position, length), literal, typeof(int));
             return new Token(SyntaxKind.NumberToken, start, literal, value);
         }
 
@@ -76,11 +75,11 @@ internal sealed class Lexer(string source) {
                 break;
         }
         
-        diagnostics.Add($"ERROR (at {position}): Bad character input: '{Current}'");
+        diagnostics.ReportBadCharacter(position, Current);
         return new Token(SyntaxKind.BadToken, position++, source.Substring(position - 1, 1));
     }
 
-    public IEnumerable<string> Diagnostics => diagnostics;
+    public Diagnostics Diagnostics => diagnostics;
 
     private char Current => Peek(0);
     private char Next => Peek(1);
@@ -93,5 +92,5 @@ internal sealed class Lexer(string source) {
     }
 
     private int position;
-    private readonly List<string> diagnostics = [];
+    private readonly Diagnostics diagnostics = [];
 }

@@ -23,7 +23,7 @@ public sealed class Compilation(SyntaxTree syntax) {
     public SyntaxTree Syntax { get; } = syntax;
 }
 
-public sealed class EvaluationResult(IEnumerable<string> diagnostics, object? result = null) {
-    public IReadOnlyList<string> Diagnostics { get; } = [..diagnostics];
+public sealed class EvaluationResult(IEnumerable<DiagnosticMessage> diagnostics, object? result = null) {
+    public IEnumerable<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public object? Result { get; } = result;
 }
