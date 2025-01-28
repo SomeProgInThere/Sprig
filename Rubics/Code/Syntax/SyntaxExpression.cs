@@ -1,10 +1,10 @@
 
 namespace Rubics.Code.Syntax;
 
-public abstract class SyntaxExpression : SyntaxNode {}
+public abstract class Expression : SyntaxNode {}
 
 internal sealed class LiteralExpression(Token literalToken, object? value)
-    : SyntaxExpression {
+    : Expression {
 
     public LiteralExpression(Token literalToken) 
         : this(literalToken, literalToken.Value) {}
@@ -18,10 +18,36 @@ internal sealed class LiteralExpression(Token literalToken, object? value)
     }
 }
 
-internal sealed class UnaryExpression(SyntaxExpression operand, Token operatorToken)
-    : SyntaxExpression {
+public sealed class NameExpression(Token identifierToken) 
+    : Expression {
+    
+    public Token IdentifierToken { get; } = identifierToken;
 
-    public SyntaxExpression Operand { get; } = operand;
+    public override SyntaxKind Kind => SyntaxKind.NameExpression;
+    public override IEnumerable<SyntaxNode> Children() {
+        yield return IdentifierToken;
+    }
+}
+
+public sealed class AssignmentExpression(Token identifierToken, Token equalsToken, Expression expression)
+    : Expression {
+    
+    public Token IdentifierToken { get; } = identifierToken;
+    public Token EqualsToken { get; } = equalsToken;
+    public Expression Expression { get; } = expression;
+
+    public override SyntaxKind Kind => SyntaxKind.AssignmentExpression;
+    public override IEnumerable<SyntaxNode> Children() {
+        yield return IdentifierToken;
+        yield return EqualsToken;
+        yield return Expression;
+    }
+}
+
+internal sealed class UnaryExpression(Expression operand, Token operatorToken)
+    : Expression {
+
+    public Expression Operand { get; } = operand;
     public Token OperatorToken { get; } = operatorToken;
 
     public override SyntaxKind Kind => SyntaxKind.UnaryExpression;
@@ -31,11 +57,11 @@ internal sealed class UnaryExpression(SyntaxExpression operand, Token operatorTo
     }
 }
 
-internal sealed class BinaryExpression(SyntaxExpression left, SyntaxExpression right, Token operatorToken)
-    : SyntaxExpression {
+internal sealed class BinaryExpression(Expression left, Expression right, Token operatorToken)
+    : Expression {
 
-    public SyntaxExpression Left { get; } = left;
-    public SyntaxExpression Right { get; } = right;
+    public Expression Left { get; } = left;
+    public Expression Right { get; } = right;
     public Token OperatorToken { get; } = operatorToken;
 
     public override SyntaxKind Kind => SyntaxKind.BinaryExpression;
@@ -46,12 +72,12 @@ internal sealed class BinaryExpression(SyntaxExpression left, SyntaxExpression r
     }
 }
 
-internal sealed class ParenthesizedExpression(Token open, Token closed, SyntaxExpression expression)
-    : SyntaxExpression {
+internal sealed class ParenthesizedExpression(Token open, Token closed, Expression expression)
+    : Expression {
 
     public Token Open { get; } = open;
     public Token Closed { get; } = closed;
-    public SyntaxExpression Expression { get; } = expression;
+    public Expression Expression { get; } = expression;
 
     public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
     public override IEnumerable<SyntaxNode> Children() {

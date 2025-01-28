@@ -15,6 +15,7 @@ public enum SyntaxKind {
     SlashToken,
     PercentToken,
     BangToken,
+    EqualsToken,
     DoubleAmpersandToken,
     DoublePipeToken,
     DoubleEqualsToken,
@@ -28,6 +29,8 @@ public enum SyntaxKind {
 
     // Expressions
     LiteralExpression,
+    NameExpression,
+    AssignmentExpression,
     UnaryExpression,
     BinaryExpression,
     ParenthesizedExpression,

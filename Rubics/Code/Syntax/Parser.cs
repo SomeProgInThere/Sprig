@@ -19,21 +19,33 @@ internal sealed class Parser {
     }
 
     public SyntaxTree Parse() {
-        var expression = ParseExpression();
+        var expression = ParseAssignmentExpression();
         var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
         return new SyntaxTree(expression, endOfFileToken, diagnostics);
     }
 
+    private Expression ParseAssignmentExpression() {
+        if (Current.Kind == SyntaxKind.IdentifierToken && Next.Kind == SyntaxKind.EqualsToken) {
+            var identifierToken = NextToken();
+            var operatorToken = NextToken();
+            var right = ParseAssignmentExpression();
+
+            return new AssignmentExpression(identifierToken, operatorToken, right);
+        }
+
+        return ParseBinaryExpression();
+    }
+
     public Diagnostics Diagnostics => diagnostics;
 
-    private SyntaxExpression ParseExpression(int parentPrecedence = 0) {
-        SyntaxExpression left;
+    private Expression ParseBinaryExpression(int parentPrecedence = 0) {
+        Expression left;
 
         var unaryPrecedence = Current.Kind.UnaryOperatorPrecedence();
         if (unaryPrecedence != 0) {
             
             var operatorToken = NextToken();
-            var operand = ParseExpression(unaryPrecedence);
+            var operand = ParseBinaryExpression(unaryPrecedence);
             left = new UnaryExpression(operand, operatorToken);
         }
         else {
@@ -46,18 +58,18 @@ internal sealed class Parser {
                 break;
 
             var operatorToken = NextToken();
-            var right = ParseExpression(binaryPrecedence);
+            var right = ParseBinaryExpression(binaryPrecedence);
             left = new BinaryExpression(left, right, operatorToken);
         }
 
         return left;
     }
 
-    private SyntaxExpression ParsePrimaryExpression() {
+    private Expression ParsePrimaryExpression() {
         switch (Current.Kind) {
             case SyntaxKind.OpenParenthesisToken: {
                 var left = NextToken();
-                var expression = ParseExpression();
+                var expression = ParseBinaryExpression();
                 var right = MatchToken(SyntaxKind.ClosedParenthesisToken);
 
                 return new ParenthesizedExpression(left, right, expression);
@@ -69,6 +81,11 @@ internal sealed class Parser {
                 var value = keywordToken.Kind == SyntaxKind.TrueKeyword;
             
                 return new LiteralExpression(keywordToken, value);
+            }
+
+            case SyntaxKind.IdentifierToken: {
+                var identifierToken = NextToken();
+                return new NameExpression(identifierToken);
             }
 
             default: {
@@ -87,6 +104,7 @@ internal sealed class Parser {
     }
 
     private Token Current => Peek(0);
+    private Token Next => Peek(1);
 
     private Token NextToken() {
         var current = Current;

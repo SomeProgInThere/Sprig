@@ -46,6 +46,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
+    public void ReportUndefinedName(TextSpan span, string literal) {
+        var message = $"Variable '{literal}' does not exist";
+        Report(span, message);
+    }
+
     private void Report(TextSpan span, string message) {
         var diagnostic = new DiagnosticMessage(span, message);
         diagnostics.Add(diagnostic);

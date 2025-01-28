@@ -3,16 +3,25 @@ using Rubics.Code.Binding;
 
 namespace Rubics.Code;
 
-internal sealed class Evaluator(BoundExpression root) {
+internal sealed class Evaluator(BoundExpression root, Dictionary<string, object> variables) {
     
     public object Evaluate() {
         return EvaluateExpression(root);
     }
 
-    private static object EvaluateExpression(BoundExpression node) {
+    private object EvaluateExpression(BoundExpression node) {
         if (node is BoundLiteralExpression literal)
             return literal.Value;
+
+        if (node is BoundVariableExpression variable)
+            return variables[variable.Name];
         
+        if (node is BoundAssignmentExpression assignment) {
+            var value = EvaluateExpression(assignment.Expression);
+            variables[assignment.Name] = value;
+            return value;
+        }
+
         if (node is BoundUnaryExpression unary) {
             var operand = EvaluateExpression(unary.Operand);
 

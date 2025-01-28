@@ -46,23 +46,12 @@ internal sealed class BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind k
         new BinaryOperator(SyntaxKind.SlashToken,           BinaryOperatorKind.Divide,      typeof(int)),
         new BinaryOperator(SyntaxKind.PercentToken,         BinaryOperatorKind.Modulus,     typeof(int)),
 
-        new BinaryOperator(SyntaxKind.DoubleEqualsToken,     BinaryOperatorKind.Equals,      typeof(int), typeof(bool)),
-        new BinaryOperator(SyntaxKind.BangEqualsToken,       BinaryOperatorKind.NotEquals,   typeof(int), typeof(bool)),
+        new BinaryOperator(SyntaxKind.DoubleEqualsToken,    BinaryOperatorKind.Equals,      typeof(int), typeof(bool)),
+        new BinaryOperator(SyntaxKind.BangEqualsToken,      BinaryOperatorKind.NotEquals,   typeof(int), typeof(bool)),
 
         new BinaryOperator(SyntaxKind.DoubleAmpersandToken, BinaryOperatorKind.LogicalAnd,  typeof(bool)),
         new BinaryOperator(SyntaxKind.DoublePipeToken,      BinaryOperatorKind.LogicalOr,   typeof(bool)),
-        new BinaryOperator(SyntaxKind.DoubleEqualsToken,     BinaryOperatorKind.Equals,      typeof(bool)),
-        new BinaryOperator(SyntaxKind.BangEqualsToken,       BinaryOperatorKind.NotEquals,   typeof(bool)),
+        new BinaryOperator(SyntaxKind.DoubleEqualsToken,    BinaryOperatorKind.Equals,      typeof(bool)),
+        new BinaryOperator(SyntaxKind.BangEqualsToken,      BinaryOperatorKind.NotEquals,   typeof(bool)),
     ];
-}
-
-internal sealed class BoundBinaryExpression(BoundExpression left, BoundExpression right, BinaryOperator op) 
-    : BoundExpression {
-
-    public BinaryOperator Op { get; } = op;
-    public BoundExpression Left { get; } = left;
-    public BoundExpression Right { get; } = right;
-
-    public override BoundKind Kind => BoundKind.BinaryExpression;
-    public override Type Type => Op.ResultType;
 }

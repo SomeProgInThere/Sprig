@@ -7,6 +7,8 @@ public static class Program {
 
     private static void Main() {
         var showTrees = false;
+        var variables = new Dictionary<string, object>();
+
         while (true) {
 
             ColorPrint("> ", ConsoleColor.Yellow);
@@ -30,7 +32,7 @@ public static class Program {
 
             var syntaxTree = SyntaxTree.Parse(line);
             var compilation = new Compilation(syntaxTree);
-            var result = compilation.Evaluate();
+            var result = compilation.Evaluate(variables);
 
             if (showTrees)
                 PrettyPrint(syntaxTree.Root);

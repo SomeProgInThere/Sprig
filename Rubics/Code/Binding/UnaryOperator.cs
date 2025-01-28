@@ -30,18 +30,8 @@ internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kin
     public Type ResultType { get; } = resultType;
 
     private static readonly UnaryOperator[] operators = [
-        new UnaryOperator(SyntaxKind.BangToken, UnaryOperatorKind.LogicalNot, typeof(bool)),
-        new UnaryOperator(SyntaxKind.PlusToken, UnaryOperatorKind.Identity, typeof(int)),
-        new UnaryOperator(SyntaxKind.MinusToken, UnaryOperatorKind.Negetion, typeof(int)),
+        new UnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, typeof(bool)),
+        new UnaryOperator(SyntaxKind.PlusToken,  UnaryOperatorKind.Identity,   typeof(int)),
+        new UnaryOperator(SyntaxKind.MinusToken, UnaryOperatorKind.Negetion,   typeof(int)),
     ];
-}
-
-internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperator op)
-    : BoundExpression {
-
-    public UnaryOperator Op { get; } = op;
-    public BoundExpression Operand { get; } = operand;
-
-    public override BoundKind Kind => BoundKind.UnaryExpression;
-    public override Type Type => Operand.Type;
 }

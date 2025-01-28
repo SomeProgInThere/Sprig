@@ -60,6 +60,11 @@ internal sealed class Lexer(string source) {
                     return new Token(SyntaxKind.BangEqualsToken, ref position, 2, "!=");
                 else
                     return new Token(SyntaxKind.BangToken, position++, "!");
+            case '=':
+                if (Next == '=')
+                    return new Token(SyntaxKind.DoubleEqualsToken, ref position, 2, "==");
+                else
+                    return new Token(SyntaxKind.EqualsToken, position++, "=");
             case '&':
                 if (Next == '&')
                     return new Token(SyntaxKind.DoubleAmpersandToken, ref position, 2, "&&");
@@ -67,10 +72,6 @@ internal sealed class Lexer(string source) {
             case '|':
                 if (Next == '|')
                     return new Token(SyntaxKind.DoublePipeToken, ref position, 2, "||");
-                break;
-            case '=':
-                if (Next == '=')
-                    return new Token(SyntaxKind.DoubleEqualsToken, ref position, 2, "==");
                 break;
         }
         
