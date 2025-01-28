@@ -10,7 +10,7 @@ internal sealed class Binder {
             SyntaxKind.LiteralExpression       => BindLiteralExpression((LiteralExpression)syntax),
             SyntaxKind.UnaryExpression         => BindUnaryExpression((UnaryExpression)syntax),
             SyntaxKind.BinaryExpression        => BindBinaryExpression((BinaryExpression)syntax),
-            SyntaxKind.ParenthesizedExpression => BindExpression((ParenthesizedExpression)syntax),
+            SyntaxKind.ParenthesizedExpression => BindExpression(((ParenthesizedExpression)syntax).Expression),
             _ => throw new Exception($"Unexpected expression: {syntax.Kind}"),
         };
     }
