@@ -57,21 +57,20 @@ internal sealed class Lexer(string source) {
             
             case '!':
                 if (Next == '=')
-                    return new Token(SyntaxKind.BangEqualsToken, position += 2, "!=");
+                    return new Token(SyntaxKind.BangEqualsToken, ref position, 2, "!=");
                 else
                     return new Token(SyntaxKind.BangToken, position++, "!");
-            
             case '&':
                 if (Next == '&')
-                    return new Token(SyntaxKind.DoubleAmpersandToken, position += 2, "&&");
+                    return new Token(SyntaxKind.DoubleAmpersandToken, ref position, 2, "&&");
                 break;
             case '|':
                 if (Next == '|')
-                    return new Token(SyntaxKind.DoublePipeToken, position += 2, "||");
+                    return new Token(SyntaxKind.DoublePipeToken, ref position, 2, "||");
                 break;
             case '=':
                 if (Next == '=')
-                    return new Token(SyntaxKind.DoubleEqualsToken, position += 2, "==");
+                    return new Token(SyntaxKind.DoubleEqualsToken, ref position, 2, "==");
                 break;
         }
         

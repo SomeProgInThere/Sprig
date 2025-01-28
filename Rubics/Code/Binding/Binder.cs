@@ -24,10 +24,11 @@ internal sealed class Binder {
 
     private BoundExpression BindUnaryExpression(UnaryExpression syntax) {
         var operand = BindExpression(syntax.Operand);
-        var op = UnaryOperator.Bind(syntax.OperatorToken.Kind, operand.Type);
+        var token = syntax.OperatorToken;
+        var op = UnaryOperator.Bind(token.Kind, operand.Type);
 
         if (op == null) {
-            diagnostics.ReportUndefinedUnaryOp(syntax.OperatorToken.Span, syntax.OperatorToken.Literal, operand.Type);
+            diagnostics.ReportUndefinedUnaryOp(token.Span, token.Literal, operand.Type);
             return operand;
         }
 
@@ -37,52 +38,15 @@ internal sealed class Binder {
     private BoundExpression BindBinaryExpression(BinaryExpression syntax) {
         var left = BindExpression(syntax.Left);
         var right = BindExpression(syntax.Right);
-        var op = BinaryOperator.Bind(syntax.OperatorToken.Kind, left.Type, right.Type);
-        
+        var token = syntax.OperatorToken;
+        var op = BinaryOperator.Bind(token.Kind, left.Type, right.Type);
+
         if (op == null) {
-            diagnostics.ReportUndefinedBinaryOp(syntax.OperatorToken.Span, syntax.OperatorToken.Literal, left.Type, right.Type);
+            diagnostics.ReportUndefinedBinaryOp(token.Span, token.Literal, left.Type, right.Type);
             return left;
         }
 
         return new BoundBinaryExpression(left, right, op);
-    }
-
-    private UnaryOperatorKind? BindUnaryOperatorKind(SyntaxKind kind, Type operatorType) {
-        if (operatorType == typeof(int)) {
-            switch (kind) {
-                case SyntaxKind.PlusToken:  return UnaryOperatorKind.Identity;
-                case SyntaxKind.MinusToken: return UnaryOperatorKind.Negetion;
-            }
-        }
-
-        if (operatorType == typeof(bool)) {
-            switch (kind) {
-                case SyntaxKind.BangToken: return UnaryOperatorKind.LogicalNot;
-            }
-        }
-
-        return null;
-    }
-
-    private static BinaryOperatorKind? BindBinaryOperatorKind(SyntaxKind kind, Type leftType, Type rightType) {
-        if (leftType == typeof(int) && rightType == typeof(int)) {
-            switch (kind) {
-                case SyntaxKind.PlusToken:    return BinaryOperatorKind.Add;
-                case SyntaxKind.MinusToken:   return BinaryOperatorKind.Substact;
-                case SyntaxKind.StarToken:    return BinaryOperatorKind.Multiply;
-                case SyntaxKind.SlashToken:   return BinaryOperatorKind.Divide;
-                case SyntaxKind.PercentToken: return BinaryOperatorKind.Modulus;
-            }
-        }
-
-        if (leftType == typeof(bool) && rightType == typeof(bool)) {
-            switch (kind) {
-                case SyntaxKind.DoubleAmpersandToken: return BinaryOperatorKind.LogicalAnd;
-                case SyntaxKind.DoublePipeToken:      return BinaryOperatorKind.LogicalOr;
-            }
-        }
-
-        return null;
     }
 
     private readonly Diagnostics diagnostics = [];

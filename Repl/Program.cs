@@ -39,8 +39,21 @@ public static class Program {
                 ColorPrint($"{result.Result}\n", ConsoleColor.Blue);
             }
             else {
-                foreach (var diagnostic in result.Diagnostics)
+                foreach (var diagnostic in result.Diagnostics) {
+                    Console.WriteLine();
                     ColorPrint($"{diagnostic}\n", ConsoleColor.Red);
+
+                    var prefix = line[..diagnostic.Span.Start];
+                    var error = line.Substring(diagnostic.Span.Start, diagnostic.Span.Length);
+                    var suffix = line[diagnostic.Span.End..];
+
+                    Console.Write($"\t{prefix}");
+                    ColorPrint(error, ConsoleColor.Red);
+
+                    Console.Write($"{suffix}\n");
+                }
+
+                Console.WriteLine();
             }
         }
     }
