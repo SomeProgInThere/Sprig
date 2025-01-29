@@ -7,7 +7,7 @@ public static class Program {
 
     private static void Main() {
         var showTrees = false;
-        var variables = new Dictionary<string, object>();
+        var variables = new Dictionary<VariableSymbol, object>();
 
         while (true) {
 

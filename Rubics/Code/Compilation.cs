@@ -6,7 +6,7 @@ namespace Rubics.Code;
 
 public sealed class Compilation(SyntaxTree syntax) {
 
-    public EvaluationResult Evaluate(Dictionary<string, object> variables) {
+    public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables) {
         var binder = new Binder(variables);
         var expression = binder.BindExpression(Syntax.Root);
 
@@ -26,4 +26,9 @@ public sealed class Compilation(SyntaxTree syntax) {
 public sealed class EvaluationResult(IEnumerable<DiagnosticMessage> diagnostics, object? result = null) {
     public IEnumerable<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public object? Result { get; } = result;
+}
+
+public sealed class VariableSymbol(string name, Type type) {
+    public string Name { get; } = name;
+    public Type Type { get; } = type;
 }

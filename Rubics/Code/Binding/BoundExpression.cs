@@ -24,19 +24,19 @@ internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperato
     public override Type Type => Operand.Type;
 }
 
-internal sealed class BoundVariableExpression(string name, Type type)
+internal sealed class BoundVariableExpression(VariableSymbol variable)
     : BoundExpression {
 
-    public string Name { get; } = name;
-
+    public VariableSymbol Variable { get; } = variable;
+    
     public override BoundKind Kind => BoundKind.VariableExpression;
-    public override Type Type => type;
+    public override Type Type => Variable.Type;
 }
 
-internal sealed class BoundAssignmentExpression(string name, BoundExpression expression)
+internal sealed class BoundAssignmentExpression(VariableSymbol variable, BoundExpression expression)
     : BoundExpression {
 
-    public string Name { get; } = name;
+    public VariableSymbol Variable { get; } = variable;
     public BoundExpression Expression { get; } = expression;
 
     public override BoundKind Kind => BoundKind.AssignmentExpression;

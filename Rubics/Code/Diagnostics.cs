@@ -47,7 +47,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUndefinedName(TextSpan span, string literal) {
-        var message = $"Variable '{literal}' does not exist";
+        var message = $"Symbol '{literal}' is not defined";
         Report(span, message);
     }
 

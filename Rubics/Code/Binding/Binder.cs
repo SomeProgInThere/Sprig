@@ -3,7 +3,7 @@ using Rubics.Code.Syntax;
 
 namespace Rubics.Code.Binding;
 
-internal sealed class Binder(Dictionary<string, object> variables) {
+internal sealed class Binder(Dictionary<VariableSymbol, object> variables) {
 
     public BoundExpression BindExpression(Expression syntax) {
         return syntax.Kind switch {
@@ -27,33 +27,28 @@ internal sealed class Binder(Dictionary<string, object> variables) {
 
     private BoundExpression BindNameExpression(NameExpression syntax) {
         var token = syntax.IdentifierToken;
-        
-        if (!variables.TryGetValue(token.Literal, out var value)) {
+        var variable = variables.Keys.FirstOrDefault(v => v.Name == token.Literal);
+
+        if (variable == null) {
             diagnostics.ReportUndefinedName(token.Span, token.Literal);
             return new BoundLiteralExpression(0);
         }
 
-        var type = value?.GetType() ?? typeof(object);
-        return new BoundVariableExpression(token.Literal, type);
+        return new BoundVariableExpression(variable);
     }
 
     private BoundExpression BindAssignmentExpression(AssignmentExpression syntax){
         var name = syntax.IdentifierToken.Literal;
         var expression = BindExpression(syntax.Expression);
 
-        object? value;
-        if (expression.Type == typeof(int))
-            value = 0;
-        else if (expression.Type == typeof(bool))
-            value = false;
-        else
-            value = null;
-        
-        if (value == null) 
-            throw new Exception($"Unsupported variable type: {expression.Type}");
-        
-        variables[name] = value;
-        return new BoundAssignmentExpression(name, expression);
+        var variable = variables.Keys.FirstOrDefault(v => v.Name == name);
+        if (variable != null)
+            variables.Remove(variable);
+
+        var newVariable = new VariableSymbol(name, expression.Type);
+        variables[newVariable] = 0;
+
+        return new BoundAssignmentExpression(newVariable, expression);
     }
 
     private BoundExpression BindUnaryExpression(UnaryExpression syntax) {

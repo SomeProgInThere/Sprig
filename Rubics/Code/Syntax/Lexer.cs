@@ -18,6 +18,7 @@ internal sealed class Lexer(string source) {
             
             if (!int.TryParse(literal, out var value))
                 diagnostics.ReportInvalidNumber(new TextSpan(position, length), literal, typeof(int));
+                
             return new Token(SyntaxKind.NumberToken, start, literal, value);
         }
 

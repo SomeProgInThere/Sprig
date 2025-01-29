@@ -3,7 +3,7 @@ using Rubics.Code.Binding;
 
 namespace Rubics.Code;
 
-internal sealed class Evaluator(BoundExpression root, Dictionary<string, object> variables) {
+internal sealed class Evaluator(BoundExpression root, Dictionary<VariableSymbol, object> variables) {
     
     public object Evaluate() {
         return EvaluateExpression(root);
@@ -14,11 +14,11 @@ internal sealed class Evaluator(BoundExpression root, Dictionary<string, object>
             return literal.Value;
 
         if (node is BoundVariableExpression variable)
-            return variables[variable.Name];
+            return variables[variable.Variable];
         
         if (node is BoundAssignmentExpression assignment) {
             var value = EvaluateExpression(assignment.Expression);
-            variables[assignment.Name] = value;
+            variables[assignment.Variable] = value;
             return value;
         }
 
