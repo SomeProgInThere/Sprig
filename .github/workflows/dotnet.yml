@@ -14,3 +14,5 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build
+      - name: Test with xUnit
+        run: dotnet test

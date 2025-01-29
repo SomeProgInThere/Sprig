@@ -37,6 +37,7 @@ public enum SyntaxKind {
 }
 
 internal static class SyntaxKindExtensions {
+    
     public static int UnaryOperatorPrecedence(this SyntaxKind kind) {
         return kind switch {
             SyntaxKind.PlusToken or SyntaxKind.MinusToken or SyntaxKind.BangToken => 6,
