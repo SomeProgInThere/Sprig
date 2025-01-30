@@ -13,6 +13,32 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build
-      - name: Test with xUnit
-        run: dotnet test --no-build
+        run: dotnet build --configuration Release --no-restore
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: ./Rubics.Test/bin/Release/net9.0/
+
+  Test:
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: ./Rubics.Test/bin/Release/net9.0/
+      - name: Test
+        run: dotnet test Rubics.Test/Rubics.Test.csproj --logger "trx;LogFileName=test-results.trx"
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults/test-results.trx
