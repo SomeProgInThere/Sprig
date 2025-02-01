@@ -48,31 +48,31 @@ internal sealed class Lexer(string source) {
         }
     
         switch (Current) {
-            case '+': return new Token(SyntaxKind.PlusToken                 , position++, "+");
-            case '-': return new Token(SyntaxKind.MinusToken                , position++, "-");
-            case '*': return new Token(SyntaxKind.StarToken                 , position++, "*");
-            case '/': return new Token(SyntaxKind.SlashToken                , position++, "/");
-            case '%': return new Token(SyntaxKind.PercentToken              , position++, "%");
-            case '(': return new Token(SyntaxKind.OpenParenthesisToken      , position++, "("); 
-            case ')': return new Token(SyntaxKind.ClosedParenthesisToken    , position++, ")");
+            case '+': return new Token(SyntaxKind.PlusToken                 , position++);
+            case '-': return new Token(SyntaxKind.MinusToken                , position++);
+            case '*': return new Token(SyntaxKind.StarToken                 , position++);
+            case '/': return new Token(SyntaxKind.SlashToken                , position++);
+            case '%': return new Token(SyntaxKind.PercentToken              , position++);
+            case '(': return new Token(SyntaxKind.OpenParenthesisToken      , position++); 
+            case ')': return new Token(SyntaxKind.ClosedParenthesisToken    , position++);
             
             case '!':
                 if (Next == '=')
-                    return new Token(SyntaxKind.BangEqualsToken, ref position, 2, "!=");
+                    return new Token(SyntaxKind.BangEqualsToken, ref position, 2);
                 else
-                    return new Token(SyntaxKind.BangToken, position++, "!");
+                    return new Token(SyntaxKind.BangToken, position++);
             case '=':
                 if (Next == '=')
-                    return new Token(SyntaxKind.DoubleEqualsToken, ref position, 2, "==");
+                    return new Token(SyntaxKind.DoubleEqualsToken, ref position, 2);
                 else
-                    return new Token(SyntaxKind.EqualsToken, position++, "=");
+                    return new Token(SyntaxKind.EqualsToken, position++);
             case '&':
                 if (Next == '&')
-                    return new Token(SyntaxKind.DoubleAmpersandToken, ref position, 2, "&&");
+                    return new Token(SyntaxKind.DoubleAmpersandToken, ref position, 2);
                 break;
             case '|':
                 if (Next == '|')
-                    return new Token(SyntaxKind.DoublePipeToken, ref position, 2, "||");
+                    return new Token(SyntaxKind.DoublePipeToken, ref position, 2);
                 break;
         }
         

@@ -30,7 +30,7 @@ internal sealed class Binder(Dictionary<VariableSymbol, object> variables) {
         var variable = variables.Keys.FirstOrDefault(v => v.Name == token.Literal);
 
         if (variable == null) {
-            diagnostics.ReportUndefinedName(token.Span, token.Literal);
+            diagnostics.ReportUndefinedName(token.Span, token.Literal ?? "");
             return new BoundLiteralExpression(0);
         }
 

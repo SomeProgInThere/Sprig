@@ -63,4 +63,23 @@ internal static class SyntaxKindExtensions {
             _ => SyntaxKind.IdentifierToken,
         };
     }
+
+    public static string? GetLiteral(SyntaxKind kind) {
+        return kind switch {
+            SyntaxKind.PlusToken => "+",
+            SyntaxKind.MinusToken => "-",
+            SyntaxKind.StarToken => "*",
+            SyntaxKind.SlashToken => "/",
+            SyntaxKind.PercentToken => "%",
+            SyntaxKind.BangToken => "!",
+            SyntaxKind.EqualsToken => "=",
+            SyntaxKind.DoubleAmpersandToken => "&&",
+            SyntaxKind.DoublePipeToken => "||",
+            SyntaxKind.DoubleEqualsToken => "==",
+            SyntaxKind.BangEqualsToken => "!=",
+            SyntaxKind.OpenParenthesisToken => "(",
+            SyntaxKind.ClosedParenthesisToken => ")",
+            _ => null,
+        };
+    }
 }
