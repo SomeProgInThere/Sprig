@@ -4,82 +4,109 @@ namespace Rubics.Code.Syntax;
 internal sealed class Lexer(string source) {
 
     public Token Lex() {
-        if (position >= source.Length)
-            return new Token(SyntaxKind.EndOfFileToken, position, "\0");
 
-        if (char.IsDigit(Current)) {
-            
-            var start = position;
-            while (char.IsDigit(Current))
-                position++;
-            
-            var length = position - start;
-            var literal = source.Substring(start, length);
-            
-            if (!int.TryParse(literal, out var value))
-                diagnostics.ReportInvalidNumber(new TextSpan(position, length), literal, typeof(int));
-                
-            return new Token(SyntaxKind.NumberToken, start, literal, value);
-        }
-
-        if (char.IsWhiteSpace(Current)) {
-            
-            var start = position;
-            while (char.IsWhiteSpace(Current))
-                position++;
-            
-            var length = position - start;
-            var literal = source.Substring(start, length);
-
-            return new Token(SyntaxKind.WhitespaceToken, start, literal);
-        }
-
-        if (char.IsLetter(Current)) {
-            
-            var start = position;
-            while (char.IsLetter(Current))
-                position++;
-            
-            var length = position - start;
-            var literal = source.Substring(start, length);
-            var kind = SyntaxKindExtensions.GetKeywordKind(literal);
-
-            return new Token(kind, start, literal);
-        }
-    
+        start = position;
+        kind = SyntaxKind.BadToken;
+        value = null;
+        
         switch (Current) {
-            case '+': return new Token(SyntaxKind.PlusToken                 , position++);
-            case '-': return new Token(SyntaxKind.MinusToken                , position++);
-            case '*': return new Token(SyntaxKind.StarToken                 , position++);
-            case '/': return new Token(SyntaxKind.SlashToken                , position++);
-            case '%': return new Token(SyntaxKind.PercentToken              , position++);
-            case '(': return new Token(SyntaxKind.OpenParenthesisToken      , position++); 
-            case ')': return new Token(SyntaxKind.ClosedParenthesisToken    , position++);
+        case '\0': kind = SyntaxKind.EndOfFileToken; break;
+        
+        case '+': kind = SyntaxKind.PlusToken;              position++; break;
+        case '-': kind = SyntaxKind.MinusToken;             position++; break;
+        case '*': kind = SyntaxKind.StarToken;              position++; break;
+        case '/': kind = SyntaxKind.SlashToken;             position++; break;
+        case '%': kind = SyntaxKind.PercentToken;           position++; break;
+        case '(': kind = SyntaxKind.OpenParenthesisToken;   position++; break; 
+        case ')': kind = SyntaxKind.ClosedParenthesisToken; position++; break;
+        
+        case '!':
+            position++;
+            if (Next != '=')
+                kind = SyntaxKind.BangToken;
+            else {
+                kind = SyntaxKind.BangEqualsToken; 
+                position++;
+            }
+            break;
+
+        case '=':
+            position++;
+            if (Next != '=') 
+                kind = SyntaxKind.EqualsToken;
+            else {
+                kind = SyntaxKind.DoubleEqualsToken; 
+                position ++;
+            }
+            break;
+
+        case '&':
+            position++;
+            if (Next == '&')
+                kind = SyntaxKind.DoubleAmpersandToken; 
+            break;
+        
+        case '|':
+            position++;
+            if (Next == '|')
+                kind = SyntaxKind.DoublePipeToken; 
+            break;
+        
+        default:
+            if (char.IsDigit(Current))
+                ReadNumberToken();
             
-            case '!':
-                if (Next == '=')
-                    return new Token(SyntaxKind.BangEqualsToken, ref position, 2);
-                else
-                    return new Token(SyntaxKind.BangToken, position++);
-            case '=':
-                if (Next == '=')
-                    return new Token(SyntaxKind.DoubleEqualsToken, ref position, 2);
-                else
-                    return new Token(SyntaxKind.EqualsToken, position++);
-            case '&':
-                if (Next == '&')
-                    return new Token(SyntaxKind.DoubleAmpersandToken, ref position, 2);
-                break;
-            case '|':
-                if (Next == '|')
-                    return new Token(SyntaxKind.DoublePipeToken, ref position, 2);
-                break;
+            else if (char.IsLetter(Current))
+                ReadIdentifierOrKeywordToken();
+            
+            else if (char.IsWhiteSpace(Current))
+                ReadWhitespaceToken();
+            
+            else {
+                diagnostics.ReportBadCharacter(position, Current);
+                position++;
+            }
+
+            break;
         }
         
-        diagnostics.ReportBadCharacter(position, Current);
-        return new Token(SyntaxKind.BadToken, position++, source.Substring(position - 1, 1));
+        var length = position - start;
+        var literal = SyntaxKindExtensions.GetLiteral(kind);
+        literal ??= source.Substring(start, length);
+
+        return new Token(kind, start, literal, value);
     }
 
+    private void ReadWhitespaceToken() {
+        while (char.IsWhiteSpace(Current))
+            position++;
+        
+        kind = SyntaxKind.WhitespaceToken;
+    }
+
+    private void ReadNumberToken() {
+        while (char.IsDigit(Current))
+            position++;
+            
+        var length = position - start;
+        var literal = source.Substring(start, length);
+            
+        if (!int.TryParse(literal, out var result))
+            diagnostics.ReportInvalidNumber(new TextSpan(start, length), source, typeof(int));
+                
+        value = result;
+        kind = SyntaxKind.NumberToken;
+    }
+
+    private void ReadIdentifierOrKeywordToken() {
+        while (char.IsLetter(Current))
+            position++;
+            
+        var length = position - start;
+        var literal = source.Substring(start, length);
+        kind = SyntaxKindExtensions.GetKeywordKind(literal);
+    }
+    
     public Diagnostics Diagnostics => diagnostics;
 
     private char Current => Peek(0);
@@ -92,6 +119,10 @@ internal sealed class Lexer(string source) {
         return source[index];
     }
 
-    private int position;
+    private int position = 0;
+    private int start;
+    private SyntaxKind kind;
+    private object? value;
+
     private readonly Diagnostics diagnostics = [];
 }
