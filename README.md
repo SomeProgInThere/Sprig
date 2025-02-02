@@ -5,12 +5,13 @@
 Currently a (very) work in progress interpreter:
   
   * Expression Evaluation
-  * Variables (only int and bool)
-  * Diagnostics
-  * Pretty printing
+  * Variables
+  * Diagnostics and Errors
+  * Pretty printing with colors
+  * Multiline Repl with basic commands
 
 ## Structure
 The Solution has three projects in it:
-  * Rubics (Core ClassLib)
+  * Rubics (Core Project)
   * Repl (Interactive Interpreter)
-  * Tests (Unit tests for Core)
+  * Tests (xUnit tests)
