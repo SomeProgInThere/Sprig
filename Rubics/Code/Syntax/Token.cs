@@ -1,6 +1,4 @@
 
-using System.Collections.Immutable;
-
 namespace Rubics.Code.Syntax;
 
 public sealed class Token(SyntaxKind kind, int position, string literal, object? value = null) 
@@ -12,5 +10,4 @@ public sealed class Token(SyntaxKind kind, int position, string literal, object?
     public TextSpan Span => new(Position, Literal.Length);
 
     public override SyntaxKind Kind { get; } = kind;
-    public override ImmutableArray<SyntaxNode> Children() => [];
 }

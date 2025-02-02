@@ -1,11 +1,28 @@
 
-using System.Collections.Immutable;
+using System.Reflection;
 
 namespace Rubics.Code.Syntax;
 
 public abstract class SyntaxNode {
     public abstract SyntaxKind Kind { get; }
-    public abstract ImmutableArray<SyntaxNode> Children();
+    
+    public IEnumerable<SyntaxNode> Children() {
+        var properties = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        
+        foreach (var property in properties) {
+            if (typeof(SyntaxNode).IsAssignableFrom(property.PropertyType)) {
+                if (property.GetValue(this) is SyntaxNode child)
+                    yield return child;
+            }
+
+            else if (typeof(IEnumerable<SyntaxNode>).IsAssignableFrom(property.PropertyType)){
+                if (property.GetValue(this) is IEnumerable<SyntaxNode> children) {
+                    foreach (var child in children)
+                        yield return child;
+                }
+            }
+        }
+    }
 }
 
 public sealed class SyntaxTree(Expression root, Token endOfFileToken, Diagnostics diagnostics) {

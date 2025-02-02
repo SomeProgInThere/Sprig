@@ -1,4 +1,6 @@
 
+using System.Collections.Immutable;
+
 namespace Rubics.Code.Syntax;
 
 internal sealed class Parser {
@@ -123,7 +125,7 @@ internal sealed class Parser {
         return new Token(kind, Current.Position, "\0");
     }
 
-    private readonly Token[] tokens = [];
+    private readonly ImmutableArray<Token> tokens = [];
     private readonly Diagnostics diagnostics = [];
     private int position;
 };

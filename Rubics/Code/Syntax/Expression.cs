@@ -15,9 +15,6 @@ internal sealed class LiteralExpression(Token literalToken, object? value)
     public object? Value { get; } = value;
 
     public override SyntaxKind Kind => SyntaxKind.LiteralExpression;
-    public override ImmutableArray<SyntaxNode> Children() {
-        return [LiteralToken];
-    }
 }
 
 public sealed class NameExpression(Token identifierToken) 
@@ -26,9 +23,6 @@ public sealed class NameExpression(Token identifierToken)
     public Token IdentifierToken { get; } = identifierToken;
 
     public override SyntaxKind Kind => SyntaxKind.NameExpression;
-    public override ImmutableArray<SyntaxNode> Children() {
-        return [IdentifierToken];
-    }
 }
 
 public sealed class AssignmentExpression(Token identifierToken, Token equalsToken, Expression expression)
@@ -39,9 +33,6 @@ public sealed class AssignmentExpression(Token identifierToken, Token equalsToke
     public Expression Expression { get; } = expression;
 
     public override SyntaxKind Kind => SyntaxKind.AssignmentExpression;
-    public override ImmutableArray<SyntaxNode> Children() {
-        return [IdentifierToken, EqualsToken, Expression];
-    }
 }
 
 internal sealed class UnaryExpression(Expression operand, Token operatorToken)
@@ -51,9 +42,6 @@ internal sealed class UnaryExpression(Expression operand, Token operatorToken)
     public Token OperatorToken { get; } = operatorToken;
 
     public override SyntaxKind Kind => SyntaxKind.UnaryExpression;
-    public override ImmutableArray<SyntaxNode> Children() {
-        return [Operand, OperatorToken];
-    }
 }
 
 internal sealed class BinaryExpression(Expression left, Expression right, Token operatorToken)
@@ -64,9 +52,6 @@ internal sealed class BinaryExpression(Expression left, Expression right, Token 
     public Token OperatorToken { get; } = operatorToken;
 
     public override SyntaxKind Kind => SyntaxKind.BinaryExpression;
-    public override ImmutableArray<SyntaxNode> Children() {
-        return [Left, Right, OperatorToken];
-    }
 }
 
 internal sealed class ParenthesizedExpression(Token open, Token closed, Expression expression)
@@ -77,7 +62,4 @@ internal sealed class ParenthesizedExpression(Token open, Token closed, Expressi
     public Expression Expression { get; } = expression;
 
     public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
-    public override ImmutableArray<SyntaxNode> Children() {
-        return [Open, Closed, Expression];
-    }
 }
