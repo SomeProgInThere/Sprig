@@ -41,17 +41,23 @@ public static class Program {
                 ColorPrint($"{result.Result}\n", ConsoleColor.Blue);
             }
             else {
+                var sourceText = syntaxTree.SourceText;
                 foreach (var diagnostic in result.Diagnostics) {
+
+                    var lineIndex = sourceText.GetLineIndex(diagnostic.Span.Start);
+                    var lineNumber = lineIndex + 1;
+                    var character = diagnostic.Span.Start - sourceText.Lines[lineIndex].Start + 1;
+
                     Console.WriteLine();
-                    ColorPrint($"{diagnostic}\n", ConsoleColor.Red);
+                    ColorPrint($"ERROR (line {lineNumber}, col {character}): ", ConsoleColor.Red);
+                    ColorPrint($"{diagnostic}\n", ConsoleColor.Gray);
 
                     var prefix = line[..diagnostic.Span.Start];
                     var error = line.Substring(diagnostic.Span.Start, diagnostic.Span.Length);
                     var suffix = line[diagnostic.Span.End..];
 
-                    Console.Write($"\t{prefix}");
+                    Console.Write($"\t->{prefix}");
                     ColorPrint(error, ConsoleColor.Red);
-
                     Console.Write($"{suffix}\n");
                 }
 

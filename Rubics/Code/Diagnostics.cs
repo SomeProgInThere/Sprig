@@ -1,19 +1,9 @@
 
 using System.Collections;
+using Rubics.Code.Source;
 using Rubics.Code.Syntax;
 
 namespace Rubics.Code;
-
-public readonly struct TextSpan(int start, int length) {
-    public int Start { get; } = start;
-    public int Length { get; } = length;
-    public readonly int End => Start + Length;
-
-    public static TextSpan CreateFromBounds(int start, int end) {
-        var length = end - start;
-        return new(start, length);
-    }
-}
 
 public sealed class DiagnosticMessage(TextSpan span, string message) {
     public TextSpan Span { get; } = span;

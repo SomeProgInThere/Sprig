@@ -1,7 +1,9 @@
 
+using Rubics.Code.Source;
+
 namespace Rubics.Code.Syntax;
 
-internal sealed class Lexer(string source) {
+internal sealed class Lexer(SourceText source) {
 
     public Token Lex() {
 
@@ -72,7 +74,7 @@ internal sealed class Lexer(string source) {
         
         var length = position - start;
         var literal = SyntaxKindExtensions.GetLiteral(kind);
-        literal ??= source.Substring(start, length);
+        literal ??= source.ToString(start, length);
 
         return new Token(kind, start, literal, value);
     }
@@ -89,10 +91,10 @@ internal sealed class Lexer(string source) {
             position++;
             
         var length = position - start;
-        var literal = source.Substring(start, length);
+        var literal = source.ToString(start, length);
             
         if (!int.TryParse(literal, out var result))
-            diagnostics.ReportInvalidNumber(new TextSpan(start, length), source, typeof(int));
+            diagnostics.ReportInvalidNumber(new TextSpan(start, length), literal, typeof(int));
                 
         value = result;
         kind = SyntaxKind.NumberToken;
@@ -103,7 +105,7 @@ internal sealed class Lexer(string source) {
             position++;
             
         var length = position - start;
-        var literal = source.Substring(start, length);
+        var literal = source.ToString(start, length);
         kind = SyntaxKindExtensions.GetKeywordKind(literal);
     }
     

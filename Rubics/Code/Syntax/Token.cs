@@ -1,4 +1,6 @@
 
+using Rubics.Code.Source;
+
 namespace Rubics.Code.Syntax;
 
 public sealed class Token(SyntaxKind kind, int position, string literal, object? value = null) 
@@ -8,6 +10,6 @@ public sealed class Token(SyntaxKind kind, int position, string literal, object?
     public string Literal { get; } = literal;
     public object? Value { get; } = value;
 
-    public override TextSpan Span => new(Position, Literal.Length);
+    public override TextSpan Span => new(Position, Literal?.Length ?? 0);
     public override SyntaxKind Kind { get; } = kind;
 }

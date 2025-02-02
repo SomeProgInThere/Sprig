@@ -1,13 +1,14 @@
 
 using System.Collections.Immutable;
+using Rubics.Code.Source;
 
 namespace Rubics.Code.Syntax;
 
 internal sealed class Parser {
 
-    public Parser(string source) {
+    public Parser(SourceText sourceText) {
         var tokens = new List<Token>();
-        var lexer = new Lexer(source);
+        var lexer = new Lexer(sourceText);
         Token token;
 
         do {
@@ -18,12 +19,13 @@ internal sealed class Parser {
         while (token.Kind != SyntaxKind.EndOfFileToken);
            
         this.tokens = [..tokens];
+        this.sourceText = sourceText;
     }
 
     public SyntaxTree Parse() {
         var expression = ParseAssignmentExpression();
         var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-        return new SyntaxTree(expression, endOfFileToken, diagnostics);
+        return new SyntaxTree(sourceText, expression, endOfFileToken, diagnostics);
     }
 
     private Expression ParseAssignmentExpression() {
@@ -103,7 +105,7 @@ internal sealed class Parser {
     private Token Peek(int offset) {
         var index = position + offset;
         if (index >= tokens.Length)
-            return tokens[^1];
+            return tokens[tokens.Length - 1];
         
         return tokens[index];
     }
@@ -127,5 +129,6 @@ internal sealed class Parser {
 
     private readonly ImmutableArray<Token> tokens = [];
     private readonly Diagnostics diagnostics = [];
+    private readonly SourceText sourceText;
     private int position;
 };
