@@ -6,4 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Code\Syntax\SyntexKindExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Code\Syntax\SyntexKindExtensions.cs" />
+  </ItemGroup>
+
 </Project>

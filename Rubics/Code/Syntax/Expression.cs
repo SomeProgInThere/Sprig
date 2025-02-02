@@ -1,6 +1,4 @@
 
-using System.Collections.Immutable;
-
 namespace Rubics.Code.Syntax;
 
 public abstract class Expression : SyntaxNode {}

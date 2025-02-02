@@ -35,7 +35,7 @@ public static class Program {
             var result = compilation.Evaluate(variables);
 
             if (showTrees)
-                PrettyPrint(syntaxTree.Root);
+                syntaxTree.Root.WriteTo(Console.Out);
 
             if (!result.Diagnostics.Any()) {
                 ColorPrint($"{result.Result}\n", ConsoleColor.Blue);
@@ -58,24 +58,6 @@ public static class Program {
                 Console.WriteLine();
             }
         }
-    }
-
-    static void PrettyPrint(SyntaxNode node, string indent = "", bool isLast = true) {
-        var marker = isLast ? "└──" : "├──";
-
-        ColorPrint($"{indent}{marker}", ConsoleColor.DarkGray);
-        ColorPrint($"{node.Kind}", ConsoleColor.White);
-
-        if (node is Token token && token.Value != null) {
-            ColorPrint($" ({token.Value})", ConsoleColor.Blue);
-        }
-
-        Console.WriteLine();
-        indent += isLast ? "    " : "│   ";
-        var lastChild = node.Children().LastOrDefault();
-
-        foreach (var child in node.Children())
-            PrettyPrint(child, indent, child == lastChild);
     }
 
     static void ColorPrint(string value, ConsoleColor color) {
