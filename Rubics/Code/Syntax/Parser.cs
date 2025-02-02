@@ -44,17 +44,15 @@ internal sealed class Parser {
 
     private Expression ParseBinaryExpression(int parentPrecedence = 0) {
         Expression left;
-
         var unaryPrecedence = Current.Kind.UnaryOperatorPrecedence();
+
         if (unaryPrecedence != 0) {
-            
             var operatorToken = NextToken();
             var operand = ParseBinaryExpression(unaryPrecedence);
             left = new UnaryExpression(operand, operatorToken);
         }
-        else {
+        else 
             left = ParsePrimaryExpression();
-        }
 
         while (true) {
             var binaryPrecedence = Current.Kind.BinaryOperatorPrecedence();
@@ -105,7 +103,7 @@ internal sealed class Parser {
     private Token Peek(int offset) {
         var index = position + offset;
         if (index >= tokens.Length)
-            return tokens[tokens.Length - 1];
+            return tokens[^1];
         
         return tokens[index];
     }

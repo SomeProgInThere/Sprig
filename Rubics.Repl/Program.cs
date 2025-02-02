@@ -1,36 +1,52 @@
-﻿using Rubics.Code.Syntax;
+﻿
+using Rubics.Code.Syntax;
 using Rubics.Code;
+using System.Text;
+using Rubics.Code.Source;
 
-namespace Repl;
+namespace Rubics.Repl;
 
 public static class Program {
 
     private static void Main() {
         var showTrees = false;
         var variables = new Dictionary<VariableSymbol, object>();
+        var sourceBuilder = new StringBuilder();
 
         while (true) {
+            if (sourceBuilder.Length == 0)
+                ColorPrint(">> ", ConsoleColor.Blue);
+            else
+                ColorPrint(" │ ", ConsoleColor.Blue);
 
-            ColorPrint("> ", ConsoleColor.Yellow);
-            var line = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-            
-            if (line == "!exit") 
-                return;
-            
-            if (line == "!clear") { 
-                Console.Clear(); 
-                continue; 
+            var input = Console.ReadLine();
+
+            if (sourceBuilder.Length == 0) {
+                if (string.IsNullOrWhiteSpace(input))
+                    continue;
+
+                if (input == "!exit") 
+                    return;
+                
+                if (input == "!clear") { 
+                    Console.Clear(); 
+                    continue; 
+                }
+
+                if (input == "!showTrees") {
+                    showTrees = !showTrees;
+                    ColorPrint($"INFO: showTrees set to: {showTrees}\n", ConsoleColor.DarkGray);
+                    continue;
+                }
             }
+            
+            sourceBuilder.AppendLine(input);
+            var source = sourceBuilder.ToString();
+            var syntaxTree = SyntaxTree.Parse(source);
 
-            if (line == "!showTrees") {
-                showTrees = !showTrees;
-                ColorPrint($"INFO: showTrees set to: {showTrees}\n", ConsoleColor.DarkGray);
+            if (!string.IsNullOrWhiteSpace(input) && syntaxTree.Diagnostics.Any())
                 continue;
-            }
 
-            var syntaxTree = SyntaxTree.Parse(line);
             var compilation = new Compilation(syntaxTree);
             var result = compilation.Evaluate(variables);
 
@@ -45,24 +61,31 @@ public static class Program {
                 foreach (var diagnostic in result.Diagnostics) {
 
                     var lineIndex = sourceText.GetLineIndex(diagnostic.Span.Start);
+                    var line = sourceText.Lines[lineIndex];
+                    
+                    var column = diagnostic.Span.Start - line.Start + 1;
                     var lineNumber = lineIndex + 1;
-                    var character = diagnostic.Span.Start - sourceText.Lines[lineIndex].Start + 1;
 
                     Console.WriteLine();
-                    ColorPrint($"ERROR (line {lineNumber}, col {character}): ", ConsoleColor.Red);
+                    ColorPrint($"ERROR (line {lineNumber}, col {column}): ", ConsoleColor.Red);
                     ColorPrint($"{diagnostic}\n", ConsoleColor.Gray);
 
-                    var prefix = line[..diagnostic.Span.Start];
-                    var error = line.Substring(diagnostic.Span.Start, diagnostic.Span.Length);
-                    var suffix = line[diagnostic.Span.End..];
+                    var prefixSpan = TextSpan.CreateFromBounds(line.Start, diagnostic.Span.Start);
+                    var suffixSpan = TextSpan.CreateFromBounds(diagnostic.Span.End, line.End);
 
-                    Console.Write($"\t->{prefix}");
+                    var prefix = sourceText.ToString(prefixSpan);
+                    var error = sourceText.ToString(diagnostic.Span);
+                    var suffix = sourceText.ToString(suffixSpan);
+
+                    Console.Write($"\t-> {prefix}");
                     ColorPrint(error, ConsoleColor.Red);
                     Console.Write($"{suffix}\n");
                 }
 
                 Console.WriteLine();
             }
+
+            sourceBuilder.Clear();
         }
     }
 

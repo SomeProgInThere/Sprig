@@ -73,9 +73,7 @@ internal sealed class Lexer(SourceText source) {
         }
         
         var length = position - start;
-        var literal = SyntaxKindExtensions.GetLiteral(kind);
-        literal ??= source.ToString(start, length);
-
+        var literal = SyntaxKindExtensions.GetLiteral(kind) ?? source.ToString(start, length);
         return new Token(kind, start, literal, value);
     }
 
