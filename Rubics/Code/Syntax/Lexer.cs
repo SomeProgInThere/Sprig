@@ -21,35 +21,35 @@ internal sealed class Lexer(string source) {
         case ')': kind = SyntaxKind.ClosedParenthesisToken; position++; break;
         
         case '!':
-            position++;
             if (Next != '=')
                 kind = SyntaxKind.BangToken;
             else {
                 kind = SyntaxKind.BangEqualsToken; 
                 position++;
             }
+            position++;
             break;
 
         case '=':
-            position++;
             if (Next != '=') 
                 kind = SyntaxKind.EqualsToken;
             else {
                 kind = SyntaxKind.DoubleEqualsToken; 
                 position ++;
             }
+            position++;
             break;
 
         case '&':
-            position++;
             if (Next == '&')
                 kind = SyntaxKind.DoubleAmpersandToken; 
+            position++;
             break;
         
         case '|':
-            position++;
             if (Next == '|')
                 kind = SyntaxKind.DoublePipeToken; 
+            position++;
             break;
         
         default:

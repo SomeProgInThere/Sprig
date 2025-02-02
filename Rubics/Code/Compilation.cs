@@ -1,4 +1,5 @@
 
+using System.Collections.Immutable;
 using Rubics.Code.Binding;
 using Rubics.Code.Syntax;
 
@@ -10,7 +11,7 @@ public sealed class Compilation(SyntaxTree syntax) {
         var binder = new Binder(variables);
         var expression = binder.BindExpression(Syntax.Root);
 
-        var diagnostics = Syntax.Diagnostics.Concat(binder.Diagnostics);
+        var diagnostics = Syntax.Diagnostics.Concat(binder.Diagnostics).ToImmutableArray();
         if (diagnostics.Any())
             return new EvaluationResult(diagnostics);
         
@@ -21,14 +22,4 @@ public sealed class Compilation(SyntaxTree syntax) {
     }
 
     public SyntaxTree Syntax { get; } = syntax;
-}
-
-public sealed class EvaluationResult(IEnumerable<DiagnosticMessage> diagnostics, object? result = null) {
-    public IEnumerable<DiagnosticMessage> Diagnostics { get; } = diagnostics;
-    public object? Result { get; } = result;
-}
-
-public sealed class VariableSymbol(string name, Type type) {
-    public string Name { get; } = name;
-    public Type Type { get; } = type;
 }

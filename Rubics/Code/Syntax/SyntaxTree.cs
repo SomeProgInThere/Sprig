@@ -1,9 +1,11 @@
 
+using System.Collections.Immutable;
+
 namespace Rubics.Code.Syntax;
 
 public abstract class SyntaxNode {
     public abstract SyntaxKind Kind { get; }
-    public abstract IEnumerable<SyntaxNode> Children();
+    public abstract ImmutableArray<SyntaxNode> Children();
 }
 
 public sealed class SyntaxTree(Expression root, Token endOfFileToken, Diagnostics diagnostics) {

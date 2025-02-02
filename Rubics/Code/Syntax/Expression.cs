@@ -1,4 +1,6 @@
 
+using System.Collections.Immutable;
+
 namespace Rubics.Code.Syntax;
 
 public abstract class Expression : SyntaxNode {}
@@ -13,8 +15,8 @@ internal sealed class LiteralExpression(Token literalToken, object? value)
     public object? Value { get; } = value;
 
     public override SyntaxKind Kind => SyntaxKind.LiteralExpression;
-    public override IEnumerable<SyntaxNode> Children() {
-        yield return LiteralToken;
+    public override ImmutableArray<SyntaxNode> Children() {
+        return [LiteralToken];
     }
 }
 
@@ -24,8 +26,8 @@ public sealed class NameExpression(Token identifierToken)
     public Token IdentifierToken { get; } = identifierToken;
 
     public override SyntaxKind Kind => SyntaxKind.NameExpression;
-    public override IEnumerable<SyntaxNode> Children() {
-        yield return IdentifierToken;
+    public override ImmutableArray<SyntaxNode> Children() {
+        return [IdentifierToken];
     }
 }
 
@@ -37,10 +39,8 @@ public sealed class AssignmentExpression(Token identifierToken, Token equalsToke
     public Expression Expression { get; } = expression;
 
     public override SyntaxKind Kind => SyntaxKind.AssignmentExpression;
-    public override IEnumerable<SyntaxNode> Children() {
-        yield return IdentifierToken;
-        yield return EqualsToken;
-        yield return Expression;
+    public override ImmutableArray<SyntaxNode> Children() {
+        return [IdentifierToken, EqualsToken, Expression];
     }
 }
 
@@ -51,9 +51,8 @@ internal sealed class UnaryExpression(Expression operand, Token operatorToken)
     public Token OperatorToken { get; } = operatorToken;
 
     public override SyntaxKind Kind => SyntaxKind.UnaryExpression;
-    public override IEnumerable<SyntaxNode> Children() {
-        yield return Operand;
-        yield return OperatorToken;
+    public override ImmutableArray<SyntaxNode> Children() {
+        return [Operand, OperatorToken];
     }
 }
 
@@ -65,10 +64,8 @@ internal sealed class BinaryExpression(Expression left, Expression right, Token 
     public Token OperatorToken { get; } = operatorToken;
 
     public override SyntaxKind Kind => SyntaxKind.BinaryExpression;
-    public override IEnumerable<SyntaxNode> Children() {
-        yield return Left;
-        yield return Right;
-        yield return OperatorToken;
+    public override ImmutableArray<SyntaxNode> Children() {
+        return [Left, Right, OperatorToken];
     }
 }
 
@@ -80,10 +77,7 @@ internal sealed class ParenthesizedExpression(Token open, Token closed, Expressi
     public Expression Expression { get; } = expression;
 
     public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
-    public override IEnumerable<SyntaxNode> Children() {
-        yield return Open;
-        yield return Closed;
-        yield return Expression;
+    public override ImmutableArray<SyntaxNode> Children() {
+        return [Open, Closed, Expression];
     }
 }
-

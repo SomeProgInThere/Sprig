@@ -14,7 +14,7 @@ internal sealed class Parser {
                 tokens.Add(token);    
         } 
         while (token.Kind != SyntaxKind.EndOfFileToken);
-        
+           
         this.tokens = [..tokens];
     }
 
@@ -66,33 +66,36 @@ internal sealed class Parser {
     }
 
     private Expression ParsePrimaryExpression() {
-        switch (Current.Kind) {
-            case SyntaxKind.OpenParenthesisToken: {
-                var left = NextToken();
-                var expression = ParseBinaryExpression();
-                var right = MatchToken(SyntaxKind.ClosedParenthesisToken);
+        return Current.Kind switch {
+            SyntaxKind.OpenParenthesisToken                     => ParseParenthesizedExpression(),
+            SyntaxKind.FalseKeyword or SyntaxKind.TrueKeyword   => ParseBooleanLiteral(),
+            SyntaxKind.NumberToken                              => ParseNumberLiteral(),
+            SyntaxKind.IdentifierToken or _                     => ParseNameExpression(),
+        };
+    }
 
-                return new ParenthesizedExpression(left, right, expression);
-            }
+    private Expression ParseParenthesizedExpression() {
+        var left = MatchToken(SyntaxKind.OpenParenthesisToken);
+        var expression = ParseBinaryExpression();
+        var right = MatchToken(SyntaxKind.ClosedParenthesisToken);
 
-            case SyntaxKind.TrueKeyword:
-            case SyntaxKind.FalseKeyword: {
-                var keywordToken = NextToken();
-                var value = keywordToken.Kind == SyntaxKind.TrueKeyword;
-            
-                return new LiteralExpression(keywordToken, value);
-            }
+        return new ParenthesizedExpression(left, right, expression);
+    }
 
-            case SyntaxKind.IdentifierToken: {
-                var identifierToken = NextToken();
-                return new NameExpression(identifierToken);
-            }
+    private Expression ParseBooleanLiteral() {
+        var value = Current.Kind == SyntaxKind.TrueKeyword;
+        var keywordToken = value ? MatchToken(SyntaxKind.TrueKeyword) : MatchToken(SyntaxKind.FalseKeyword);
+        return new LiteralExpression(keywordToken, value);
+    }
 
-            default: {
-                var numberToken = MatchToken(SyntaxKind.NumberToken);
-                return new LiteralExpression(numberToken);
-            }
-        }
+    private Expression ParseNameExpression() {
+        var identifierToken = MatchToken(SyntaxKind.IdentifierToken);
+        return new NameExpression(identifierToken);
+    }
+
+    private Expression ParseNumberLiteral() {
+        var numberToken = MatchToken(SyntaxKind.NumberToken);
+        return new LiteralExpression(numberToken);
     }
 
     private Token Peek(int offset) {
