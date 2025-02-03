@@ -1,8 +1,8 @@
 ﻿
 using Rubics.Code.Syntax;
+using Rubics.Code.Source;
 using Rubics.Code;
 using System.Text;
-using Rubics.Code.Source;
 
 namespace Rubics.Repl;
 
