@@ -20,6 +20,7 @@ internal sealed class Parser {
            
         this.tokens = [..tokens];
         this.sourceText = sourceText;
+        diagnostics = lexer.Diagnostics;
     }
 
     public SyntaxTree Parse() {

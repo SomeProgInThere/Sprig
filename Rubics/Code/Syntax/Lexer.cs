@@ -119,7 +119,7 @@ internal sealed class Lexer(SourceText source) {
         return source[index];
     }
 
-    private int position = 0;
+    private int position;
     private int start;
     private SyntaxKind kind;
     private object? value;

@@ -77,7 +77,7 @@ public static class Program {
                     var error = sourceText.ToString(diagnostic.Span);
                     var suffix = sourceText.ToString(suffixSpan);
 
-                    Console.Write($"\t-> {prefix}");
+                    Console.Write($"\t{prefix}");
                     ColorPrint(error, ConsoleColor.Red);
                     Console.Write($"{suffix}\n");
                 }

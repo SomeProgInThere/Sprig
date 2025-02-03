@@ -35,11 +35,27 @@ public sealed class SourceText {
     public int Length => Source.Length;
 
     public string ToString(int start, int length) => Source.Substring(start, length);
-    public string ToString(TextSpan span) => Source.Substring(span.Start, span.Length);
+    
+    // TODO: Cleanup of this mess
+    public string ToString(TextSpan span) {
+        int length;
+        if (span.Length == -1 || span.Length == 1)
+            length = 0;
+        else
+            length = span.Length;
+
+        int start;
+        if (span.Start <= 0)
+            start = 0;
+        else 
+            start = span.Start - 1;
+
+        return Source.Substring(start, length);
+    }
     public override string ToString() => Source;
 
     private SourceText(string source) {
-        this.Source = source; 
+        Source = source; 
         Lines = ParseLines(this, source);
     }
 
@@ -59,7 +75,7 @@ public sealed class SourceText {
             }
         }
 
-        if (position > start)
+        if (position >= start)
             AddLine(result, sourceText, position, start, 0);
 
         return result.ToImmutable();
