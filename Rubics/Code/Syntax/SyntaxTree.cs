@@ -1,19 +1,17 @@
 
+using System.Collections.Immutable;
 using Rubics.Code.Source;
 
 namespace Rubics.Code.Syntax;
 
-public sealed class SyntaxTree(SourceText sourceText, Expression root, Token endOfFileToken, Diagnostics diagnostics) {
-    
+public sealed class SyntaxTree {
+
     public static SyntaxTree Parse(string source) {
         var sourceText = SourceText.FromString(source);
         return Parse(sourceText);
     }
 
-    public static SyntaxTree Parse(SourceText sourceText) {
-        var parser = new Parser(sourceText);
-        return parser.Parse();
-    }
+    public static SyntaxTree Parse(SourceText sourceText) => new(sourceText);
     
     public static IEnumerable<Token> ParseTokens(string source) {
         var sourceText = SourceText.FromString(source);
@@ -31,8 +29,24 @@ public sealed class SyntaxTree(SourceText sourceText, Expression root, Token end
         }
     }
 
-    public Expression Root { get; } = root;
-    public Token EndOfFileToken { get; } = endOfFileToken;
-    public Diagnostics Diagnostics { get; } = diagnostics;
-    public SourceText SourceText { get; } = sourceText;
+    private SyntaxTree(SourceText sourceText) {
+        var parser = new Parser(sourceText);
+        
+        SourceText = sourceText;
+        Root = parser.ParseCompilationUnit();
+        Diagnostics = [.. parser.Diagnostics];
+    }
+
+    public SourceText SourceText { get; }
+    public CompilationUnit Root { get; }
+    public ImmutableArray<DiagnosticMessage> Diagnostics { get; }
+}
+
+public class CompilationUnit(Expression expression, Token endOfFileToken) 
+    : SyntaxNode {
+        
+    public Expression Expression { get; } = expression;
+    public Token EndOfFile { get; } = endOfFileToken;
+
+    public override SyntaxKind Kind => SyntaxKind.CompilationUnit;
 }

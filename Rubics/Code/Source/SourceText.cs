@@ -36,22 +36,11 @@ public sealed class SourceText {
 
     public string ToString(int start, int length) => Source.Substring(start, length);
     
-    // TODO: Cleanup of this mess
+    // TODO: Fix bug \r\n\r\n
     public string ToString(TextSpan span) {
-        int length;
-        if (span.Length == -1 || span.Length == 1)
-            length = 0;
-        else
-            length = span.Length;
-
-        int start;
-        if (span.Start <= 0)
-            start = 0;
-        else 
-            start = span.Start - 1;
-
-        return Source.Substring(start, length);
+        return Source.Substring(span.Start, span.Length);
     }
+
     public override string ToString() => Source;
 
     private SourceText(string source) {

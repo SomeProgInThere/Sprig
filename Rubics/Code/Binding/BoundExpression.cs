@@ -24,13 +24,13 @@ internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperato
     public override Type Type => Operand.Type;
 }
 
-internal sealed class BoundVariableExpression(VariableSymbol variable)
+internal sealed class BoundVariableExpression(VariableSymbol? variable)
     : BoundExpression {
 
-    public VariableSymbol Variable { get; } = variable;
+    public VariableSymbol? Variable { get; } = variable;
     
     public override BoundKind Kind => BoundKind.VariableExpression;
-    public override Type Type => Variable.Type;
+    public override Type Type => Variable?.Type ?? typeof(void);
 }
 
 internal sealed class BoundAssignmentExpression(VariableSymbol variable, BoundExpression expression)

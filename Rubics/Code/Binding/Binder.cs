@@ -1,9 +1,10 @@
 
+using System.Collections.Immutable;
 using Rubics.Code.Syntax;
 
 namespace Rubics.Code.Binding;
 
-internal sealed class Binder(Dictionary<VariableSymbol, object> variables) {
+internal sealed class Binder(BoundScope? parent) {
 
     public BoundExpression BindExpression(Expression syntax) {
         return syntax.Kind switch {
@@ -18,7 +19,41 @@ internal sealed class Binder(Dictionary<VariableSymbol, object> variables) {
         };
     }
 
+    public static BoundGlobalScope BindGlobalScope(BoundGlobalScope? previous, CompilationUnit compilation) {
+        var parentScope = CreateParentScope(previous);
+        var binder = new Binder(parentScope);
+        
+        var expression = binder.BindExpression(compilation.Expression);
+        var variables = binder.Scope.Variables;
+        var diagnostics = binder.Diagnostics.ToImmutableArray();
+
+        return new BoundGlobalScope(previous, diagnostics, variables, expression);
+    }
+
+    private static BoundScope? CreateParentScope(BoundGlobalScope? previous) {
+        
+        var stack = new Stack<BoundGlobalScope>();
+        while (previous != null) {
+            stack.Push(previous);
+            previous = previous.Previous;
+        }
+
+        BoundScope? parent = null;
+        while (stack.Count > 0) {
+            previous = stack.Pop();
+            var scope = new BoundScope(parent);
+            
+            foreach (var variable in previous.Variables)
+                scope.TryDeclare(variable);
+
+            parent = scope;
+        }
+
+        return parent;
+    }
+
     public Diagnostics Diagnostics => diagnostics;
+    public BoundScope Scope { get; } = new BoundScope(parent);
 
     private static BoundExpression BindLiteralExpression(LiteralExpression syntax) {
         var value = syntax.Value ?? 0;
@@ -27,9 +62,8 @@ internal sealed class Binder(Dictionary<VariableSymbol, object> variables) {
 
     private BoundExpression BindNameExpression(NameExpression syntax) {
         var token = syntax.IdentifierToken;
-        var variable = variables.Keys.FirstOrDefault(v => v.Name == token.Literal);
 
-        if (variable == null) {
+        if (!Scope.TryLookup(token.Literal, out var variable)) {
             diagnostics.ReportUndefinedName(token.Span, token.Literal);
             return new BoundLiteralExpression(0);
         }
@@ -40,15 +74,12 @@ internal sealed class Binder(Dictionary<VariableSymbol, object> variables) {
     private BoundExpression BindAssignmentExpression(AssignmentExpression syntax){
         var name = syntax.IdentifierToken.Literal;
         var expression = BindExpression(syntax.Expression);
+        var variable = new VariableSymbol(name, expression.Type);
 
-        var variable = variables.Keys.FirstOrDefault(v => v.Name == name);
-        if (variable != null)
-            variables.Remove(variable);
+        if (!Scope.TryDeclare(variable))
+            diagnostics.ReportVariableAlreadyDeclared(syntax.IdentifierToken.Span, name);
 
-        var newVariable = new VariableSymbol(name, expression.Type);
-        variables[newVariable] = 0;
-
-        return new BoundAssignmentExpression(newVariable, expression);
+        return new BoundAssignmentExpression(variable, expression);
     }
 
     private BoundExpression BindUnaryExpression(UnaryExpression syntax) {

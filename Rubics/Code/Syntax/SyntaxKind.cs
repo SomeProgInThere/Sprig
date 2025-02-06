@@ -34,4 +34,7 @@ public enum SyntaxKind {
     UnaryExpression,
     BinaryExpression,
     ParenthesizedExpression,
+    
+    // Nodes
+    CompilationUnit,
 }

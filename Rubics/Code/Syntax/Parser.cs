@@ -23,11 +23,13 @@ internal sealed class Parser {
         diagnostics = lexer.Diagnostics;
     }
 
-    public SyntaxTree Parse() {
+    public CompilationUnit ParseCompilationUnit() {
         var expression = ParseAssignmentExpression();
         var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-        return new SyntaxTree(sourceText, expression, endOfFileToken, diagnostics);
+        return new(expression, endOfFileToken);
     }
+
+    public Diagnostics Diagnostics => diagnostics;
 
     private Expression ParseAssignmentExpression() {
         if (Current.Kind == SyntaxKind.IdentifierToken && Next.Kind == SyntaxKind.EqualsToken) {
@@ -40,8 +42,6 @@ internal sealed class Parser {
 
         return ParseBinaryExpression();
     }
-
-    public Diagnostics Diagnostics => diagnostics;
 
     private Expression ParseBinaryExpression(int parentPrecedence = 0) {
         Expression left;

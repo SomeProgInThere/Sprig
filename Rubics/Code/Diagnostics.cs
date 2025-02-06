@@ -46,6 +46,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
+    public void ReportVariableAlreadyDeclared(TextSpan span, string name) {
+        var message = $"Variables '{name}' is already declared";
+        Report(span, message);
+    }
+
     private void Report(TextSpan span, string message) {
         var diagnostic = new DiagnosticMessage(span, message);
         diagnostics.Add(diagnostic);

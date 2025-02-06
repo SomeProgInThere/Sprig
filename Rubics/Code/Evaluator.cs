@@ -4,27 +4,32 @@ using Rubics.Code.Binding;
 
 namespace Rubics.Code;
 
-internal sealed class Evaluator(BoundExpression root, Dictionary<VariableSymbol, object> variables) {
+internal sealed class Evaluator(BoundExpression? root, Dictionary<VariableSymbol, object> variables) {
     
     public object Evaluate() {
         return EvaluateExpression(root);
     }
 
-    private object EvaluateExpression(BoundExpression node){
-        return node.Kind switch {
+    private object EvaluateExpression(BoundExpression? node){
+        return node?.Kind switch {
             BoundKind.LiteralExpression     => EvaluateLiteralExpression((BoundLiteralExpression)node),
             BoundKind.VariableExpression    => EvaluateVariableExpression((BoundVariableExpression)node),
             BoundKind.AssignmentExpression  => EvaluateAssignmentExpression((BoundAssignmentExpression)node),
             BoundKind.UnaryExpression       => EvaluateUnaryExpression((BoundUnaryExpression)node),
             BoundKind.BinaryExpression      => EvaluateBinaryExpression((BoundBinaryExpression)node),
             
-            _ => throw new Exception($"Undefined node: {node.Kind}"),
+            _ => throw new Exception($"Undefined node: {node?.Kind}"),
         };
     }
 
     private static object EvaluateLiteralExpression(BoundLiteralExpression literal) => literal.Value;
     
-    private object EvaluateVariableExpression(BoundVariableExpression variable) => variables[variable.Variable];
+    private object EvaluateVariableExpression(BoundVariableExpression variable) {
+        if (variable.Variable is null)
+            throw new Exception($"Variable: {nameof(variable.Variable)} is not initialized");
+        
+        return variables[variable.Variable];
+    }
 
     private object EvaluateAssignmentExpression(BoundAssignmentExpression assignment) {
         var value = EvaluateExpression(assignment.Expression);

@@ -14,7 +14,9 @@ public static class Program {
         var variables = new Dictionary<VariableSymbol, object>();
         var sourceBuilder = new StringBuilder();
 
-        ColorPrint($"{startupMessage}\n\n", ConsoleColor.DarkBlue);
+        Compilation? previous = null;
+
+        ColorPrint($"{startupMessage}\n\n", ConsoleColor.DarkGray);
 
         while (true) {
             if (sourceBuilder.Length == 0)
@@ -29,7 +31,7 @@ public static class Program {
                     continue;
 
                 if (input == "!exit") {
-                    ColorPrint("Terminated.\n\n", ConsoleColor.DarkGray);
+                    ColorPrint("Terminated\n\n", ConsoleColor.DarkGray);
                     return;
                 }
 
@@ -40,7 +42,18 @@ public static class Program {
 
                 if (input == "!tree") {
                     showTrees = !showTrees;
-                    ColorPrint($"INFO: showTrees set to: {showTrees}\n\n", ConsoleColor.DarkGray);
+                    ColorPrint($"INFO: show parse tree set to {showTrees}\n\n", ConsoleColor.DarkGray);
+                    continue;
+                }
+
+                if (input == "!reset") {
+                    previous = null;
+                    ColorPrint("INFO: environment reset done", ConsoleColor.DarkGray);
+                    continue;
+                }
+
+                if (input == "!help") {
+                    DisplayCommands();
                     continue;
                 }
             }
@@ -52,7 +65,7 @@ public static class Program {
             if (!string.IsNullOrWhiteSpace(input) && syntaxTree.Diagnostics.Any())
                 continue;
 
-            var compilation = new Compilation(syntaxTree);
+            var compilation = previous is null ? new Compilation(syntaxTree) : previous.ContinueWith(syntaxTree);
             var result = compilation.Evaluate(variables);
 
             if (showTrees)
@@ -60,6 +73,7 @@ public static class Program {
 
             if (!result.Diagnostics.Any()) {
                 ColorPrint($"{result.Result}\n", ConsoleColor.White);
+                previous = compilation;
             }
             else {
                 var sourceText = syntaxTree.SourceText;
@@ -92,6 +106,22 @@ public static class Program {
         }
     }
 
+    static void DisplayCommands() {
+        var commands = new List<(string, string)> {
+            ("help", "show list of commands"),
+            ("exit", "terminate the session"),
+            ("clear", "clears the output console"),
+            ("tree", "show internal parse trees for expressions"),
+        };
+
+        foreach (var c in commands) {
+            ColorPrint($"\n\t!{c.Item1}:", ConsoleColor.Gray);
+            ColorPrint($"\t{c.Item2}", ConsoleColor.DarkGray);
+        }
+
+        Console.WriteLine("\n");
+    }
+
     static void ColorPrint(string value, ConsoleColor color) {
         Console.ForegroundColor = color;
         Console.Write(value);
@@ -101,6 +131,6 @@ public static class Program {
     static readonly string startupMessage = $"""
         Rubics v0alpha
         {RuntimeInformation.OSDescription} ({RuntimeInformation.ProcessArchitecture}) 
-        Commands: "!tree", "!clear", "!exit"
+        Type "!help" for list of commands
     """;
 }
