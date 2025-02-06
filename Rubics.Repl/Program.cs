@@ -3,6 +3,7 @@ using Rubics.Code.Syntax;
 using Rubics.Code.Source;
 using Rubics.Code;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Rubics.Repl;
 
@@ -13,11 +14,13 @@ public static class Program {
         var variables = new Dictionary<VariableSymbol, object>();
         var sourceBuilder = new StringBuilder();
 
+        ColorPrint($"{startupMessage}\n\n", ConsoleColor.DarkBlue);
+
         while (true) {
             if (sourceBuilder.Length == 0)
-                ColorPrint(">> ", ConsoleColor.Blue);
+                ColorPrint(">> ", ConsoleColor.Cyan);
             else
-                ColorPrint(" │ ", ConsoleColor.Blue);
+                ColorPrint(" . ", ConsoleColor.DarkGray);
 
             var input = Console.ReadLine();
 
@@ -25,17 +28,19 @@ public static class Program {
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
 
-                if (input == "!exit") 
+                if (input == "!exit") {
+                    ColorPrint("Terminated.\n\n", ConsoleColor.DarkGray);
                     return;
-                
+                }
+
                 if (input == "!clear") { 
                     Console.Clear(); 
                     continue; 
                 }
 
-                if (input == "!showTrees") {
+                if (input == "!tree") {
                     showTrees = !showTrees;
-                    ColorPrint($"INFO: showTrees set to: {showTrees}\n", ConsoleColor.DarkGray);
+                    ColorPrint($"INFO: showTrees set to: {showTrees}\n\n", ConsoleColor.DarkGray);
                     continue;
                 }
             }
@@ -54,7 +59,7 @@ public static class Program {
                 syntaxTree.Root.WriteTo(Console.Out);
 
             if (!result.Diagnostics.Any()) {
-                ColorPrint($"{result.Result}\n", ConsoleColor.Blue);
+                ColorPrint($"{result.Result}\n", ConsoleColor.White);
             }
             else {
                 var sourceText = syntaxTree.SourceText;
@@ -67,7 +72,7 @@ public static class Program {
                     var lineNumber = lineIndex + 1;
 
                     Console.WriteLine();
-                    ColorPrint($"ERROR (line {lineNumber}, col {column}): ", ConsoleColor.Red);
+                    ColorPrint($"ERROR (ln {lineNumber}, col {column}): ", ConsoleColor.DarkRed);
                     ColorPrint($"{diagnostic}\n", ConsoleColor.Gray);
 
                     var prefixSpan = TextSpan.CreateFromBounds(line.Start, diagnostic.Span.Start);
@@ -81,8 +86,6 @@ public static class Program {
                     ColorPrint(error, ConsoleColor.Red);
                     Console.Write($"{suffix}\n");
                 }
-
-                Console.WriteLine();
             }
 
             sourceBuilder.Clear();
@@ -94,4 +97,10 @@ public static class Program {
         Console.Write(value);
         Console.ResetColor();
     }
+
+    static readonly string startupMessage = $"""
+        Rubics v0alpha
+        {RuntimeInformation.OSDescription} ({RuntimeInformation.ProcessArchitecture}) 
+        Commands: "!tree", "!clear", "!exit"
+    """;
 }
