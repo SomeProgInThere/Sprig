@@ -72,7 +72,7 @@ public static class Program {
                     var lineNumber = lineIndex + 1;
 
                     Console.WriteLine();
-                    ColorPrint($"ERROR (ln {lineNumber}, col {column}): ", ConsoleColor.DarkRed);
+                    ColorPrint($"ERROR (Ln {lineNumber}, Col {column}): ", ConsoleColor.DarkRed);
                     ColorPrint($"{diagnostic}\n", ConsoleColor.Gray);
 
                     var prefixSpan = TextSpan.CreateFromBounds(line.Start, diagnostic.Span.Start);
