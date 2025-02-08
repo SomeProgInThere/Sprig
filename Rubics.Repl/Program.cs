@@ -48,7 +48,7 @@ public static class Program {
 
                 if (input == "!reset") {
                     previous = null;
-                    ColorPrint("INFO: environment reset done", ConsoleColor.DarkGray);
+                    ColorPrint("INFO: environment reset done\n\n", ConsoleColor.DarkGray);
                     continue;
                 }
 
@@ -102,6 +102,7 @@ public static class Program {
                 }
             }
 
+            Console.WriteLine();
             sourceBuilder.Clear();
         }
     }
