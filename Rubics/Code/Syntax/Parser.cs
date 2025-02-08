@@ -19,7 +19,6 @@ internal sealed class Parser {
         while (token.Kind != SyntaxKind.EndOfFileToken);
            
         this.tokens = [..tokens];
-        this.sourceText = sourceText;
         diagnostics = lexer.Diagnostics;
     }
 
@@ -128,6 +127,5 @@ internal sealed class Parser {
 
     private readonly ImmutableArray<Token> tokens = [];
     private readonly Diagnostics diagnostics = [];
-    private readonly SourceText sourceText;
     private int position;
 };

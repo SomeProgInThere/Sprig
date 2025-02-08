@@ -17,7 +17,7 @@ internal sealed class BoundLiteralExpression(object value)
 internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperator op)
     : BoundExpression {
 
-    public UnaryOperator Op { get; } = op;
+    public UnaryOperator Operator { get; } = op;
     public BoundExpression Operand { get; } = operand;
 
     public override BoundKind Kind => BoundKind.UnaryExpression;
@@ -46,10 +46,10 @@ internal sealed class BoundAssignmentExpression(VariableSymbol variable, BoundEx
 internal sealed class BoundBinaryExpression(BoundExpression left, BoundExpression right, BinaryOperator op) 
     : BoundExpression {
 
-    public BinaryOperator Op { get; } = op;
+    public BinaryOperator Operator { get; } = op;
     public BoundExpression Left { get; } = left;
     public BoundExpression Right { get; } = right;
 
     public override BoundKind Kind => BoundKind.BinaryExpression;
-    public override Type Type => Op.ResultType;
+    public override Type Type => Operator.ResultType;
 }

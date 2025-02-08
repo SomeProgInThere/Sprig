@@ -40,12 +40,13 @@ internal sealed class Evaluator(BoundExpression? root, Dictionary<VariableSymbol
     private object EvaluateUnaryExpression(BoundUnaryExpression unary) {
         var operand = EvaluateExpression(unary.Operand);
 
-        return unary.Op.Kind switch {
+        return unary.Operator.Kind switch {
             UnaryOperatorKind.Identity => (int)operand,
             UnaryOperatorKind.Negetion => -(int)operand,
+            UnaryOperatorKind.BitwiseNot => ~(int)operand,
             UnaryOperatorKind.LogicalNot => !(bool)operand,
 
-            _ => throw new Exception($"Unexpected Unary operator: {unary.Op}"),
+            _ => throw new Exception($"Unexpected Unary operator: {unary.Operator}"),
         };
     }
 
@@ -53,8 +54,7 @@ internal sealed class Evaluator(BoundExpression? root, Dictionary<VariableSymbol
         var left = EvaluateExpression(binary.Left);
         var right = EvaluateExpression(binary.Right);
 
-        return binary.Op.Kind switch
-        {
+        return binary.Operator.Kind switch {
             BinaryOperatorKind.Add      => (int)left + (int)right,
             BinaryOperatorKind.Substact => (int)left - (int)right,
             BinaryOperatorKind.Multiply => (int)left * (int)right,
@@ -64,10 +64,19 @@ internal sealed class Evaluator(BoundExpression? root, Dictionary<VariableSymbol
             BinaryOperatorKind.LogicalAnd => (bool)left && (bool)right,
             BinaryOperatorKind.LogicalOr  => (bool)left || (bool)right,
 
+            BinaryOperatorKind.BitwiseAnd => (int)left & (int)right,
+            BinaryOperatorKind.BitwiseOr  => (int)left | (int)right,
+            BinaryOperatorKind.BitwiseXor => (int)left ^ (int)right,
+
+            BinaryOperatorKind.GreaterThan          => (int)left >  (int)right,
+            BinaryOperatorKind.GreaterThanEqualsTo  => (int)left >= (int)right,
+            BinaryOperatorKind.LesserThan           => (int)left <  (int)right,
+            BinaryOperatorKind.LesserThanEqualsTo   => (int)left <= (int)right,
+
             BinaryOperatorKind.Equals    => Equals(left, right),
             BinaryOperatorKind.NotEquals => !Equals(left, right),
 
-            _ => throw new Exception($"Unexpected Binary operator: {binary.Op}"),
+            _ => throw new Exception($"Unexpected Binary operator: {binary.Operator}"),
         };
     }
 }

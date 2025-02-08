@@ -6,6 +6,7 @@ namespace Rubics.Code.Binding;
 internal enum UnaryOperatorKind {
     Identity,
     Negetion,
+    BitwiseNot,
     LogicalNot,
 }
 
@@ -30,8 +31,9 @@ internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kin
     public Type ResultType { get; } = resultType;
 
     private static readonly UnaryOperator[] operators = [
-        new UnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, typeof(bool)),
         new UnaryOperator(SyntaxKind.PlusToken,  UnaryOperatorKind.Identity,   typeof(int)),
         new UnaryOperator(SyntaxKind.MinusToken, UnaryOperatorKind.Negetion,   typeof(int)),
+        new UnaryOperator(SyntaxKind.TildeToken,  UnaryOperatorKind.BitwiseNot,   typeof(int)),
+        new UnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, typeof(bool)),
     ];
 }

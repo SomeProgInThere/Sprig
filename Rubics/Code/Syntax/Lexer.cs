@@ -13,47 +13,74 @@ internal sealed class Lexer(SourceText source) {
         
         switch (Current) {
         case '\0': kind = SyntaxKind.EndOfFileToken; break;
-        
-        case '+': kind = SyntaxKind.PlusToken;              position++; break;
-        case '-': kind = SyntaxKind.MinusToken;             position++; break;
-        case '*': kind = SyntaxKind.StarToken;              position++; break;
-        case '/': kind = SyntaxKind.SlashToken;             position++; break;
-        case '%': kind = SyntaxKind.PercentToken;           position++; break;
         case '(': kind = SyntaxKind.OpenParenthesisToken;   position++; break; 
         case ')': kind = SyntaxKind.ClosedParenthesisToken; position++; break;
-        
+
+        case '+':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.PlusToken, SyntaxKind.PlusEqualsToken);
+            break;
+
+        case '-':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.MinusToken, SyntaxKind.MinusEqualsToken);
+            break;
+
+        case '*':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.StarToken, SyntaxKind.StarEqualsToken);
+            break;
+
+        case '/':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.SlashToken, SyntaxKind.SlashEqualsToken);
+            break;
+
+        case '%':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.PercentToken, SyntaxKind.PercentEqualsToken);
+            break;
+
         case '!':
-            if (Next != '=')
-                kind = SyntaxKind.BangToken;
-            else {
-                kind = SyntaxKind.BangEqualsToken; 
-                position++;
-            }
-            position++;
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.BangToken, SyntaxKind.BangEqualsToken);
             break;
 
         case '=':
-            if (Next != '=') 
-                kind = SyntaxKind.EqualsToken;
-            else {
-                kind = SyntaxKind.DoubleEqualsToken; 
-                position ++;
-            }
-            position++;
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken);
+            break;
+
+        case '~':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.TildeToken, SyntaxKind.TildeEqualsToken);
+            break;
+
+        case '^':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.CircumflexToken, SyntaxKind.CircumflexEqualsToken);
+            break;
+
+        case '<':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.RightArrowToken, SyntaxKind.RightArrowEqualsToken);
+            break;
+
+        case '>':
+            SetKind(ref kind, ref position, 
+                '=', SyntaxKind.LeftArrowToken, SyntaxKind.LeftArrowEqualsToken);
             break;
 
         case '&':
-            if (Next == '&')
-                kind = SyntaxKind.DoubleAmpersandToken; 
-            position++;
+            SetKind(ref kind, ref position, 
+                '&', '=', SyntaxKind.AmpersandToken, SyntaxKind.DoubleAmpersandToken, SyntaxKind.AmpersandEqualsToken);
             break;
         
         case '|':
-            if (Next == '|')
-                kind = SyntaxKind.DoublePipeToken; 
-            position++;
+            SetKind(ref kind, ref position, 
+                '|', '=', SyntaxKind.PipeToken, SyntaxKind.DoublePipeToken, SyntaxKind.PipeEqualsToken);
             break;
-        
+
         default:
             if (char.IsDigit(Current))
                 ReadNumberToken();
@@ -75,6 +102,17 @@ internal sealed class Lexer(SourceText source) {
         var length = position - start;
         var literal = SyntaxKindExtensions.GetLiteral(kind) ?? source.ToString(start, length);
         return new Token(kind, start, literal, value);
+    }
+
+    private void SetKind(ref SyntaxKind kind, ref int position, char l1, SyntaxKind k1, SyntaxKind k2) {
+        if (Next == l1) { kind = k2; position+= 2; return; }
+        kind = k1; position++;
+    }
+
+    private void SetKind(ref SyntaxKind kind, ref int position, char l1, char l2, SyntaxKind k1, SyntaxKind k2, SyntaxKind k3) {
+        if (Next == l1) { kind = k2; position += 2; return; }
+        if (Next == l2) { kind = k3; position += 2; return; }
+        kind = k1; position++;
     }
 
     private void ReadWhitespaceToken() {
