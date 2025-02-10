@@ -41,6 +41,8 @@ public enum SyntaxKind {
 
     OpenParenthesisToken,
     ClosedParenthesisToken,
+    OpenBraceToken,
+    ClosedBraceToken,
 
     // Keywords
     TrueKeyword,
@@ -56,4 +58,8 @@ public enum SyntaxKind {
     
     // Nodes
     CompilationUnit,
+
+    // Statements
+    BlockStatment,
+    ExpressionStatement,
 }

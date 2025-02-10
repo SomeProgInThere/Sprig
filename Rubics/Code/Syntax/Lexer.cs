@@ -13,8 +13,11 @@ internal sealed class Lexer(SourceText source) {
         
         switch (Current) {
         case '\0': kind = SyntaxKind.EndOfFileToken; break;
+        
         case '(': kind = SyntaxKind.OpenParenthesisToken;   position++; break; 
         case ')': kind = SyntaxKind.ClosedParenthesisToken; position++; break;
+        case '{': kind = SyntaxKind.OpenBraceToken; position++; break; 
+        case '}': kind = SyntaxKind.ClosedBraceToken; position++; break;
 
         case '+':
             SetKind(ref kind, ref position, 

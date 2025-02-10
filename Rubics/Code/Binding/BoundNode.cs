@@ -2,6 +2,11 @@
 namespace Rubics.Code.Binding;
 
 internal enum BoundKind {
+    // Statements
+    BlockStatement,
+    ExpressionStatement,
+    
+    // Expressions
     LiteralExpression,
     UnaryExpression,
     VariableExpression,

@@ -20,7 +20,7 @@ public sealed class Compilation {
         if (diagnostics.Any())
             return new EvaluationResult(diagnostics);
         
-        var evaluator = new Evaluator(GlobalScope?.Expression, variables);
+        var evaluator = new Evaluator(GlobalScope?.Statement, variables);
         var result = evaluator.Evaluate();
 
         return new EvaluationResult([], result);

@@ -23,12 +23,38 @@ internal sealed class Parser {
     }
 
     public CompilationUnit ParseCompilationUnit() {
-        var expression = ParseAssignmentExpression();
+        var statment = ParseStatement();
         var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-        return new(expression, endOfFileToken);
+        return new(statment, endOfFileToken);
     }
 
     public Diagnostics Diagnostics => diagnostics;
+
+    private Statement ParseStatement() {
+        if (Current.Kind == SyntaxKind.OpenBraceToken)
+            return ParseBlockStatement();
+        
+        return ParseExpressionStatement();
+    }
+
+    private Statement ParseBlockStatement() {        
+        var statements = ImmutableArray.CreateBuilder<Statement>();
+        var openBraceToken = MatchToken(SyntaxKind.OpenBraceToken);
+
+        while (Current.Kind != SyntaxKind.EndOfFileToken && Current.Kind != SyntaxKind.ClosedBraceToken) {
+            var statement = ParseStatement();
+            statements.Add(statement);
+        }
+
+        var closedBraceToken = MatchToken(SyntaxKind.ClosedBraceToken);
+        
+        return new BlockStatement(openBraceToken, statements.ToImmutable(), closedBraceToken);
+    }
+
+    private Statement ParseExpressionStatement() {
+        var expression = ParseAssignmentExpression();
+        return new ExpressionStatement(expression);
+    }
 
     private Expression ParseAssignmentExpression() {
         if (Current.Kind == SyntaxKind.IdentifierToken && Next.Kind == SyntaxKind.EqualsToken) {

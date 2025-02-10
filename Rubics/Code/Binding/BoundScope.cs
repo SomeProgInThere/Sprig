@@ -30,10 +30,10 @@ internal sealed class BoundGlobalScope(
     BoundGlobalScope? previous,
     ImmutableArray<DiagnosticMessage> diagnostics,
     ImmutableArray<VariableSymbol> variables,
-    BoundExpression expression
+    BoundStatement statement
 ) {
     public BoundGlobalScope? Previous { get; } = previous;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public ImmutableArray<VariableSymbol> Variables { get; } = variables;
-    public BoundExpression Expression { get; } = expression;
+    public BoundStatement Statement { get; } = statement;
 }

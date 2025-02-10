@@ -98,11 +98,10 @@ public static class Program {
 
                     Console.Write($"\t{prefix}");
                     ColorPrint(error, ConsoleColor.Red);
-                    Console.Write($"{suffix}\n");
+                    Console.Write($"{suffix}\n\n");
                 }
             }
 
-            Console.WriteLine();
             sourceBuilder.Clear();
         }
     }

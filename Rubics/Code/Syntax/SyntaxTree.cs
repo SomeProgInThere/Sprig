@@ -42,10 +42,10 @@ public sealed class SyntaxTree {
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; }
 }
 
-public class CompilationUnit(Expression expression, Token endOfFileToken) 
+public class CompilationUnit(Statement statement, Token endOfFileToken) 
     : SyntaxNode {
-        
-    public Expression Expression { get; } = expression;
+
+    public Statement Statement { get; } = statement;
     public Token EndOfFile { get; } = endOfFileToken;
 
     public override SyntaxKind Kind => SyntaxKind.CompilationUnit;

@@ -4,12 +4,35 @@ using Rubics.Code.Binding;
 
 namespace Rubics.Code;
 
-internal sealed class Evaluator(BoundExpression? root, Dictionary<VariableSymbol, object> variables) {
+internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol, object> variables) {
     
-    public object Evaluate() {
-        return EvaluateExpression(root);
+    public object? Evaluate() {
+        EvaluateStatement(root);
+        return lastValue;
     }
 
+    private void EvaluateStatement(BoundStatement? statement) {
+        switch (statement?.Kind) {
+            case BoundKind.BlockStatement:
+                EvaluateBlockStatement((BoundBlockStatement)statement);
+                break;
+            
+            case BoundKind.ExpressionStatement:
+                EvaluateExpressionStatement((BoundExpressionStatement)statement);
+                break;
+
+            default: 
+                throw new Exception($"Undefined statement: {statement?.Kind}");
+        }
+    }
+
+    private void EvaluateBlockStatement(BoundBlockStatement statement) {
+        foreach (var boundStatement in statement.Statements)
+            EvaluateStatement(boundStatement);
+    }
+
+    private void EvaluateExpressionStatement(BoundExpressionStatement statement) => lastValue = EvaluateExpression(statement.Expression);
+    
     private object EvaluateExpression(BoundExpression? node){
         return node?.Kind switch {
             BoundKind.LiteralExpression     => EvaluateLiteralExpression((BoundLiteralExpression)node),
@@ -79,6 +102,8 @@ internal sealed class Evaluator(BoundExpression? root, Dictionary<VariableSymbol
             _ => throw new Exception($"Unexpected Binary operator: {binary.Operator}"),
         };
     }
+
+    private object? lastValue;
 }
 
 public sealed class EvaluationResult(ImmutableArray<DiagnosticMessage> diagnostics, object? result = null) {

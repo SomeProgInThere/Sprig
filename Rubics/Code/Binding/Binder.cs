@@ -6,7 +6,32 @@ namespace Rubics.Code.Binding;
 
 internal sealed class Binder(BoundScope? parent) {
 
-    public BoundExpression BindExpression(Expression syntax) {
+    private BoundStatement BindStatement(Statement syntax) {
+        return syntax.Kind switch {
+            SyntaxKind.BlockStatment        => BindBlockStatement((BlockStatement)syntax),
+            SyntaxKind.ExpressionStatement  => BindExpressionStatement((ExpressionStatement)syntax),
+
+            _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
+        };
+    }
+
+    private BoundStatement BindBlockStatement(BlockStatement syntax) {
+        var statements = ImmutableArray.CreateBuilder<BoundStatement>();
+        
+        foreach (var statement in syntax.Statements) {
+            var boundStatement = BindStatement(statement);
+            statements.Add(boundStatement);
+        }
+
+        return new BoundBlockStatement(statements.ToImmutable());
+    }
+
+    private BoundStatement BindExpressionStatement(ExpressionStatement syntax) {
+        var expression = BindExpression(syntax.Expression);
+        return new BoundExpressionStatement(expression);
+    }
+
+    private BoundExpression BindExpression(Expression syntax) {
         return syntax.Kind switch {
             SyntaxKind.LiteralExpression       => BindLiteralExpression((LiteralExpression)syntax),
             SyntaxKind.NameExpression          => BindNameExpression((NameExpression)syntax),
@@ -23,11 +48,11 @@ internal sealed class Binder(BoundScope? parent) {
         var parentScope = CreateParentScope(previous);
         var binder = new Binder(parentScope);
         
-        var expression = binder.BindExpression(compilation.Expression);
+        var statement = binder.BindStatement(compilation.Statement);
         var variables = binder.Scope.Variables;
         var diagnostics = binder.Diagnostics.ToImmutableArray();
 
-        return new BoundGlobalScope(previous, diagnostics, variables, expression);
+        return new BoundGlobalScope(previous, diagnostics, variables, statement);
     }
 
     private static BoundScope? CreateParentScope(BoundGlobalScope? previous) {
@@ -71,7 +96,7 @@ internal sealed class Binder(BoundScope? parent) {
         return new BoundVariableExpression(variable);
     }
 
-    private BoundExpression BindAssignmentExpression(AssignmentExpression syntax){
+    private BoundExpression BindAssignmentExpression(AssignmentExpression syntax) {
         var name = syntax.IdentifierToken.Literal;
         var expression = BindExpression(syntax.Expression);
         var variable = new VariableSymbol(name, expression.Type);
