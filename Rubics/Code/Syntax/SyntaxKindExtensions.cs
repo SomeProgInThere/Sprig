@@ -44,6 +44,9 @@ internal static class SyntaxKindExtensions {
         return literal switch {
             "true"  => SyntaxKind.TrueKeyword,
             "false" => SyntaxKind.FalseKeyword,
+            "let"   => SyntaxKind.LetKeyword,
+            "var"   => SyntaxKind.VarKeyword,
+
             _ => SyntaxKind.IdentifierToken,
         };
     }
@@ -65,6 +68,7 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.ClosedParenthesisToken   => ")",
             SyntaxKind.OpenBraceToken           => "{",
             SyntaxKind.ClosedBraceToken         => "}",
+
             SyntaxKind.PlusEqualsToken          => "+=",
             SyntaxKind.MinusEqualsToken         => "-=",
             SyntaxKind.StarEqualsToken          => "*=",
@@ -78,6 +82,12 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.DoublePipeToken          => "||",
             SyntaxKind.PipeEqualsToken          => "|=",
             SyntaxKind.CircumflexEqualsToken    => "^=",
+            
+            SyntaxKind.TrueKeyword => "true",
+            SyntaxKind.FalseKeyword => "false",
+            SyntaxKind.LetKeyword => "let",
+            SyntaxKind.VarKeyword => "var",
+
             _ => null,
         };
     }

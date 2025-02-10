@@ -47,7 +47,17 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportVariableAlreadyDeclared(TextSpan span, string name) {
-        var message = $"Variables '{name}' is already declared";
+        var message = $"Variable '{name}' is already declared";
+        Report(span, message);
+    }
+
+    public void ReportCannotConvert(TextSpan span, Type actual, Type? expected) {
+        var message = $"Cannot convert type '{actual}' to '{expected}'";
+        Report(span, message);
+    }
+
+    public void ReportCannotAssign(TextSpan span, string name) {
+        var message = $"Cannot assign value to immutabe Variable '{name}'";
         Report(span, message);
     }
 
@@ -57,5 +67,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+
     private readonly List<DiagnosticMessage> diagnostics = [];
 }

@@ -17,6 +17,10 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
                 EvaluateBlockStatement((BoundBlockStatement)statement);
                 break;
             
+            case BoundKind.VariableDeclaration:
+                EvaluateVariableDeclaration((BoundVariableDeclarationStatement)statement);
+                break;
+
             case BoundKind.ExpressionStatement:
                 EvaluateExpressionStatement((BoundExpressionStatement)statement);
                 break;
@@ -31,6 +35,12 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
             EvaluateStatement(boundStatement);
     }
 
+    private void EvaluateVariableDeclaration(BoundVariableDeclarationStatement statement) {
+        var value = EvaluateExpression(statement.Initializer);
+        variables[statement.Variable] = value;
+        lastValue = value;
+    }
+    
     private void EvaluateExpressionStatement(BoundExpressionStatement statement) => lastValue = EvaluateExpression(statement.Expression);
     
     private object EvaluateExpression(BoundExpression? node){
@@ -111,7 +121,8 @@ public sealed class EvaluationResult(ImmutableArray<DiagnosticMessage> diagnosti
     public object? Result { get; } = result;
 }
 
-public sealed class VariableSymbol(string name, Type type) {
+public sealed class VariableSymbol(string name, bool mutable, Type type) {
     public string Name { get; } = name;
+    public bool Mutable { get; } = mutable;
     public Type Type { get; } = type;
 }

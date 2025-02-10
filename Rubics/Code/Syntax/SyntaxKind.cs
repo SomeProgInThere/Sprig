@@ -47,6 +47,8 @@ public enum SyntaxKind {
     // Keywords
     TrueKeyword,
     FalseKeyword,
+    LetKeyword,
+    VarKeyword,
 
     // Expressions
     LiteralExpression,
@@ -62,4 +64,5 @@ public enum SyntaxKind {
     // Statements
     BlockStatment,
     ExpressionStatement,
+    VariableDeclaration,
 }

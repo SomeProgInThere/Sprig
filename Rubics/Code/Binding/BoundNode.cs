@@ -12,6 +12,7 @@ internal enum BoundKind {
     VariableExpression,
     BinaryExpression,
     AssignmentExpression,
+    VariableDeclaration,
 }
 
 internal abstract class BoundNode {

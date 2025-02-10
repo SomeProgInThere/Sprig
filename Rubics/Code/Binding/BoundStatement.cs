@@ -12,6 +12,15 @@ internal sealed class BoundBlockStatement(ImmutableArray<BoundStatement> stateme
     public override BoundKind Kind => BoundKind.BlockStatement;
 }
 
+internal sealed class BoundVariableDeclarationStatement(VariableSymbol variable, BoundExpression initializer)
+    : BoundStatement {
+        
+    public VariableSymbol Variable { get; } = variable;
+    public BoundExpression Initializer { get; } = initializer;
+
+    public override BoundKind Kind => BoundKind.VariableDeclaration;
+}
+
 internal sealed class BoundExpressionStatement(BoundExpression expression)
     : BoundStatement {
         

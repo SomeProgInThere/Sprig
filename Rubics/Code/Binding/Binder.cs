@@ -9,6 +9,7 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundStatement BindStatement(Statement syntax) {
         return syntax.Kind switch {
             SyntaxKind.BlockStatment        => BindBlockStatement((BlockStatement)syntax),
+            SyntaxKind.VariableDeclaration  => BindVariableDeclaration((VariableDeclarationStatement)syntax),
             SyntaxKind.ExpressionStatement  => BindExpressionStatement((ExpressionStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
@@ -17,13 +18,28 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundStatement BindBlockStatement(BlockStatement syntax) {
         var statements = ImmutableArray.CreateBuilder<BoundStatement>();
-        
+        Scope = new BoundScope(Scope);
+
         foreach (var statement in syntax.Statements) {
             var boundStatement = BindStatement(statement);
             statements.Add(boundStatement);
         }
 
+        Scope = Scope.Parent;
         return new BoundBlockStatement(statements.ToImmutable());
+    }
+
+    private BoundStatement BindVariableDeclaration(VariableDeclarationStatement syntax) {
+        var name = syntax.Identifier.Literal;
+        var mutable = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
+        var initializer = BindExpression(syntax.Initializer);
+
+        var variable = new VariableSymbol(name, mutable, initializer.Type);
+
+        if (!Scope.TryDeclare(variable))
+            diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name);
+
+        return new BoundVariableDeclarationStatement(variable, initializer);
     }
 
     private BoundStatement BindExpressionStatement(ExpressionStatement syntax) {
@@ -78,7 +94,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     public Diagnostics Diagnostics => diagnostics;
-    public BoundScope Scope { get; } = new BoundScope(parent);
+    public BoundScope Scope = new(parent);
 
     private static BoundExpression BindLiteralExpression(LiteralExpression syntax) {
         var value = syntax.Value ?? 0;
@@ -99,10 +115,19 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundExpression BindAssignmentExpression(AssignmentExpression syntax) {
         var name = syntax.IdentifierToken.Literal;
         var expression = BindExpression(syntax.Expression);
-        var variable = new VariableSymbol(name, expression.Type);
 
-        if (!Scope.TryDeclare(variable))
-            diagnostics.ReportVariableAlreadyDeclared(syntax.IdentifierToken.Span, name);
+        if (!Scope.TryLookup(name, out var variable)) {
+            diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
+            return expression;
+        }
+
+        if (variable?.Mutable ?? false)
+            diagnostics.ReportCannotAssign(syntax.EqualsToken.Span, name);
+
+        if (expression.Type != variable?.Type) {
+            diagnostics.ReportCannotConvert(syntax.Expression.Span, expression.Type, variable?.Type);
+            return expression;
+        }
 
         return new BoundAssignmentExpression(variable, expression);
     }

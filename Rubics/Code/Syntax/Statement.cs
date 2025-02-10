@@ -22,3 +22,14 @@ public sealed class ExpressionStatement(Expression expression)
 
     public override SyntaxKind Kind => SyntaxKind.ExpressionStatement;
 }
+
+public sealed class VariableDeclarationStatement(Token keyword, Token identifier, Token equalsToken, Expression initializer)
+    : Statement {
+
+    public Token Keyword { get; } = keyword;
+    public Token Identifier { get; } = identifier;
+    public Token EqualsToken { get; } = equalsToken;
+    public Expression Initializer { get; } = initializer;
+
+    public override SyntaxKind Kind => SyntaxKind.VariableDeclaration;
+}

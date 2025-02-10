@@ -31,10 +31,14 @@ internal sealed class Parser {
     public Diagnostics Diagnostics => diagnostics;
 
     private Statement ParseStatement() {
-        if (Current.Kind == SyntaxKind.OpenBraceToken)
-            return ParseBlockStatement();
-        
-        return ParseExpressionStatement();
+        return Current.Kind switch {
+            SyntaxKind.OpenBraceToken => ParseBlockStatement(),
+            
+            SyntaxKind.LetKeyword or 
+            SyntaxKind.VarKeyword => ParseVariableDeclaration(),
+            
+            _ => ParseExpressionStatement(),
+        };
     }
 
     private Statement ParseBlockStatement() {        
@@ -51,6 +55,17 @@ internal sealed class Parser {
         return new BlockStatement(openBraceToken, statements.ToImmutable(), closedBraceToken);
     }
 
+    private Statement ParseVariableDeclaration() {
+        var expected = Current.Kind == SyntaxKind.LetKeyword ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword;
+        
+        var keyword = MatchToken(expected);
+        var identifier = MatchToken(SyntaxKind.IdentifierToken);
+        var equalsToken = MatchToken(SyntaxKind.EqualsToken);
+        
+        var initializer = ParseAssignmentExpression();
+        return new VariableDeclarationStatement(keyword, identifier, equalsToken, initializer);
+    }
+    
     private Statement ParseExpressionStatement() {
         var expression = ParseAssignmentExpression();
         return new ExpressionStatement(expression);
