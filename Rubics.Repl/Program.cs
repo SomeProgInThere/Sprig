@@ -20,9 +20,9 @@ public static class Program {
 
         while (true) {
             if (sourceBuilder.Length == 0)
-                ColorPrint(">> ", ConsoleColor.Cyan);
+                ColorPrint("» ", ConsoleColor.Cyan);
             else
-                ColorPrint(" . ", ConsoleColor.DarkGray);
+                ColorPrint("  ", ConsoleColor.DarkGray);
 
             var input = Console.ReadLine();
 
@@ -98,7 +98,7 @@ public static class Program {
 
                     Console.Write($"\t{prefix}");
                     ColorPrint(error, ConsoleColor.Red);
-                    Console.Write($"{suffix}\n\n");
+                    Console.Write($"{suffix}\n");
                 }
             }
 
@@ -129,7 +129,7 @@ public static class Program {
     }
 
     static readonly string startupMessage = $"""
-        Rubics v0alpha
+        Rubics
         {RuntimeInformation.OSDescription} ({RuntimeInformation.ProcessArchitecture}) 
         Type "!help" for list of commands
     """;

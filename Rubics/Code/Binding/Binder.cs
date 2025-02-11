@@ -25,7 +25,7 @@ internal sealed class Binder(BoundScope? parent) {
             statements.Add(boundStatement);
         }
 
-        Scope = Scope.Parent;
+        Scope = Scope.Parent ?? new BoundScope(parent);
         return new BoundBlockStatement(statements.ToImmutable());
     }
 
