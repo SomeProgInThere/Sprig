@@ -19,6 +19,8 @@ internal enum BinaryOperatorKind {
     BitwiseOr,
     BitwiseXor,
     BitwiseNot,
+    BitshiftLeft,
+    BitshiftRight,
     GreaterThan,
     GreaterThanEqualsTo,
     LesserThan,
@@ -59,7 +61,10 @@ internal sealed class BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind k
         new BinaryOperator(SyntaxKind.TildeToken,               BinaryOperatorKind.BitwiseNot,  typeof(int)),
         new BinaryOperator(SyntaxKind.AmpersandToken,           BinaryOperatorKind.BitwiseAnd,  typeof(int)), 
         new BinaryOperator(SyntaxKind.PipeToken,                BinaryOperatorKind.BitwiseOr,   typeof(int)), 
-        new BinaryOperator(SyntaxKind.CircumflexToken,          BinaryOperatorKind.BitwiseXor,  typeof(int)), 
+        new BinaryOperator(SyntaxKind.CircumflexToken,          BinaryOperatorKind.BitwiseXor,  typeof(int)),
+         
+        new BinaryOperator(SyntaxKind.DoubleLeftArrowToken,     BinaryOperatorKind.BitshiftLeft,   typeof(int)), 
+        new BinaryOperator(SyntaxKind.DoubleRightArrowToken,    BinaryOperatorKind.BitshiftRight,  typeof(int)), 
 
         new BinaryOperator(SyntaxKind.DoubleEqualsToken,        BinaryOperatorKind.Equals,                  typeof(int), typeof(bool)),
         new BinaryOperator(SyntaxKind.BangEqualsToken,          BinaryOperatorKind.NotEquals,               typeof(int), typeof(bool)),

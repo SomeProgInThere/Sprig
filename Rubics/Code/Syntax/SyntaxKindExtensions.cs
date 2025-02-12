@@ -17,7 +17,9 @@ internal static class SyntaxKindExtensions {
         return kind switch {
             SyntaxKind.AmpersandToken or
             SyntaxKind.CircumflexToken or
-            SyntaxKind.PipeToken => 6,
+            SyntaxKind.PipeToken or
+            SyntaxKind.DoubleLeftArrowToken or
+            SyntaxKind.DoubleRightArrowToken => 6,
 
             SyntaxKind.StarToken or 
             SyntaxKind.SlashToken or 
@@ -82,6 +84,8 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.DoublePipeToken          => "||",
             SyntaxKind.PipeEqualsToken          => "|=",
             SyntaxKind.CircumflexEqualsToken    => "^=",
+            SyntaxKind.DoubleLeftArrowToken     => ">>",
+            SyntaxKind.DoubleRightArrowToken     => "<<",
             
             SyntaxKind.TrueKeyword => "true",
             SyntaxKind.FalseKeyword => "false",

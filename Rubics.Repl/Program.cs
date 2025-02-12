@@ -72,7 +72,7 @@ public static class Program {
                 syntaxTree.Root.WriteTo(Console.Out);
 
             if (!result.Diagnostics.Any()) {
-                ColorPrint($"{result.Result}\n", ConsoleColor.White);
+                ColorPrint($"{result.Result}\n", ConsoleColor.Blue);
                 previous = compilation;
             }
             else {
@@ -92,7 +92,7 @@ public static class Program {
                     var prefixSpan = TextSpan.CreateFromBounds(line.Start, diagnostic.Span.Start);
                     var suffixSpan = TextSpan.CreateFromBounds(diagnostic.Span.End, line.End);
 
-                    var prefix = sourceText.ToString(prefixSpan);
+                    var prefix = sourceText.ToString(prefixSpan).Trim('\t');
                     var error = sourceText.ToString(diagnostic.Span);
                     var suffix = sourceText.ToString(suffixSpan);
 

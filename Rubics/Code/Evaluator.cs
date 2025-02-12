@@ -101,6 +101,9 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
             BinaryOperatorKind.BitwiseOr  => (int)left | (int)right,
             BinaryOperatorKind.BitwiseXor => (int)left ^ (int)right,
 
+            BinaryOperatorKind.BitshiftLeft  => (int)left >> (int)right,
+            BinaryOperatorKind.BitshiftRight => (int)left << (int)right,
+
             BinaryOperatorKind.GreaterThan          => (int)left >  (int)right,
             BinaryOperatorKind.GreaterThanEqualsTo  => (int)left >= (int)right,
             BinaryOperatorKind.LesserThan           => (int)left <  (int)right,

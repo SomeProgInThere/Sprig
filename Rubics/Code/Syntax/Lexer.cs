@@ -66,12 +66,12 @@ internal sealed class Lexer(SourceText source) {
 
         case '<':
             SetKind(ref kind, ref position, 
-                '=', SyntaxKind.RightArrowToken, SyntaxKind.RightArrowEqualsToken);
+                '<', '=', SyntaxKind.RightArrowToken, SyntaxKind.DoubleRightArrowToken, SyntaxKind.RightArrowEqualsToken);
             break;
 
         case '>':
             SetKind(ref kind, ref position, 
-                '=', SyntaxKind.LeftArrowToken, SyntaxKind.LeftArrowEqualsToken);
+                '>', '=', SyntaxKind.LeftArrowToken, SyntaxKind.DoubleLeftArrowToken, SyntaxKind.LeftArrowEqualsToken);
             break;
 
         case '&':
