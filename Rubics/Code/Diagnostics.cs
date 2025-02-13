@@ -31,13 +31,13 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
-    public void ReportUndefinedUnaryOp(TextSpan span, string literal, Type type) {
-        var message = $"Unary operator '{literal}' is not defined for type {type}";
+    public void ReportUndefinedUnaryOperator(TextSpan span, string literal, Type type) {
+        var message = $"Unary operator '{literal}' is not defined for type '{type}'";
         Report(span, message);
     }
 
-    public void ReportUndefinedBinaryOp(TextSpan span, string literal, Type left, Type right) {
-        var message = $"Binary operator '{literal}' is not defined for types {left} and {right}";
+    public void ReportUndefinedBinaryOperator(TextSpan span, string literal, Type left, Type right) {
+        var message = $"Binary operator '{literal}' is not defined for types '{left}' and '{right}'";
         Report(span, message);
     }
 
@@ -46,7 +46,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
-    public void ReportVariableAlreadyDeclared(TextSpan span, string name) {
+    public void ReportVariableRedeclaration(TextSpan span, string name) {
         var message = $"Variable '{name}' is already declared";
         Report(span, message);
     }
@@ -57,7 +57,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportCannotAssign(TextSpan span, string name) {
-        var message = $"Cannot assign value to immutabe Variable '{name}'";
+        var message = $"Cannot assign value to immutabe variable '{name}'";
         Report(span, message);
     }
 

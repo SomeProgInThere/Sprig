@@ -10,6 +10,8 @@ public readonly struct TextSpan(int start, int length) {
     public int Start { get; } = start;
     public int Length { get; } = length;
     public readonly int End => Start + Length;
+
+    public override string ToString() => $"{Start}..{End}";
 }
 
 public sealed class TextLine(SourceText source, int start, int length, int lengthWithLineBreak) {

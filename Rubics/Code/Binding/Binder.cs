@@ -37,7 +37,7 @@ internal sealed class Binder(BoundScope? parent) {
         var variable = new VariableSymbol(name, mutable, initializer.Type);
 
         if (!Scope.TryDeclare(variable))
-            diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name);
+            diagnostics.ReportVariableRedeclaration(syntax.Identifier.Span, name);
 
         return new BoundVariableDeclarationStatement(variable, initializer);
     }
@@ -138,7 +138,7 @@ internal sealed class Binder(BoundScope? parent) {
         var op = UnaryOperator.Bind(token.Kind, operand.Type);
 
         if (op == null) {
-            diagnostics.ReportUndefinedUnaryOp(token.Span, token.Literal, operand.Type);
+            diagnostics.ReportUndefinedUnaryOperator(token.Span, token.Literal, operand.Type);
             return operand;
         }
 
@@ -152,7 +152,7 @@ internal sealed class Binder(BoundScope? parent) {
         var op = BinaryOperator.Bind(token.Kind, left.Type, right.Type);
 
         if (op == null) {
-            diagnostics.ReportUndefinedBinaryOp(token.Span, token.Literal, left.Type, right.Type);
+            diagnostics.ReportUndefinedBinaryOperator(token.Span, token.Literal, left.Type, right.Type);
             return left;
         }
 
