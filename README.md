@@ -21,4 +21,4 @@ The Solution has three projects in it:
 ## Goals
 Learning the fundamentals of making a interpreter (and a *actual* compiler later on)
 
-Following the amazing series by ![terrajobst](https://youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y&si=Uh0fbgiPPq36D50x)
+Following the amazing series by [*terrajobst*](https://youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y&si=Uh0fbgiPPq36D50x)
