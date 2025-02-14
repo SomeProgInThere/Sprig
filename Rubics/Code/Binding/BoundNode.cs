@@ -5,6 +5,7 @@ internal enum BoundKind {
     // Statements
     BlockStatement,
     ExpressionStatement,
+    IfStatement,
     
     // Expressions
     LiteralExpression,
@@ -12,6 +13,7 @@ internal enum BoundKind {
     VariableExpression,
     BinaryExpression,
     AssignmentExpression,
+
     VariableDeclaration,
 }
 

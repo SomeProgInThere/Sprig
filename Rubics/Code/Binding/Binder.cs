@@ -11,6 +11,7 @@ internal sealed class Binder(BoundScope? parent) {
             SyntaxKind.BlockStatment        => BindBlockStatement((BlockStatement)syntax),
             SyntaxKind.VariableDeclaration  => BindVariableDeclaration((VariableDeclarationStatement)syntax),
             SyntaxKind.ExpressionStatement  => BindExpressionStatement((ExpressionStatement)syntax),
+            SyntaxKind.IfStatement          => BindIfStatement((IfStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
         };
@@ -47,6 +48,18 @@ internal sealed class Binder(BoundScope? parent) {
         return new BoundExpressionStatement(expression);
     }
 
+    private BoundStatement BindIfStatement(IfStatement syntax) {
+        var condition = BindExpression(syntax.IfClause.Condition, typeof(bool));
+        var ifStatement = BindStatement(syntax.IfClause.IfStatment);
+        
+        var elseStatement = syntax.ElseClause switch {
+            null => null,
+            _ => BindStatement(syntax.ElseClause.ElseStatment),
+        };
+
+        return new BoundIfStatment(condition, ifStatement, elseStatement);
+    }
+
     private BoundExpression BindExpression(Expression syntax) {
         return syntax.Kind switch {
             SyntaxKind.LiteralExpression       => BindLiteralExpression((LiteralExpression)syntax),
@@ -58,6 +71,14 @@ internal sealed class Binder(BoundScope? parent) {
             
             _ => throw new Exception($"Unexpected expression: {syntax.Kind}"),
         };
+    }
+
+    private BoundExpression BindExpression(Expression syntax, Type targetType) {
+        var result = BindExpression(syntax);
+        if (result.Type != targetType)
+            diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
+        
+        return result;
     }
 
     public static BoundGlobalScope BindGlobalScope(BoundGlobalScope? previous, CompilationUnit compilation) {

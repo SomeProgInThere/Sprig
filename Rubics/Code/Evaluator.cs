@@ -11,38 +11,51 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
         return lastValue;
     }
 
-    private void EvaluateStatement(BoundStatement? statement) {
-        switch (statement?.Kind) {
+    private void EvaluateStatement(BoundStatement? node) {
+        switch (node?.Kind) {
             case BoundKind.BlockStatement:
-                EvaluateBlockStatement((BoundBlockStatement)statement);
+                EvaluateBlockStatement((BoundBlockStatement)node);
                 break;
             
             case BoundKind.VariableDeclaration:
-                EvaluateVariableDeclaration((BoundVariableDeclarationStatement)statement);
+                EvaluateVariableDeclaration((BoundVariableDeclarationStatement)node);
                 break;
 
             case BoundKind.ExpressionStatement:
-                EvaluateExpressionStatement((BoundExpressionStatement)statement);
+                EvaluateExpressionStatement((BoundExpressionStatement)node);
+                break;
+
+            case BoundKind.IfStatement:
+                EvaluateIfStatement((BoundIfStatment)node);
                 break;
 
             default: 
-                throw new Exception($"Undefined statement: {statement?.Kind}");
+                throw new Exception($"Undefined statement: {node?.Kind}");
         }
     }
 
-    private void EvaluateBlockStatement(BoundBlockStatement statement) {
-        foreach (var boundStatement in statement.Statements)
+    private void EvaluateBlockStatement(BoundBlockStatement node) {
+        foreach (var boundStatement in node.Statements)
             EvaluateStatement(boundStatement);
     }
 
-    private void EvaluateVariableDeclaration(BoundVariableDeclarationStatement statement) {
-        var value = EvaluateExpression(statement.Initializer);
-        variables[statement.Variable] = value;
+    private void EvaluateVariableDeclaration(BoundVariableDeclarationStatement node) {
+        var value = EvaluateExpression(node.Initializer);
+        variables[node.Variable] = value;
         lastValue = value;
     }
     
-    private void EvaluateExpressionStatement(BoundExpressionStatement statement) => lastValue = EvaluateExpression(statement.Expression);
+    private void EvaluateExpressionStatement(BoundExpressionStatement node) => lastValue = EvaluateExpression(node.Expression);
     
+    private void EvaluateIfStatement(BoundIfStatment node) {
+        var condition = (bool)EvaluateExpression(node.Condition);
+        
+        if (condition)
+            EvaluateStatement(node.IfStatement);
+        else if (node.ElseStatement != null)
+            EvaluateStatement(node.ElseStatement);
+    }
+
     private object EvaluateExpression(BoundExpression? node){
         return node?.Kind switch {
             BoundKind.LiteralExpression     => EvaluateLiteralExpression((BoundLiteralExpression)node),

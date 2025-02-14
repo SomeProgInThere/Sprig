@@ -46,6 +46,8 @@ internal static class SyntaxKindExtensions {
         return literal switch {
             "true"  => SyntaxKind.TrueKeyword,
             "false" => SyntaxKind.FalseKeyword,
+            "if"    => SyntaxKind.IfKeyword,
+            "else"    => SyntaxKind.ElseKeyword,
             "let"   => SyntaxKind.LetKeyword,
             "var"   => SyntaxKind.VarKeyword,
 
@@ -87,10 +89,12 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.DoubleLeftArrowToken     => ">>",
             SyntaxKind.DoubleRightArrowToken     => "<<",
             
-            SyntaxKind.TrueKeyword => "true",
+            SyntaxKind.TrueKeyword  => "true",
             SyntaxKind.FalseKeyword => "false",
-            SyntaxKind.LetKeyword => "let",
-            SyntaxKind.VarKeyword => "var",
+            SyntaxKind.IfKeyword    => "if",
+            SyntaxKind.ElseKeyword  => "else",
+            SyntaxKind.LetKeyword   => "let",
+            SyntaxKind.VarKeyword   => "var",
 
             _ => null,
         };

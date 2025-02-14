@@ -27,3 +27,13 @@ internal sealed class BoundExpressionStatement(BoundExpression expression)
     public BoundExpression Expression { get; } = expression;
     public override BoundKind Kind => BoundKind.ExpressionStatement;
 }
+
+internal sealed class BoundIfStatment(BoundExpression condition, BoundStatement ifStatement, BoundStatement? elseStatement)
+    : BoundStatement {
+
+    public BoundExpression Condition { get; } = condition;
+    public BoundStatement IfStatement { get; } = ifStatement;
+    public BoundStatement? ElseStatement { get; } = elseStatement;
+
+    public override BoundKind Kind => BoundKind.IfStatement;
+}

@@ -33,3 +33,12 @@ public sealed class VariableDeclarationStatement(Token keyword, Token identifier
 
     public override SyntaxKind Kind => SyntaxKind.VariableDeclaration;
 }
+
+public sealed class IfStatement(IfClause ifClause, ElseClause? elseClause) 
+    : Statement {
+
+    public IfClause IfClause { get; } = ifClause;
+    public ElseClause? ElseClause { get; } = elseClause;
+
+    public override SyntaxKind Kind => SyntaxKind.IfStatement;
+}

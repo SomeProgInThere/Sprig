@@ -36,6 +36,8 @@ internal sealed class Parser {
             
             SyntaxKind.LetKeyword or 
             SyntaxKind.VarKeyword => ParseVariableDeclaration(),
+
+            SyntaxKind.IfKeyword => ParseIfStatement(), 
             
             _ => ParseExpressionStatement(),
         };
@@ -81,6 +83,23 @@ internal sealed class Parser {
         }
 
         return ParseBinaryExpression();
+    }
+
+    private Statement ParseIfStatement() {
+        var ifKeyword = MatchToken(SyntaxKind.IfKeyword);
+        var condition = ParseAssignmentExpression();
+        var ifStatement = ParseStatement();
+
+        var ifClause = new IfClause(ifKeyword, condition, ifStatement);
+        ElseClause? elseClause = null;
+
+        if (Current.Kind == SyntaxKind.ElseKeyword) {
+            var elseKeyword = NextToken();
+            var elseStatement = ParseStatement();
+            elseClause = new ElseClause(elseKeyword, elseStatement);
+        }
+
+        return new IfStatement(ifClause, elseClause);
     }
 
     private Expression ParseBinaryExpression(int parentPrecedence = 0) {
