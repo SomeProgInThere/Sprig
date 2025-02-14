@@ -5,11 +5,12 @@ using Rubics.Code;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Rubics.Repl;
+namespace Rubics.CLI;
 
 public static class Program {
 
     private static void Main() {
+        
         var showTrees = false;
         var variables = new Dictionary<VariableSymbol, object>();
         var sourceBuilder = new StringBuilder();

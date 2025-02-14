@@ -53,6 +53,7 @@ public enum SyntaxKind {
     VarKeyword,
     IfKeyword,
     ElseKeyword,
+    WhileKeyword,
 
     // Expressions
     LiteralExpression,
@@ -64,7 +65,6 @@ public enum SyntaxKind {
     
     // Nodes
     CompilationUnit,
-    IfClause,
     ElseClause,
 
     // Statements
@@ -72,4 +72,5 @@ public enum SyntaxKind {
     ExpressionStatement,
     VariableDeclaration,
     IfStatement,
+    WhileStatement,
 }

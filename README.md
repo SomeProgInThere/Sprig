@@ -14,9 +14,9 @@ Currently a work in progress interpreter:
 
 ## Structure
 The Solution has three projects in it:
-  * Rubics (Core Compiler)
-  * Repl (Interactive Interpreter)
-  * Tests (xUnit tests)
+  * Rubics (Main)
+  * Rubics.CLI (Command-line Interface)
+  * Rubics.Test (Tests for compiler)
 
 ## Goals
 Learning the fundamentals of making a interpreter (and a *actual* compiler later on)

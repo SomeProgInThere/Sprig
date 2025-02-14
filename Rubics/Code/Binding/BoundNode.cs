@@ -6,6 +6,7 @@ internal enum BoundKind {
     BlockStatement,
     ExpressionStatement,
     IfStatement,
+    WhileStatement,
     
     // Expressions
     LiteralExpression,

@@ -12,6 +12,7 @@ internal sealed class Binder(BoundScope? parent) {
             SyntaxKind.VariableDeclaration  => BindVariableDeclaration((VariableDeclarationStatement)syntax),
             SyntaxKind.ExpressionStatement  => BindExpressionStatement((ExpressionStatement)syntax),
             SyntaxKind.IfStatement          => BindIfStatement((IfStatement)syntax),
+            SyntaxKind.WhileStatement       => BindWhileStatement((WhileStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
         };
@@ -49,15 +50,21 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindIfStatement(IfStatement syntax) {
-        var condition = BindExpression(syntax.IfClause.Condition, typeof(bool));
-        var ifStatement = BindStatement(syntax.IfClause.IfStatment);
+        var condition = BindExpression(syntax.Condition, typeof(bool));
+        var body = BindStatement(syntax.Body);
         
-        var elseStatement = syntax.ElseClause switch {
+        var elseBody = syntax.ElseClause switch {
             null => null,
-            _ => BindStatement(syntax.ElseClause.ElseStatment),
+            _ => BindStatement(syntax.ElseClause.Body),
         };
 
-        return new BoundIfStatment(condition, ifStatement, elseStatement);
+        return new BoundIfStatment(condition, body, elseBody);
+    }
+
+    private BoundStatement BindWhileStatement(WhileStatement syntax) {
+        var condition = BindExpression(syntax.Condition, typeof(bool));
+        var body = BindStatement(syntax.Body);
+        return new BoundWhileStatment(condition, body);
     }
 
     private BoundExpression BindExpression(Expression syntax) {

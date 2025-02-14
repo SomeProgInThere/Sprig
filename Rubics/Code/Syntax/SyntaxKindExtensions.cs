@@ -48,6 +48,7 @@ internal static class SyntaxKindExtensions {
             "false" => SyntaxKind.FalseKeyword,
             "if"    => SyntaxKind.IfKeyword,
             "else"    => SyntaxKind.ElseKeyword,
+            "while"   => SyntaxKind.WhileKeyword,
             "let"   => SyntaxKind.LetKeyword,
             "var"   => SyntaxKind.VarKeyword,
 
@@ -92,6 +93,7 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.TrueKeyword  => "true",
             SyntaxKind.FalseKeyword => "false",
             SyntaxKind.IfKeyword    => "if",
+            SyntaxKind.WhileKeyword => "while",
             SyntaxKind.ElseKeyword  => "else",
             SyntaxKind.LetKeyword   => "let",
             SyntaxKind.VarKeyword   => "var",

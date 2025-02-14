@@ -38,6 +38,7 @@ internal sealed class Parser {
             SyntaxKind.VarKeyword => ParseVariableDeclaration(),
 
             SyntaxKind.IfKeyword => ParseIfStatement(), 
+            SyntaxKind.WhileKeyword => ParseWhileStatement(),
             
             _ => ParseExpressionStatement(),
         };
@@ -88,18 +89,25 @@ internal sealed class Parser {
     private Statement ParseIfStatement() {
         var ifKeyword = MatchToken(SyntaxKind.IfKeyword);
         var condition = ParseAssignmentExpression();
-        var ifStatement = ParseStatement();
+        var body = ParseStatement();
 
-        var ifClause = new IfClause(ifKeyword, condition, ifStatement);
         ElseClause? elseClause = null;
 
         if (Current.Kind == SyntaxKind.ElseKeyword) {
             var elseKeyword = NextToken();
-            var elseStatement = ParseStatement();
-            elseClause = new ElseClause(elseKeyword, elseStatement);
+            var elseBody = ParseStatement();
+            elseClause = new ElseClause(elseKeyword, elseBody);
         }
 
-        return new IfStatement(ifClause, elseClause);
+        return new IfStatement(ifKeyword, condition, body, elseClause);
+    }
+
+    private Statement ParseWhileStatement() {
+        var whileKeyword = MatchToken(SyntaxKind.WhileKeyword);
+        var condition = ParseAssignmentExpression();
+        var body = ParseStatement();
+
+        return new WhileStatement(whileKeyword, condition, body);
     }
 
     private Expression ParseBinaryExpression(int parentPrecedence = 0) {

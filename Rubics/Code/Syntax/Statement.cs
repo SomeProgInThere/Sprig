@@ -34,11 +34,23 @@ public sealed class VariableDeclarationStatement(Token keyword, Token identifier
     public override SyntaxKind Kind => SyntaxKind.VariableDeclaration;
 }
 
-public sealed class IfStatement(IfClause ifClause, ElseClause? elseClause) 
+public sealed class IfStatement(Token ifToken, Expression condition, Statement body, ElseClause? elseClause) 
     : Statement {
 
-    public IfClause IfClause { get; } = ifClause;
+    public Token IfToken { get; } = ifToken;
+    public Expression Condition { get; } = condition;
+    public Statement Body { get; } = body;
     public ElseClause? ElseClause { get; } = elseClause;
 
     public override SyntaxKind Kind => SyntaxKind.IfStatement;
+}
+
+public sealed class WhileStatement(Token whileToken, Expression condition, Statement body) 
+    : Statement {
+
+    public Token WhileToken { get; } = whileToken;
+    public Expression Condition { get; } = condition;
+    public Statement Body { get; } = body;
+
+    public override SyntaxKind Kind => SyntaxKind.WhileStatement;
 }

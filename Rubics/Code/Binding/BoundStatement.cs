@@ -37,3 +37,12 @@ internal sealed class BoundIfStatment(BoundExpression condition, BoundStatement 
 
     public override BoundKind Kind => BoundKind.IfStatement;
 }
+
+internal class BoundWhileStatment(BoundExpression condition, BoundStatement body) 
+: BoundStatement {
+
+    public BoundExpression Condition { get; } = condition;
+    public BoundStatement Body { get; } = body;
+
+    public override BoundKind Kind => BoundKind.WhileStatement;
+}

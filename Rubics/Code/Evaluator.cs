@@ -29,6 +29,10 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
                 EvaluateIfStatement((BoundIfStatment)node);
                 break;
 
+            case BoundKind.WhileStatement:
+                EvaluateWhileStatement((BoundWhileStatment)node);
+                break;
+
             default: 
                 throw new Exception($"Undefined statement: {node?.Kind}");
         }
@@ -54,6 +58,11 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
             EvaluateStatement(node.IfStatement);
         else if (node.ElseStatement != null)
             EvaluateStatement(node.ElseStatement);
+    }
+
+    private void EvaluateWhileStatement(BoundWhileStatment node) {        
+        while ((bool)EvaluateExpression(node.Condition))
+            EvaluateStatement(node.Body);
     }
 
     private object EvaluateExpression(BoundExpression? node){
