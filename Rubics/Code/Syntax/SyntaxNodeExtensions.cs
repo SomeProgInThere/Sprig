@@ -6,11 +6,13 @@ internal sealed class SyntaxNodeExtensions {
         var consoleOut = writer == Console.Out;
         var marker = last ? "└──" : "├──";
 
+        Console.ForegroundColor = ConsoleColor.DarkGray;
         writer.Write(indent);
 
         if (consoleOut)
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             writer.Write(marker);
-            Console.ForegroundColor = node is Token ? ConsoleColor.DarkBlue : ConsoleColor.Cyan;
+            Console.ForegroundColor = node is Token ? ConsoleColor.Blue : ConsoleColor.DarkMagenta;
 
         writer.Write(node.Kind);
 

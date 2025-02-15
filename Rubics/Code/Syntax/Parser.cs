@@ -97,8 +97,16 @@ internal sealed class Parser {
             var elseKeyword = NextToken();
             var elseBody = ParseStatement();
             elseClause = new ElseClause(elseKeyword, elseBody);
-        }
 
+            orderedClauses.Push(elseClause);
+        } 
+        else {
+            orderedClauses.Push(elseClause);
+            if (orderedClauses.Count > 0 && orderedClauses.Peek() != null) {
+                return new IfStatement(ifKeyword, condition, body, orderedClauses.Pop());
+            }
+        }
+        
         return new IfStatement(ifKeyword, condition, body, elseClause);
     }
 
@@ -193,7 +201,9 @@ internal sealed class Parser {
         return new Token(kind, Current.Position, "\0");
     }
 
+    private readonly Stack<ElseClause?> orderedClauses = new();
     private readonly ImmutableArray<Token> tokens = [];
     private readonly Diagnostics diagnostics = [];
+    
     private int position;
 };

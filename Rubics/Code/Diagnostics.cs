@@ -17,7 +17,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     public IEnumerator<DiagnosticMessage> GetEnumerator() => diagnostics.GetEnumerator();
 
     public void ReportInvalidNumber(TextSpan span, string literal, Type type) {
-        var message = $"Number {literal} is not valid {type}";
+        var message = $"Number '{literal}' is not valid '{type}'";
         Report(span, message);
     }
 
@@ -27,7 +27,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUnexpectedToken(TextSpan span, SyntaxKind actual, SyntaxKind expected) {
-        var message = $"Unexpected token <{actual}>, expected <{expected}>";
+        var message = $"Unexpected token '{actual.GetLiteral()}', expected '{expected.GetLiteral()}'";
         Report(span, message);
     }
 

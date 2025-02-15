@@ -103,7 +103,7 @@ internal sealed class Lexer(SourceText source) {
         }
         
         var length = position - start;
-        var literal = SyntaxKindExtensions.GetLiteral(kind) ?? source.ToString(start, length);
+        var literal = kind.GetLiteral() ?? source.ToString(start, length);
         return new Token(kind, start, literal, value);
     }
 
@@ -145,7 +145,7 @@ internal sealed class Lexer(SourceText source) {
             
         var length = position - start;
         var literal = source.ToString(start, length);
-        kind = SyntaxKindExtensions.GetKeywordKind(literal);
+        kind = literal.GetKeywordKind();
     }
     
     public Diagnostics Diagnostics => diagnostics;
