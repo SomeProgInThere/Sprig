@@ -30,19 +30,16 @@ internal sealed class Parser {
 
     public Diagnostics Diagnostics => diagnostics;
 
-    private Statement ParseStatement() {
-        return Current.Kind switch {
-            SyntaxKind.OpenBraceToken => ParseBlockStatement(),
-            
-            SyntaxKind.LetKeyword or 
-            SyntaxKind.VarKeyword => ParseVariableDeclaration(),
-
-            SyntaxKind.IfKeyword => ParseIfStatement(), 
-            SyntaxKind.WhileKeyword => ParseWhileStatement(),
-            
-            _ => ParseExpressionStatement(),
-        };
-    }
+    private Statement ParseStatement() => Current.Kind switch {
+        SyntaxKind.OpenBraceToken   => ParseBlockStatement(),
+        SyntaxKind.LetKeyword or 
+        SyntaxKind.VarKeyword       => ParseVariableDeclaration(),
+        SyntaxKind.IfKeyword        => ParseIfStatement(),
+        SyntaxKind.WhileKeyword     => ParseWhileStatement(),
+        SyntaxKind.IdentifierToken  => ParseAssignOperationStatement(),
+        
+        _ => ParseExpressionStatement(),
+    };
 
     private Statement ParseBlockStatement() {        
         var statements = ImmutableArray.CreateBuilder<Statement>();
@@ -68,22 +65,29 @@ internal sealed class Parser {
         var initializer = ParseAssignmentExpression();
         return new VariableDeclarationStatement(keyword, identifier, equalsToken, initializer);
     }
-    
-    private Statement ParseExpressionStatement() {
-        var expression = ParseAssignmentExpression();
-        return new ExpressionStatement(expression);
-    }
 
-    private Expression ParseAssignmentExpression() {
-        if (Current.Kind == SyntaxKind.IdentifierToken && Next.Kind == SyntaxKind.EqualsToken) {
-            var identifierToken = NextToken();
-            var operatorToken = NextToken();
-            var right = ParseAssignmentExpression();
-
-            return new AssignmentExpression(identifierToken, operatorToken, right);
+    private Statement ParseAssignOperationStatement() {
+        var isAssignOperator = Next.Kind switch {
+            SyntaxKind.PlusEqualsToken          or
+            SyntaxKind.MinusEqualsToken         or
+            SyntaxKind.StarEqualsToken          or
+            SyntaxKind.SlashEqualsToken         or
+            SyntaxKind.PercentEqualsToken       or
+            SyntaxKind.AmpersandEqualsToken     or
+            SyntaxKind.PipeEqualsToken          or
+            SyntaxKind.CircumflexEqualsToken    => true,
+            _ => false,
+        };
+        
+        if (isAssignOperator) {
+            var identifier = MatchToken(SyntaxKind.IdentifierToken);
+            var assignOperatorToken = NextToken();
+            var expression = ParseAssignmentExpression();
+            
+            return new AssignOperationStatement(identifier, assignOperatorToken, expression);
         }
 
-        return ParseBinaryExpression();
+        return ParseExpressionStatement();
     }
 
     private Statement ParseIfStatement() {
@@ -96,8 +100,8 @@ internal sealed class Parser {
         if (Current.Kind == SyntaxKind.ElseKeyword) {
             var elseKeyword = NextToken();
             var elseBody = ParseStatement();
-            elseClause = new ElseClause(elseKeyword, elseBody);
 
+            elseClause = new ElseClause(elseKeyword, elseBody);
             orderedClauses.Push(elseClause);
         } 
         else {
@@ -116,6 +120,23 @@ internal sealed class Parser {
         var body = ParseStatement();
 
         return new WhileStatement(whileKeyword, condition, body);
+    }
+
+    private Statement ParseExpressionStatement() {
+        var expression = ParseAssignmentExpression();
+        return new ExpressionStatement(expression);
+    }
+
+    private Expression ParseAssignmentExpression() {
+        if (Current.Kind == SyntaxKind.IdentifierToken && Next.Kind == SyntaxKind.EqualsToken) {
+            var identifierToken = NextToken();
+            var operatorToken = NextToken();
+            var right = ParseAssignmentExpression();
+
+            return new AssignmentExpression(identifierToken, operatorToken, right);
+        }
+
+        return ParseBinaryExpression();
     }
 
     private Expression ParseBinaryExpression(int parentPrecedence = 0) {

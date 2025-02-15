@@ -7,6 +7,8 @@ internal enum BoundKind {
     ExpressionStatement,
     IfStatement,
     WhileStatement,
+    VariableDeclaration,
+    AssignOperationStatement,
     
     // Expressions
     LiteralExpression,
@@ -15,7 +17,6 @@ internal enum BoundKind {
     BinaryExpression,
     AssignmentExpression,
 
-    VariableDeclaration,
 }
 
 internal abstract class BoundNode {

@@ -8,11 +8,12 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundStatement BindStatement(Statement syntax) {
         return syntax.Kind switch {
-            SyntaxKind.BlockStatment        => BindBlockStatement((BlockStatement)syntax),
-            SyntaxKind.VariableDeclaration  => BindVariableDeclaration((VariableDeclarationStatement)syntax),
-            SyntaxKind.ExpressionStatement  => BindExpressionStatement((ExpressionStatement)syntax),
-            SyntaxKind.IfStatement          => BindIfStatement((IfStatement)syntax),
-            SyntaxKind.WhileStatement       => BindWhileStatement((WhileStatement)syntax),
+            SyntaxKind.BlockStatment            => BindBlockStatement((BlockStatement)syntax),
+            SyntaxKind.VariableDeclaration      => BindVariableDeclaration((VariableDeclarationStatement)syntax),
+            SyntaxKind.AssignOperationStatement => BindAssignOperationStatement((AssignOperationStatement)syntax),
+            SyntaxKind.ExpressionStatement      => BindExpressionStatement((ExpressionStatement)syntax),
+            SyntaxKind.IfStatement              => BindIfStatement((IfStatement)syntax),
+            SyntaxKind.WhileStatement           => BindWhileStatement((WhileStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
         };
@@ -42,6 +43,22 @@ internal sealed class Binder(BoundScope? parent) {
             diagnostics.ReportVariableRedeclaration(syntax.Identifier.Span, name);
 
         return new BoundVariableDeclarationStatement(variable, initializer);
+    }
+
+    private BoundStatement BindAssignOperationStatement(AssignOperationStatement syntax) {
+        var name = syntax.Identifier.Literal;
+        var expression = BindExpression(syntax.Expression);
+
+        if (!Scope.TryLookup(name, out var variable))
+            diagnostics.ReportUndefinedName(syntax.Identifier.Span, name);
+        
+        if (variable?.Mutable ?? false)
+            diagnostics.ReportCannotAssign(syntax.AssignOperatorToken.Span, name);
+
+        if (expression.Type != variable?.Type)
+            diagnostics.ReportCannotConvert(syntax.AssignOperatorToken.Span, expression.Type, variable?.Type);
+
+        return new BoundAssignOperationStatement(variable, syntax.AssignOperatorToken, expression);
     }
 
     private BoundStatement BindExpressionStatement(ExpressionStatement syntax) {

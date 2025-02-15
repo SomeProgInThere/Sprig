@@ -1,5 +1,6 @@
 
 using System.Collections.Immutable;
+using Rubics.Code.Syntax;
 
 namespace Rubics.Code.Binding;
 
@@ -19,6 +20,16 @@ internal sealed class BoundVariableDeclarationStatement(VariableSymbol variable,
     public BoundExpression Initializer { get; } = initializer;
 
     public override BoundKind Kind => BoundKind.VariableDeclaration;
+}
+
+internal sealed class BoundAssignOperationStatement(VariableSymbol? variable, Token assignOperatorToken, BoundExpression expression)
+    : BoundStatement {
+        
+    public VariableSymbol? Variable { get; } = variable;
+    public Token AssignOperatorToken { get; } = assignOperatorToken;
+    public BoundExpression Expression { get; } = expression;
+
+    public override BoundKind Kind => BoundKind.AssignOperationStatement;
 }
 
 internal sealed class BoundExpressionStatement(BoundExpression expression)

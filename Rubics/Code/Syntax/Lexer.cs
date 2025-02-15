@@ -16,8 +16,15 @@ internal sealed class Lexer(SourceText source) {
         
         case '(': kind = SyntaxKind.OpenParenthesisToken;   position++; break; 
         case ')': kind = SyntaxKind.ClosedParenthesisToken; position++; break;
-        case '{': kind = SyntaxKind.OpenBraceToken; position++; break; 
-        case '}': kind = SyntaxKind.ClosedBraceToken; position++; break;
+        case '{': kind = SyntaxKind.OpenBraceToken;         position++; break; 
+        case '}': kind = SyntaxKind.ClosedBraceToken;       position++; break;
+
+        case '~': kind = SyntaxKind.TildeToken;             position++; break;
+
+        case '.':
+            SetKind(ref kind, ref position,
+                '.', SyntaxKind.DotToken, SyntaxKind.DoubleDotToken);
+            break;
 
         case '+':
             SetKind(ref kind, ref position, 
@@ -52,11 +59,6 @@ internal sealed class Lexer(SourceText source) {
         case '=':
             SetKind(ref kind, ref position, 
                 '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken);
-            break;
-
-        case '~':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.TildeToken, SyntaxKind.TildeEqualsToken);
             break;
 
         case '^':

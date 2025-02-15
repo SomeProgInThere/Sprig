@@ -1,6 +1,7 @@
 
 using System.Collections.Immutable;
 using Rubics.Code.Binding;
+using Rubics.Code.Syntax;
 
 namespace Rubics.Code;
 
@@ -21,6 +22,10 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
                 EvaluateVariableDeclaration((BoundVariableDeclarationStatement)node);
                 break;
 
+            case BoundKind.AssignOperationStatement:
+                EvaluateAssigOperationStatement((BoundAssignOperationStatement)node);
+                break;
+
             case BoundKind.ExpressionStatement:
                 EvaluateExpressionStatement((BoundExpressionStatement)node);
                 break;
@@ -35,6 +40,28 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
 
             default: 
                 throw new Exception($"Undefined statement: {node?.Kind}");
+        }
+    }
+
+    private void EvaluateAssigOperationStatement(BoundAssignOperationStatement node) {
+        var value = (int)EvaluateExpression(node.Expression);
+
+        if (node.Variable != null) {
+            var kind = node.AssignOperatorToken.Kind;
+            variables[node.Variable] = kind switch {
+                SyntaxKind.PlusEqualsToken          => (int)variables[node.Variable] + value,
+                SyntaxKind.MinusEqualsToken         => (int)variables[node.Variable] - value,
+                SyntaxKind.StarEqualsToken          => (int)variables[node.Variable] * value,
+                SyntaxKind.SlashEqualsToken         => (int)variables[node.Variable] / value,
+                SyntaxKind.PercentEqualsToken       => (int)variables[node.Variable] % value,
+                SyntaxKind.AmpersandEqualsToken     => (int)variables[node.Variable] & value,
+                SyntaxKind.PipeEqualsToken          => (int)variables[node.Variable] | value,
+                SyntaxKind.CircumflexEqualsToken    => (int)variables[node.Variable] ^ value,
+                
+                _ => throw new Exception($"Undefined assignment operator: {kind}"),
+            };
+
+            lastValue = variables[node.Variable];
         }
     }
 
@@ -79,37 +106,37 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
 
     private static object EvaluateLiteralExpression(BoundLiteralExpression literal) => literal.Value;
     
-    private object EvaluateVariableExpression(BoundVariableExpression variable) {
-        if (variable.Variable is null)
-            throw new Exception($"Variable: {nameof(variable.Variable)} is not initialized");
+    private object EvaluateVariableExpression(BoundVariableExpression node) {
+        if (node.Variable is null)
+            throw new Exception($"Variable: {nameof(node.Variable)} is not initialized");
         
-        return variables[variable.Variable];
+        return variables[node.Variable];
     }
 
-    private object EvaluateAssignmentExpression(BoundAssignmentExpression assignment) {
-        var value = EvaluateExpression(assignment.Expression);
-        variables[assignment.Variable] = value;
+    private object EvaluateAssignmentExpression(BoundAssignmentExpression node) {
+        var value = EvaluateExpression(node.Expression);
+        variables[node.Variable] = value;
         return value;
     }
 
-    private object EvaluateUnaryExpression(BoundUnaryExpression unary) {
-        var operand = EvaluateExpression(unary.Operand);
+    private object EvaluateUnaryExpression(BoundUnaryExpression node) {
+        var operand = EvaluateExpression(node.Operand);
 
-        return unary.Operator.Kind switch {
-            UnaryOperatorKind.Identity => (int)operand,
-            UnaryOperatorKind.Negetion => -(int)operand,
+        return node.Operator.Kind switch {
+            UnaryOperatorKind.Identity   => (int)operand,
+            UnaryOperatorKind.Negetion   => -(int)operand,
             UnaryOperatorKind.BitwiseNot => ~(int)operand,
             UnaryOperatorKind.LogicalNot => !(bool)operand,
 
-            _ => throw new Exception($"Unexpected Unary operator: {unary.Operator}"),
+            _ => throw new Exception($"Unexpected Unary operator: {node.Operator}"),
         };
     }
 
-    private object EvaluateBinaryExpression(BoundBinaryExpression binary) {
-        var left = EvaluateExpression(binary.Left);
-        var right = EvaluateExpression(binary.Right);
+    private object EvaluateBinaryExpression(BoundBinaryExpression node) {
+        var left = EvaluateExpression(node.Left);
+        var right = EvaluateExpression(node.Right);
 
-        return binary.Operator.Kind switch {
+        return node.Operator.Kind switch {
             BinaryOperatorKind.Add      => (int)left + (int)right,
             BinaryOperatorKind.Substact => (int)left - (int)right,
             BinaryOperatorKind.Multiply => (int)left * (int)right,
@@ -134,7 +161,7 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
             BinaryOperatorKind.Equals    => Equals(left, right),
             BinaryOperatorKind.NotEquals => !Equals(left, right),
 
-            _ => throw new Exception($"Unexpected Binary operator: {binary.Operator}"),
+            _ => throw new Exception($"Unexpected Binary operator: {node.Operator}"),
         };
     }
 
