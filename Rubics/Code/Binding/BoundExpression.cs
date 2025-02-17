@@ -1,4 +1,6 @@
 
+using Rubics.Code.Syntax;
+
 namespace Rubics.Code.Binding;
 
 internal abstract class BoundExpression : BoundNode {
@@ -52,4 +54,15 @@ internal sealed class BoundBinaryExpression(BoundExpression left, BoundExpressio
 
     public override BoundKind Kind => BoundKind.BinaryExpression;
     public override Type Type => Operator.ResultType;
+}
+
+internal sealed class BoundRangeExpression(BoundExpression lower, Token rangeToken, BoundExpression upper)
+    : BoundExpression
+{
+    public BoundExpression Lower { get; } = lower;
+    public Token RangeToken { get; } = rangeToken;
+    public BoundExpression Upper { get; } = upper;
+
+    public override BoundKind Kind => BoundKind.RangeExpression;
+    public override Type Type => Lower.Type;
 }

@@ -23,7 +23,7 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
                 break;
 
             case BoundKind.AssignOperationStatement:
-                EvaluateAssigOperationStatement((BoundAssignOperationStatement)node);
+                EvaluateAssignOperationStatement((BoundAssignOperationStatement)node);
                 break;
 
             case BoundKind.ExpressionStatement:
@@ -38,31 +38,36 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
                 EvaluateWhileStatement((BoundWhileStatment)node);
                 break;
 
+            case BoundKind.ForStatement:
+                EvaluateForStatement((BoundForStatement)node);
+                break;
+
             default: 
                 throw new Exception($"Undefined statement: {node?.Kind}");
         }
     }
 
-    private void EvaluateAssigOperationStatement(BoundAssignOperationStatement node) {
+    private void EvaluateAssignOperationStatement(BoundAssignOperationStatement node) {
         var value = (int)EvaluateExpression(node.Expression);
 
-        if (node.Variable != null) {
-            var kind = node.AssignOperatorToken.Kind;
-            variables[node.Variable] = kind switch {
-                SyntaxKind.PlusEqualsToken          => (int)variables[node.Variable] + value,
-                SyntaxKind.MinusEqualsToken         => (int)variables[node.Variable] - value,
-                SyntaxKind.StarEqualsToken          => (int)variables[node.Variable] * value,
-                SyntaxKind.SlashEqualsToken         => (int)variables[node.Variable] / value,
-                SyntaxKind.PercentEqualsToken       => (int)variables[node.Variable] % value,
-                SyntaxKind.AmpersandEqualsToken     => (int)variables[node.Variable] & value,
-                SyntaxKind.PipeEqualsToken          => (int)variables[node.Variable] | value,
-                SyntaxKind.CircumflexEqualsToken    => (int)variables[node.Variable] ^ value,
+        if (node.Variable == null) 
+            return;
+        
+        var kind = node.AssignOperatorToken.Kind;
+        variables[node.Variable] = kind switch {
+            SyntaxKind.PlusEqualsToken          => (int)variables[node.Variable] + value,
+            SyntaxKind.MinusEqualsToken         => (int)variables[node.Variable] - value,
+            SyntaxKind.StarEqualsToken          => (int)variables[node.Variable] * value,
+            SyntaxKind.SlashEqualsToken         => (int)variables[node.Variable] / value,
+            SyntaxKind.PercentEqualsToken       => (int)variables[node.Variable] % value,
+            SyntaxKind.AmpersandEqualsToken     => (int)variables[node.Variable] & value,
+            SyntaxKind.PipeEqualsToken          => (int)variables[node.Variable] | value,
+            SyntaxKind.CircumflexEqualsToken    => (int)variables[node.Variable] ^ value,
                 
-                _ => throw new Exception($"Undefined assignment operator: {kind}"),
-            };
+            _ => throw new Exception($"Undefined assignment operator: {kind}"),
+        };
 
-            lastValue = variables[node.Variable];
-        }
+        lastValue = variables[node.Variable];
     }
 
     private void EvaluateBlockStatement(BoundBlockStatement node) {
@@ -92,13 +97,25 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
             EvaluateStatement(node.Body);
     }
 
-    private object EvaluateExpression(BoundExpression? node){
+    private void EvaluateForStatement(BoundForStatement node) {
+        var range = ((object, object))EvaluateExpression(node.Range);
+        var lower = (int)range.Item1;
+        var upper = (int)range.Item2;
+
+        for (var i = lower; i <= upper; i++) {
+            variables[node.Variable] = i;
+            EvaluateStatement(node.Body);
+        }
+    }
+
+    private object EvaluateExpression(BoundExpression? node) {
         return node?.Kind switch {
             BoundKind.LiteralExpression     => EvaluateLiteralExpression((BoundLiteralExpression)node),
             BoundKind.VariableExpression    => EvaluateVariableExpression((BoundVariableExpression)node),
             BoundKind.AssignmentExpression  => EvaluateAssignmentExpression((BoundAssignmentExpression)node),
             BoundKind.UnaryExpression       => EvaluateUnaryExpression((BoundUnaryExpression)node),
             BoundKind.BinaryExpression      => EvaluateBinaryExpression((BoundBinaryExpression)node),
+            BoundKind.RangeExpression       => EvaluateRangeExpression((BoundRangeExpression)node),
             
             _ => throw new Exception($"Undefined node: {node?.Kind}"),
         };
@@ -163,6 +180,12 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
 
             _ => throw new Exception($"Unexpected Binary operator: {node.Operator}"),
         };
+    }
+
+    private object EvaluateRangeExpression(BoundRangeExpression node) {
+        var lower = EvaluateExpression(node.Lower);
+        var upper = EvaluateExpression(node.Upper);
+        return (lower, upper);
     }
 
     private object? lastValue;

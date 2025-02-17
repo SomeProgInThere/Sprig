@@ -64,3 +64,15 @@ public sealed class WhileStatement(Token whileToken, Expression condition, State
 
     public override SyntaxKind Kind => SyntaxKind.WhileStatement;
 }
+
+public sealed class ForStatement(Token forKeyword, Token identifier, Token inKeyword, Expression range, Statement body) 
+    : Statement {
+
+    public Token ForKeyword { get; } = forKeyword;
+    public Token Identifier { get; } = identifier;
+    public Token InKeyword { get; } = inKeyword;
+    public Expression Range { get; } = range;
+    public Statement Body { get; } = body;
+
+    public override SyntaxKind Kind => SyntaxKind.ForStatement;
+}

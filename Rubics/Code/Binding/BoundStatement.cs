@@ -57,3 +57,13 @@ internal class BoundWhileStatment(BoundExpression condition, BoundStatement body
 
     public override BoundKind Kind => BoundKind.WhileStatement;
 }
+
+internal class BoundForStatement(VariableSymbol variable, BoundExpression range, BoundStatement body)
+    : BoundStatement {
+
+    public VariableSymbol Variable { get; } = variable;
+    public BoundExpression Range { get; } = range;
+    public BoundStatement Body { get; } = body;
+
+    public override BoundKind Kind => BoundKind.ForStatement;
+}

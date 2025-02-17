@@ -61,3 +61,13 @@ internal sealed class ParenthesizedExpression(Token open, Token closed, Expressi
 
     public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
 }
+
+internal sealed class RangeExpression(Expression lowerBound, Token rangeToken, Expression upperBound)
+    : Expression
+{
+    public Expression LowerBound { get; } = lowerBound;
+    public Token RangeToken { get; } = rangeToken;
+    public Expression UpperBound { get; } = upperBound;
+
+    public override SyntaxKind Kind => SyntaxKind.RangeExpression;
+}

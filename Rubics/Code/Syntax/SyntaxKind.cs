@@ -55,6 +55,8 @@ public enum SyntaxKind {
     IfKeyword,
     ElseKeyword,
     WhileKeyword,
+    ForKeyword,
+    InKeyword,
 
     // Expressions
     LiteralExpression,
@@ -63,6 +65,7 @@ public enum SyntaxKind {
     UnaryExpression,
     BinaryExpression,
     ParenthesizedExpression,
+    RangeExpression,
     
     // Nodes
     CompilationUnit,
@@ -75,4 +78,5 @@ public enum SyntaxKind {
     AssignOperationStatement,
     IfStatement,
     WhileStatement,
+    ForStatement,
 }

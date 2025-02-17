@@ -14,6 +14,7 @@ internal sealed class Binder(BoundScope? parent) {
             SyntaxKind.ExpressionStatement      => BindExpressionStatement((ExpressionStatement)syntax),
             SyntaxKind.IfStatement              => BindIfStatement((IfStatement)syntax),
             SyntaxKind.WhileStatement           => BindWhileStatement((WhileStatement)syntax),
+            SyntaxKind.ForStatement             => BindForStatement((ForStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
         };
@@ -84,6 +85,19 @@ internal sealed class Binder(BoundScope? parent) {
         return new BoundWhileStatment(condition, body);
     }
 
+    private BoundStatement BindForStatement(ForStatement syntax) {
+        var name = syntax.Identifier.Literal;
+        var range = BindExpression(syntax.Range, typeof(int));
+        var variable = new VariableSymbol(name, true, range.Type);
+
+        if (!Scope.TryDeclare(variable))
+            diagnostics.ReportVariableRedeclaration(syntax.Identifier.Span, name);
+        
+        var body = BindStatement(syntax.Body);
+
+        return new BoundForStatement(variable, range, body);
+    }
+
     private BoundExpression BindExpression(Expression syntax) {
         return syntax.Kind switch {
             SyntaxKind.LiteralExpression       => BindLiteralExpression((LiteralExpression)syntax),
@@ -91,6 +105,7 @@ internal sealed class Binder(BoundScope? parent) {
             SyntaxKind.AssignmentExpression    => BindAssignmentExpression((AssignmentExpression)syntax),
             SyntaxKind.UnaryExpression         => BindUnaryExpression((UnaryExpression)syntax),
             SyntaxKind.BinaryExpression        => BindBinaryExpression((BinaryExpression)syntax),
+            SyntaxKind.RangeExpression         => BindRangeExpression((RangeExpression)syntax),
             SyntaxKind.ParenthesizedExpression => BindExpression(((ParenthesizedExpression)syntax).Expression),
             
             _ => throw new Exception($"Unexpected expression: {syntax.Kind}"),
@@ -202,6 +217,19 @@ internal sealed class Binder(BoundScope? parent) {
         }
 
         return new BoundBinaryExpression(left, right, op);
+    }
+
+    private BoundExpression BindRangeExpression(RangeExpression syntax) {
+        var lower = BindExpression(syntax.LowerBound);
+        var rangeToken = syntax.RangeToken;
+        var upper = BindExpression(syntax.UpperBound);
+
+        if (lower.Type != upper.Type) {
+            diagnostics.ReportCannotConvert(syntax.UpperBound.Span, upper.Type, lower.Type);
+            return upper;
+        }
+
+        return new BoundRangeExpression(lower, rangeToken, upper);
     }
 
     private readonly Diagnostics diagnostics = [];

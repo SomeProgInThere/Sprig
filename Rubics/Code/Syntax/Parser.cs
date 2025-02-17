@@ -19,16 +19,16 @@ internal sealed class Parser {
         while (token.Kind != SyntaxKind.EndOfFileToken);
            
         this.tokens = [..tokens];
-        diagnostics = lexer.Diagnostics;
+        Diagnostics = lexer.Diagnostics;
     }
 
     public CompilationUnit ParseCompilationUnit() {
-        var statment = ParseStatement();
+        var statement = ParseStatement();
         var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-        return new(statment, endOfFileToken);
+        return new CompilationUnit(statement, endOfFileToken);
     }
 
-    public Diagnostics Diagnostics => diagnostics;
+    public Diagnostics Diagnostics { get; }
 
     private Statement ParseStatement() => Current.Kind switch {
         SyntaxKind.OpenBraceToken   => ParseBlockStatement(),
@@ -36,6 +36,7 @@ internal sealed class Parser {
         SyntaxKind.VarKeyword       => ParseVariableDeclaration(),
         SyntaxKind.IfKeyword        => ParseIfStatement(),
         SyntaxKind.WhileKeyword     => ParseWhileStatement(),
+        SyntaxKind.ForKeyword       => ParseForStatement(),
         SyntaxKind.IdentifierToken  => ParseAssignOperationStatement(),
         
         _ => ParseExpressionStatement(),
@@ -122,6 +123,17 @@ internal sealed class Parser {
         return new WhileStatement(whileKeyword, condition, body);
     }
 
+    private Statement ParseForStatement() {
+        var forKeyword = MatchToken(SyntaxKind.ForKeyword);
+        var identifierToken = NextToken();
+        var inKeyword = MatchToken(SyntaxKind.InKeyword);
+        
+        var range = ParseRangeExpression();
+        var body = ParseStatement();
+
+        return new ForStatement(forKeyword, identifierToken, inKeyword, range, body);
+    }
+
     private Statement ParseExpressionStatement() {
         var expression = ParseAssignmentExpression();
         return new ExpressionStatement(expression);
@@ -197,12 +209,17 @@ internal sealed class Parser {
         return new LiteralExpression(numberToken);
     }
 
+    private Expression ParseRangeExpression() {
+        var lower = ParseAssignmentExpression();
+        var rangeToken = MatchToken(SyntaxKind.DoubleDotToken);
+        var upper = ParseAssignmentExpression();
+
+        return new RangeExpression(lower, rangeToken, upper);
+    }
+
     private Token Peek(int offset) {
         var index = position + offset;
-        if (index >= tokens.Length)
-            return tokens[^1];
-        
-        return tokens[index];
+        return index >= tokens.Length ? tokens[^1] : tokens[index];
     }
 
     private Token Current => Peek(0);
@@ -218,13 +235,12 @@ internal sealed class Parser {
         if (Current.Kind == kind)
             return NextToken();
         
-        diagnostics.ReportUnexpectedToken(Current.Span, Current.Kind, kind);
+        Diagnostics.ReportUnexpectedToken(Current.Span, Current.Kind, kind);
         return new Token(kind, Current.Position, "\0");
     }
 
     private readonly Stack<ElseClause?> orderedClauses = new();
-    private readonly ImmutableArray<Token> tokens = [];
-    private readonly Diagnostics diagnostics = [];
-    
+    private readonly ImmutableArray<Token> tokens;
+
     private int position;
 };
