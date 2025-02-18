@@ -8,7 +8,9 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.PlusToken or 
             SyntaxKind.MinusToken or 
             SyntaxKind.BangToken or
-            SyntaxKind.TildeToken => 7,
+            SyntaxKind.TildeToken or
+            SyntaxKind.DoublePlusToken or
+            SyntaxKind.DoubleMinusToken => 7,
             _ => 0,
         };
     }
@@ -18,11 +20,13 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.AmpersandToken or
             SyntaxKind.CircumflexToken or
             SyntaxKind.PipeToken or
+            SyntaxKind.DoubleStarToken or
             SyntaxKind.DoubleLeftArrowToken or
             SyntaxKind.DoubleRightArrowToken => 6,
 
             SyntaxKind.StarToken or 
-            SyntaxKind.SlashToken or 
+            SyntaxKind.SlashToken or
+            SyntaxKind.DoubleSlashToken or 
             SyntaxKind.PercentToken => 5,
             
             SyntaxKind.PlusToken or 
@@ -76,6 +80,10 @@ internal static class SyntaxKindExtensions {
             SyntaxKind.OpenBraceToken           => "{",
             SyntaxKind.ClosedBraceToken         => "}",
 
+            SyntaxKind.DoublePlusToken          => "++",
+            SyntaxKind.DoubleMinusToken         => "--",
+            SyntaxKind.DoubleStarToken          => "**",
+            SyntaxKind.DoubleSlashToken         => "//",
             SyntaxKind.PlusEqualsToken          => "+=",
             SyntaxKind.MinusEqualsToken         => "-=",
             SyntaxKind.StarEqualsToken          => "*=",

@@ -27,7 +27,10 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUnexpectedToken(TextSpan span, SyntaxKind actual, SyntaxKind expected) {
-        var message = $"Unexpected token '{actual.GetLiteral()}', expected '{expected.GetLiteral()}'";
+        var actualString = actual.GetLiteral() is null ? $"<{actual}>" : $"'{actual.GetLiteral()}'";
+        var expectedString = expected.GetLiteral() is null ? $"<{expected}>" : $"'{expected.GetLiteral()}'";
+        var message = $"Unexpected token {actualString}, expected {expectedString}";
+        
         Report(span, message);
     }
 
@@ -42,7 +45,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUndefinedName(TextSpan span, string literal) {
-        var message = $"Symbol '{literal}' is not defined";
+        var literalString = literal == "\0" ? "<null>" : $"'{literal}'";
+        var message = $"Symbol {literalString} is not defined";
         Report(span, message);
     }
 

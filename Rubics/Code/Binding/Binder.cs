@@ -164,6 +164,9 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundExpression BindNameExpression(NameExpression syntax) {
         var token = syntax.IdentifierToken;
 
+        if (token.Literal == "\0")
+            return new BoundLiteralExpression(0);
+
         if (!Scope.TryLookup(token.Literal, out var variable)) {
             diagnostics.ReportUndefinedName(token.Span, token.Literal);
             return new BoundLiteralExpression(0);
@@ -175,6 +178,9 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundExpression BindAssignmentExpression(AssignmentExpression syntax) {
         var name = syntax.IdentifierToken.Literal;
         var expression = BindExpression(syntax.Expression);
+        
+        if (name == "\0")
+            return expression;
 
         if (!Scope.TryLookup(name, out var variable)) {
             diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);

@@ -139,14 +139,46 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
     private object EvaluateUnaryExpression(BoundUnaryExpression node) {
         var operand = EvaluateExpression(node.Operand);
 
-        return node.Operator.Kind switch {
-            UnaryOperatorKind.Identity   => (int)operand,
-            UnaryOperatorKind.Negetion   => -(int)operand,
-            UnaryOperatorKind.BitwiseNot => ~(int)operand,
-            UnaryOperatorKind.LogicalNot => !(bool)operand,
+        switch (node.Operator.Kind) {
+            case UnaryOperatorKind.Identity:
+                return (int)operand;
+                
+            case UnaryOperatorKind.Negetion:
+                return -(int)operand;
 
-            _ => throw new Exception($"Unexpected Unary operator: {node.Operator}"),
-        };
+            case UnaryOperatorKind.BitwiseNot:
+                return ~(int)operand;
+
+            case UnaryOperatorKind.LogicalNot:
+                return !(bool)operand;
+
+            case UnaryOperatorKind.PostIncrement: {
+                var value = (int)operand;
+                value++;
+                return value;
+            }
+
+            case UnaryOperatorKind.PostDecrement: {
+                var value = (int)operand;
+                value--;
+                return value;
+            }
+                
+            case UnaryOperatorKind.PreIncrement: {
+                var value = (int)operand;
+                ++value;
+                return value;
+            }
+            
+            case UnaryOperatorKind.PreDecrement: {
+                var value = (int)operand;
+                --value;
+                return value;
+            }
+            
+            default:
+                throw new Exception($"Unexpected Unary operator: {node.Operator}");
+        }
     }
 
     private object EvaluateBinaryExpression(BoundBinaryExpression node) {
@@ -159,6 +191,9 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
             BinaryOperatorKind.Multiply => (int)left * (int)right,
             BinaryOperatorKind.Divide   => (int)left / (int)right,
             BinaryOperatorKind.Modulus  => (int)left % (int)right,
+
+            BinaryOperatorKind.Remainder    => Math.DivRem((int)left, (int)right).Remainder,
+            BinaryOperatorKind.RaisePower   => (int)Math.Pow((int)left, (int)right),
 
             BinaryOperatorKind.LogicalAnd => (bool)left && (bool)right,
             BinaryOperatorKind.LogicalOr  => (bool)left || (bool)right,

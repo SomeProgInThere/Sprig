@@ -8,6 +8,10 @@ internal enum UnaryOperatorKind {
     Negetion,
     BitwiseNot,
     LogicalNot,
+    PreIncrement,
+    PreDecrement,
+    PostIncrement,
+    PostDecrement,
 }
 
 internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kind, Type operandType, Type resultType) {
@@ -16,11 +20,9 @@ internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kin
         : this(syntaxKind, operatorKind, operandType, operandType) {}
 
     public static UnaryOperator? Bind(SyntaxKind kind, Type operandType) {
-        foreach (var op in operators) {
-            if (op.SyntaxKind == kind && op.OperandType == operandType) {
+        foreach (var op in operators)
+            if (op.SyntaxKind == kind && op.OperandType == operandType)
                 return op;
-            }
-        }
 
         return null;
     }
@@ -33,7 +35,13 @@ internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kin
     private static readonly UnaryOperator[] operators = [
         new UnaryOperator(SyntaxKind.PlusToken,  UnaryOperatorKind.Identity,   typeof(int)),
         new UnaryOperator(SyntaxKind.MinusToken, UnaryOperatorKind.Negetion,   typeof(int)),
-        new UnaryOperator(SyntaxKind.TildeToken,  UnaryOperatorKind.BitwiseNot,   typeof(int)),
+        new UnaryOperator(SyntaxKind.TildeToken, UnaryOperatorKind.BitwiseNot, typeof(int)),
+
+        new UnaryOperator(SyntaxKind.DoublePlusToken,  UnaryOperatorKind.PostIncrement, typeof(int)),
+        new UnaryOperator(SyntaxKind.DoubleMinusToken, UnaryOperatorKind.PostDecrement, typeof(int)),
+        new UnaryOperator(SyntaxKind.DoublePlusToken,  UnaryOperatorKind.PreIncrement,  typeof(int)),
+        new UnaryOperator(SyntaxKind.DoubleMinusToken, UnaryOperatorKind.PreDecrement,  typeof(int)),
+        
         new UnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, typeof(bool)),
     ];
 }

@@ -26,6 +26,10 @@ public enum SyntaxKind {
 
     DoubleAmpersandToken,
     DoublePipeToken,
+    DoublePlusToken,
+    DoubleMinusToken,
+    DoubleStarToken,
+    DoubleSlashToken,
     DoubleEqualsToken,
     DoubleLeftArrowToken,
     DoubleRightArrowToken,

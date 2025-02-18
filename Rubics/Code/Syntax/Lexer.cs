@@ -21,68 +21,104 @@ internal sealed class Lexer(SourceText source) {
         case '~': kind = SyntaxKind.TildeToken;             position++; break;
 
         case '+':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.PlusToken, SyntaxKind.PlusEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', '+', 
+                SyntaxKind.PlusToken, SyntaxKind.PlusEqualsToken, SyntaxKind.DoublePlusToken
+            );
             break;
 
         case '-':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.MinusToken, SyntaxKind.MinusEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', '-', 
+                SyntaxKind.MinusToken, SyntaxKind.MinusEqualsToken, SyntaxKind.DoubleMinusToken
+            );
             break;
 
         case '*':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.StarToken, SyntaxKind.StarEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', '*', 
+                SyntaxKind.StarToken, SyntaxKind.StarEqualsToken, SyntaxKind.DoubleStarToken
+            );
             break;
 
         case '/':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.SlashToken, SyntaxKind.SlashEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', '/', 
+                SyntaxKind.SlashToken, SyntaxKind.SlashEqualsToken, SyntaxKind.DoubleSlashToken
+            );
             break;
 
         case '%':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.PercentToken, SyntaxKind.PercentEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', 
+                SyntaxKind.PercentToken, SyntaxKind.PercentEqualsToken
+            );
             break;
 
         case '!':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.BangToken, SyntaxKind.BangEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', SyntaxKind.BangToken, SyntaxKind.BangEqualsToken
+            );
             break;
 
         case '=':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken
+            );
             break;
 
         case '^':
-            SetKind(ref kind, ref position, 
-                '=', SyntaxKind.CircumflexToken, SyntaxKind.CircumflexEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '=', SyntaxKind.CircumflexToken, SyntaxKind.CircumflexEqualsToken
+            );
             break;
 
         case '<':
-            SetKind(ref kind, ref position, 
-                '<', '=', SyntaxKind.RightArrowToken, SyntaxKind.DoubleRightArrowToken, SyntaxKind.RightArrowEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '<', '=', 
+                SyntaxKind.RightArrowToken, SyntaxKind.DoubleRightArrowToken, SyntaxKind.RightArrowEqualsToken
+            );
             break;
 
         case '>':
-            SetKind(ref kind, ref position, 
-                '>', '=', SyntaxKind.LeftArrowToken, SyntaxKind.DoubleLeftArrowToken, SyntaxKind.LeftArrowEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '>', '=', 
+                SyntaxKind.LeftArrowToken, SyntaxKind.DoubleLeftArrowToken, SyntaxKind.LeftArrowEqualsToken
+            );
             break;
 
         case '&':
-            SetKind(ref kind, ref position, 
-                '&', '=', SyntaxKind.AmpersandToken, SyntaxKind.DoubleAmpersandToken, SyntaxKind.AmpersandEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '&', '=', 
+                SyntaxKind.AmpersandToken, SyntaxKind.DoubleAmpersandToken, SyntaxKind.AmpersandEqualsToken
+            );
             break;
         
         case '|':
-            SetKind(ref kind, ref position, 
-                '|', '=', SyntaxKind.PipeToken, SyntaxKind.DoublePipeToken, SyntaxKind.PipeEqualsToken);
+            SetKind(
+                ref kind, ref position, 
+                '|', '=', 
+                SyntaxKind.PipeToken, SyntaxKind.DoublePipeToken, SyntaxKind.PipeEqualsToken
+            );
             break;
 
         case '.':
-            SetKind(ref kind, ref position,
-                '.', SyntaxKind.DotToken, SyntaxKind.DoubleDotToken);
+            SetKind(
+                ref kind, ref position,
+                '.', 
+                SyntaxKind.DotToken, SyntaxKind.DoubleDotToken
+            );
             break;
 
         default:

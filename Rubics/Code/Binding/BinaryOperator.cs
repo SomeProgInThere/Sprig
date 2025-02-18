@@ -9,6 +9,8 @@ internal enum BinaryOperatorKind {
     Substact,
     Multiply,
     Divide,
+    Remainder,
+    RaisePower,
     Modulus,
     LogicalAnd,
     LogicalOr,
@@ -57,6 +59,8 @@ internal sealed class BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind k
         new BinaryOperator(SyntaxKind.StarToken,                BinaryOperatorKind.Multiply,    typeof(int)),
         new BinaryOperator(SyntaxKind.SlashToken,               BinaryOperatorKind.Divide,      typeof(int)),
         new BinaryOperator(SyntaxKind.PercentToken,             BinaryOperatorKind.Modulus,     typeof(int)),
+        new BinaryOperator(SyntaxKind.DoubleSlashToken,         BinaryOperatorKind.Remainder,   typeof(int)),
+        new BinaryOperator(SyntaxKind.DoubleStarToken,          BinaryOperatorKind.RaisePower,  typeof(int)),
         
         new BinaryOperator(SyntaxKind.TildeToken,               BinaryOperatorKind.BitwiseNot,  typeof(int)),
         new BinaryOperator(SyntaxKind.AmpersandToken,           BinaryOperatorKind.BitwiseAnd,  typeof(int)), 
