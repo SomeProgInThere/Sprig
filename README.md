@@ -6,7 +6,7 @@ Currently a work in progress interpreter:
   
   * Expression Evaluation
   * Variable declatations (mutable and unmutable)
-  * Expressions and statements with scopes
+  * Expressions and statements (if-else, while, for, etc.) with scopes
   * Diagnostics and Errors with line and column numbers
   * Pretty printing with colors in CLI
   * Multiline Repl with commands
