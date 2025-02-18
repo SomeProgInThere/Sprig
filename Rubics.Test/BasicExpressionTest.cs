@@ -4,7 +4,7 @@ using Rubics.Code.Syntax;
 
 namespace Rubics.Tests;
 
-public class ArithmeticTest {
+public class BasixExpressionTest {
 
     [Theory]
     [MemberData(nameof(BasicTestExpressions))]
