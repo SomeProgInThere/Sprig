@@ -153,20 +153,14 @@ internal sealed class Parser {
             return new AssignmentExpression(identifierToken, operatorToken, right);
         }
 
+        //ParsePostUnaryExpression();
+
         return ParseBinaryExpression();
     }
 
     private Expression ParseBinaryExpression(int parentPrecedence = 0) {
         Expression left;
-        var unaryPrecedence = Current.Kind.UnaryOperatorPrecedence();
-
-        if (unaryPrecedence != 0) {
-            var operatorToken = NextToken();
-            var operand = ParseBinaryExpression(unaryPrecedence);
-            left = new UnaryExpression(operand, operatorToken);
-        }
-        else 
-            left = ParsePrimaryExpression();
+        left = ParsePreUnaryExpression();
 
         while (true) {
             var binaryPrecedence = Current.Kind.BinaryOperatorPrecedence();
@@ -179,6 +173,30 @@ internal sealed class Parser {
         }
 
         return left;
+    }
+
+    private Expression ParsePreUnaryExpression() {
+        var unaryPrecedence = Current.Kind.UnaryOperatorPrecedence();
+
+        if (unaryPrecedence != 0) {
+            var operatorToken = NextToken();
+            var operand = ParseBinaryExpression(unaryPrecedence);
+            return new UnaryExpression(operand, operatorToken);
+        }
+
+        return ParsePrimaryExpression();
+    }
+
+    private Expression ParsePostUnaryExpression() {
+        if (Current.Kind == SyntaxKind.IdentifierToken 
+            && (Next.Kind == SyntaxKind.DoublePlusToken || Next.Kind == SyntaxKind.DoubleMinusToken)) 
+        {
+            var operand = ParseAssignmentExpression();
+            var operatorToken = NextToken();
+            return new UnaryExpression(operand, operatorToken);
+        }
+
+        return ParseBinaryExpression();
     }
 
     private Expression ParsePrimaryExpression() {

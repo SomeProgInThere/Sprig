@@ -164,7 +164,7 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundExpression BindNameExpression(NameExpression syntax) {
         var token = syntax.IdentifierToken;
 
-        if (token.Literal == "\0")
+        if (token.IsNull())
             return new BoundLiteralExpression(0);
 
         if (!Scope.TryLookup(token.Literal, out var variable)) {
@@ -179,7 +179,7 @@ internal sealed class Binder(BoundScope? parent) {
         var name = syntax.IdentifierToken.Literal;
         var expression = BindExpression(syntax.Expression);
         
-        if (name == "\0")
+        if (syntax.IdentifierToken.IsNull())
             return expression;
 
         if (!Scope.TryLookup(name, out var variable)) {

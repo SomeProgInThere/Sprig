@@ -13,3 +13,7 @@ public sealed class Token(SyntaxKind kind, int position, string literal, object?
     public override TextSpan Span => new(Position, Literal.Length);
     public override SyntaxKind Kind { get; } = kind;
 }
+
+public static class TokenExtensions {
+    public static bool IsNull(this Token token) => token.Literal == "\0";
+}
