@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Sprig.Code.Binding;
 
 internal abstract class BoundNode {
-    public abstract BoundKind Kind { get; }
+    public abstract BoundNodeKind Kind { get; }
 
     public IEnumerable<BoundNode> Children() {
         var properties = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);

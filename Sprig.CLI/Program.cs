@@ -74,7 +74,6 @@ public static class Program {
                 continue;
 
             var compilation = previous is null ? new Compilation(syntaxTree) : previous.ContinueWith(syntaxTree);
-            var result = compilation.Evaluate(variables);
 
             if (showTrees)
                 syntaxTree.Root.WriteTo(Console.Out);
@@ -82,6 +81,8 @@ public static class Program {
             if (showProgram)
                 compilation.EmitTree(Console.Out);
 
+            var result = compilation.Evaluate(variables);
+            
             if (!result.Diagnostics.Any()) {
                 ColorPrint($"{result.Result}\n", ConsoleColor.Blue);
                 previous = compilation;

@@ -10,7 +10,7 @@ internal sealed class BoundBlockStatement(ImmutableArray<BoundStatement> stateme
     : BoundStatement {
         
     public ImmutableArray<BoundStatement> Statements { get; } = statements;
-    public override BoundKind Kind => BoundKind.BlockStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.BlockStatement;
 }
 
 internal sealed class BoundVariableDeclarationStatement(VariableSymbol variable, BoundExpression initializer)
@@ -19,7 +19,7 @@ internal sealed class BoundVariableDeclarationStatement(VariableSymbol variable,
     public VariableSymbol Variable { get; } = variable;
     public BoundExpression Initializer { get; } = initializer;
 
-    public override BoundKind Kind => BoundKind.VariableDeclarationStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.VariableDeclarationStatement;
 }
 
 internal sealed class BoundAssignOperationStatement(VariableSymbol? variable, Token assignOperatorToken, BoundExpression expression)
@@ -29,14 +29,38 @@ internal sealed class BoundAssignOperationStatement(VariableSymbol? variable, To
     public Token AssignOperatorToken { get; } = assignOperatorToken;
     public BoundExpression Expression { get; } = expression;
 
-    public override BoundKind Kind => BoundKind.AssignOperationStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.AssignOperationStatement;
 }
 
 internal sealed class BoundExpressionStatement(BoundExpression expression)
     : BoundStatement {
         
     public BoundExpression Expression { get; } = expression;
-    public override BoundKind Kind => BoundKind.ExpressionStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.ExpressionStatement;
+}
+
+internal sealed class BoundGotoStatement(LabelSymbol label)
+    : BoundStatement {
+
+    public LabelSymbol Label { get; } = label;
+    public override BoundNodeKind Kind => BoundNodeKind.GotoStatement;
+}
+
+internal sealed class BoundConditionalGotoStatement(LabelSymbol label, BoundExpression condition, bool jumpIfFalse = false)
+    : BoundStatement {
+
+    public LabelSymbol Label { get; } = label;
+    public BoundExpression Condition { get; } = condition;
+    public bool JumpIfFalse { get; } = jumpIfFalse;
+
+    public override BoundNodeKind Kind => BoundNodeKind.ConditionalGotoStatement;
+}
+
+internal sealed class BoundLableStatement(LabelSymbol label)
+    : BoundStatement {
+
+    public LabelSymbol Label { get; } = label;
+    public override BoundNodeKind Kind => BoundNodeKind.LabelStatement;
 }
 
 internal sealed class BoundIfStatement(BoundExpression condition, BoundStatement ifStatement, BoundStatement? elseStatement)
@@ -46,7 +70,7 @@ internal sealed class BoundIfStatement(BoundExpression condition, BoundStatement
     public BoundStatement IfStatement { get; } = ifStatement;
     public BoundStatement? ElseStatement { get; } = elseStatement;
 
-    public override BoundKind Kind => BoundKind.IfStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.IfStatement;
 }
 
 internal class BoundWhileStatement(BoundExpression condition, BoundStatement body) 
@@ -55,7 +79,7 @@ internal class BoundWhileStatement(BoundExpression condition, BoundStatement bod
     public BoundExpression Condition { get; } = condition;
     public BoundStatement Body { get; } = body;
 
-    public override BoundKind Kind => BoundKind.WhileStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.WhileStatement;
 }
 
 internal class BoundForStatement(VariableSymbol variable, BoundExpression range, BoundStatement body)
@@ -65,5 +89,5 @@ internal class BoundForStatement(VariableSymbol variable, BoundExpression range,
     public BoundExpression Range { get; } = range;
     public BoundStatement Body { get; } = body;
 
-    public override BoundKind Kind => BoundKind.ForStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.ForStatement;
 }

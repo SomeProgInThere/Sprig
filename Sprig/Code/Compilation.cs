@@ -35,7 +35,7 @@ public sealed class Compilation {
         statement.WriteTo(writer);
     }
 
-    private BoundStatement GetStatement() {
+    private BoundBlockStatement GetStatement() {
         if (GlobalScope is null)
             throw new Exception("GlobalScope is null");
 

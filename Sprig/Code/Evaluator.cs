@@ -5,42 +5,60 @@ using Sprig.Code.Syntax;
 
 namespace Sprig.Code;
 
-internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol, object> variables) {
+internal sealed class Evaluator(BoundBlockStatement? root, Dictionary<VariableSymbol, object> variables) {
     
     public object? Evaluate() {
-        EvaluateStatement(root);
-        return lastValue;
-    }
+        var labelMap = new Dictionary<LabelSymbol, int>();
 
-    private void EvaluateStatement(BoundStatement? node) {
-        switch (node?.Kind) {
-            case BoundKind.BlockStatement:
-                EvaluateBlockStatement((BoundBlockStatement)node);
-                break;
-            
-            case BoundKind.VariableDeclarationStatement:
-                EvaluateVariableDeclaration((BoundVariableDeclarationStatement)node);
-                break;
-
-            case BoundKind.AssignOperationStatement:
-                EvaluateAssignOperationStatement((BoundAssignOperationStatement)node);
-                break;
-
-            case BoundKind.ExpressionStatement:
-                EvaluateExpressionStatement((BoundExpressionStatement)node);
-                break;
-
-            case BoundKind.IfStatement:
-                EvaluateIfStatement((BoundIfStatement)node);
-                break;
-
-            case BoundKind.WhileStatement:
-                EvaluateWhileStatement((BoundWhileStatement)node);
-                break;
-
-            default: 
-                throw new Exception($"Undefined statement: {node?.Kind}");
+        for (var i = 0; i < root?.Statements.Length; i++) {
+            if (root.Statements[i] is BoundLableStatement statement)
+                labelMap.Add(statement.Label, i + 1);
         }
+
+        var index = 0;
+        while (index < root.Statements.Length) {
+            var statement = root.Statements[index];
+            switch (statement.Kind) {
+                case BoundNodeKind.VariableDeclarationStatement:
+                    EvaluateVariableDeclaration((BoundVariableDeclarationStatement)statement);
+                    index++;
+                    break;
+
+                case BoundNodeKind.AssignOperationStatement:
+                    EvaluateAssignOperationStatement((BoundAssignOperationStatement)statement);
+                    index++;
+                    break;
+
+                case BoundNodeKind.ExpressionStatement:
+                    EvaluateExpressionStatement((BoundExpressionStatement)statement);
+                    index++;
+                    break;
+
+                case BoundNodeKind.GotoStatement:
+                    var gotoStatement = (BoundGotoStatement)statement;
+                    index = labelMap[gotoStatement.Label];
+                    break;
+
+                case BoundNodeKind.ConditionalGotoStatement:
+                    var conditionalGotoStatement = (BoundConditionalGotoStatement)statement;
+                    var condition = (bool)EvaluateExpression(conditionalGotoStatement.Condition);
+                    
+                    if ((condition && !conditionalGotoStatement.JumpIfFalse) || (!condition && conditionalGotoStatement.JumpIfFalse))
+                        index = labelMap[conditionalGotoStatement.Label];
+                    else 
+                        index++;
+                    break;
+                
+                case BoundNodeKind.LabelStatement:
+                    index++;
+                    break;
+
+                default:
+                    throw new Exception($"Undefined statement: {statement.Kind}");
+            }
+        } 
+
+        return lastValue;
     }
 
     private void EvaluateAssignOperationStatement(BoundAssignOperationStatement node) {
@@ -66,11 +84,6 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
         lastValue = variables[node.Variable];
     }
 
-    private void EvaluateBlockStatement(BoundBlockStatement node) {
-        foreach (var boundStatement in node.Statements)
-            EvaluateStatement(boundStatement);
-    }
-
     private void EvaluateVariableDeclaration(BoundVariableDeclarationStatement node) {
         var value = EvaluateExpression(node.Initializer);
         variables[node.Variable] = value;
@@ -79,28 +92,14 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
     
     private void EvaluateExpressionStatement(BoundExpressionStatement node) => lastValue = EvaluateExpression(node.Expression);
     
-    private void EvaluateIfStatement(BoundIfStatement node) {
-        var condition = (bool)EvaluateExpression(node.Condition);
-        
-        if (condition)
-            EvaluateStatement(node.IfStatement);
-        else if (node.ElseStatement != null)
-            EvaluateStatement(node.ElseStatement);
-    }
-
-    private void EvaluateWhileStatement(BoundWhileStatement node) {        
-        while ((bool)EvaluateExpression(node.Condition))
-            EvaluateStatement(node.Body);
-    }
-
     private object EvaluateExpression(BoundExpression? node) {
         return node?.Kind switch {
-            BoundKind.LiteralExpression     => EvaluateLiteralExpression((BoundLiteralExpression)node),
-            BoundKind.VariableExpression    => EvaluateVariableExpression((BoundVariableExpression)node),
-            BoundKind.AssignmentExpression  => EvaluateAssignmentExpression((BoundAssignmentExpression)node),
-            BoundKind.UnaryExpression       => EvaluateUnaryExpression((BoundUnaryExpression)node),
-            BoundKind.BinaryExpression      => EvaluateBinaryExpression((BoundBinaryExpression)node),
-            BoundKind.RangeExpression       => EvaluateRangeExpression((BoundRangeExpression)node),
+            BoundNodeKind.LiteralExpression     => EvaluateLiteralExpression((BoundLiteralExpression)node),
+            BoundNodeKind.VariableExpression    => EvaluateVariableExpression((BoundVariableExpression)node),
+            BoundNodeKind.AssignmentExpression  => EvaluateAssignmentExpression((BoundAssignmentExpression)node),
+            BoundNodeKind.UnaryExpression       => EvaluateUnaryExpression((BoundUnaryExpression)node),
+            BoundNodeKind.BinaryExpression      => EvaluateBinaryExpression((BoundBinaryExpression)node),
+            BoundNodeKind.RangeExpression       => EvaluateRangeExpression((BoundRangeExpression)node),
             
             _ => throw new Exception($"Undefined node: {node?.Kind}"),
         };
@@ -214,10 +213,4 @@ internal sealed class Evaluator(BoundStatement? root, Dictionary<VariableSymbol,
 public sealed class EvaluationResult(ImmutableArray<DiagnosticMessage> diagnostics, object? result = null) {
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public object? Result { get; } = result;
-}
-
-public sealed class VariableSymbol(string name, bool mutable, Type type) {
-    public string Name { get; } = name;
-    public bool Mutable { get; } = mutable;
-    public Type Type { get; } = type;
 }
