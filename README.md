@@ -1,4 +1,4 @@
-# Rubics [![dotnet-build](https://github.com/SomeProgInThere/Rubics/actions/workflows/dotnet.yml/badge.svg)](https://github.com/SomeProgInThere/Rubics/actions/workflows/dotnet.yml)
+# Sprig [![dotnet-build](https://github.com/SomeProgInThere/Rubics/actions/workflows/dotnet.yml/badge.svg)](https://github.com/SomeProgInThere/Rubics/actions/workflows/dotnet.yml)
 
 ### A Compiler for my own language Rubics made with .NET framework
 ## Status
@@ -14,9 +14,9 @@ Currently a work in progress interpreter:
 
 ## Structure
 The Solution has three projects in it:
-  * Rubics (Main)
-  * Rubics.CLI (Command-line Interface)
-  * Rubics.Test (Tests for compiler)
+  * Sprig (Main)
+  * Sprig.CLI (Command-line Interface)
+  * Sprig.Test (Tests for compiler)
 
 ## Goals
 Learning the fundamentals of making a interpreter (and a *actual* compiler later on)
