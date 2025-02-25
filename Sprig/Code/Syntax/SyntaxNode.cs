@@ -35,7 +35,11 @@ public abstract class SyntaxNode {
         }
     }
 
-    public void WriteTo(TextWriter writer) => SyntaxNodeExtensions.PrettyPrint(writer, this);
+    public void WriteTo(TextWriter writer) {
+        writer.WriteLine("ParseTree");
+        SyntaxNodeExtensions.PrettyPrint(writer, this);
+        writer.WriteLine();
+    }
 
     public override string ToString() {
         using var writer = new StringWriter();

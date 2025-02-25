@@ -43,7 +43,7 @@ internal sealed class Evaluator(BoundBlockStatement? root, Dictionary<VariableSy
                     var conditionalGotoStatement = (BoundConditionalGotoStatement)statement;
                     var condition = (bool)EvaluateExpression(conditionalGotoStatement.Condition);
                     
-                    if ((condition && !conditionalGotoStatement.JumpIfFalse) || (!condition && conditionalGotoStatement.JumpIfFalse))
+                    if (condition && conditionalGotoStatement.Jump || !condition && !conditionalGotoStatement.Jump)
                         index = labelMap[conditionalGotoStatement.Label];
                     else 
                         index++;

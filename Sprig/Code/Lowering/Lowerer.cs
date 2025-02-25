@@ -43,9 +43,9 @@ internal sealed class Lowerer() : BoundTreeRewriter {
                 <then-body>             	|           <then-body>
                                         	|       else
         LL-IR:                          	|           <else-body>
-            goto-false <condition> end      |   
+            goto <condition> end      		|   
                 <then-body>             	|   LL-IR:
-            end:                        	|       goto-false <condition> else      
+            end:                        	|       goto <condition> else      
                                         	|           <then-body>
                                         	|       goto end
                                         	|       else:
@@ -56,7 +56,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 		if (node.ElseStatement is null) {
 			var endLabel = GenerateLabel();
 
-			var gotoCondition = new BoundConditionalGotoStatement(endLabel, node.Condition, true);
+			var gotoCondition = new BoundConditionalGotoStatement(endLabel, node.Condition, false);
 			var endStatement = new BoundLableStatement(endLabel);
 			var result = new BoundBlockStatement([gotoCondition, node.IfStatement, endStatement]);
 
@@ -66,7 +66,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 			var elseLabel = GenerateLabel();
 			var endLabel = GenerateLabel();
 
-			var gotoCondition = new BoundConditionalGotoStatement(elseLabel, node.Condition, true);
+			var gotoCondition = new BoundConditionalGotoStatement(elseLabel, node.Condition, false);
 			var gotoStatement = new BoundGotoStatement(endLabel);
 			var elseStatement = new BoundLableStatement(elseLabel);
 			var endStatement = new BoundLableStatement(endLabel);
@@ -88,7 +88,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 			continue:
 				<body>
 			check:
-				goto-true <condition> continue
+				goto <condition> continue
 			end:
 	*/
     protected override BoundStatement RewriteWhileStatement(BoundWhileStatement node) {
@@ -117,7 +117,8 @@ internal sealed class Lowerer() : BoundTreeRewriter {
         
         IL-IR:
             var <var> = <lower>
-            while (<var> <= <upper>)
+			var <upperBound> = <upper>
+            while (<var> <= <upperBound>)
                 <body>
                 <var> = <var> + 1
     */
@@ -126,9 +127,12 @@ internal sealed class Lowerer() : BoundTreeRewriter {
         var variableDeclaration = new BoundVariableDeclarationStatement(node.Variable, range.Lower);
         var variable = new BoundVariableExpression(node.Variable);
 
+		var upperBoundSymbol = new VariableSymbol("upperBound", true, typeof(int));
+		var upperBoundDeclaration = new BoundVariableDeclarationStatement(upperBoundSymbol, range.Upper);
+
         var condition = new BoundBinaryExpression(
             variable,
-            range.Upper,
+            new BoundVariableExpression(upperBoundSymbol),
             BinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, typeof(int), typeof(int)) 
                 ?? throw new Exception("Invaild binary operation")
         );
@@ -145,7 +149,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 
         var whileBody = new BoundBlockStatement([node.Body, step]);
         var whileStatement = new BoundWhileStatement(condition, whileBody);
-        var result = new BoundBlockStatement([variableDeclaration, whileStatement]);
+        var result = new BoundBlockStatement([variableDeclaration, upperBoundDeclaration, whileStatement]);
 
         return RewriteStatement(result);
     }

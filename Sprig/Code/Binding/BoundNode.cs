@@ -43,7 +43,11 @@ internal abstract class BoundNode {
         }
     }
 
-    public void WriteTo(TextWriter writer) => BoundNodeExtensions.PrettyPrint(writer, this);
+    public void WriteTo(TextWriter writer) {
+        writer.WriteLine("BoundTree");
+        BoundNodeExtensions.PrettyPrint(writer, this);
+        writer.WriteLine();
+    }
 
     public override string ToString() {
         using var writer = new StringWriter();

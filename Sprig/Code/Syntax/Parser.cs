@@ -210,7 +210,7 @@ internal sealed class Parser {
 
     private Expression ParseParenthesizedExpression() {
         var left = MatchToken(SyntaxKind.OpenParenthesisToken);
-        var expression = ParseBinaryExpression();
+        var expression = ParseAssignmentExpression();
         var right = MatchToken(SyntaxKind.ClosedParenthesisToken);
 
         return new ParenthesizedExpression(left, right, expression);
@@ -233,9 +233,9 @@ internal sealed class Parser {
     }
 
     private Expression ParseRangeExpression() {
-        var lower = ParseAssignmentExpression();
+        var lower = ParsePrimaryExpression();
         var rangeToken = MatchToken(SyntaxKind.DoubleDotToken);
-        var upper = ParseAssignmentExpression();
+        var upper = ParsePrimaryExpression();
 
         return new RangeExpression(lower, rangeToken, upper);
     }

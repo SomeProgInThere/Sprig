@@ -12,7 +12,7 @@ public static class Program {
     private static void Main() {
         
         var showTrees = false;
-        var showProgram = false;
+        var showBinding = false;
         var variables = new Dictionary<VariableSymbol, object>();
         var sourceBuilder = new StringBuilder();
 
@@ -48,9 +48,9 @@ public static class Program {
                     continue;
                 }
 
-                if (input == "!program") {
-                    showProgram = !showProgram;
-                    ColorPrint($"Info: show program tree set to {showProgram}\n\n", ConsoleColor.DarkGray);
+                if (input == "!binding") {
+                    showBinding = !showBinding;
+                    ColorPrint($"Info: show bound tree set to {showBinding}\n\n", ConsoleColor.DarkGray);
                     continue;
                 }
 
@@ -78,7 +78,7 @@ public static class Program {
             if (showTrees)
                 syntaxTree.Root.WriteTo(Console.Out);
 
-            if (showProgram)
+            if (showBinding)
                 compilation.EmitTree(Console.Out);
 
             var result = compilation.Evaluate(variables);
@@ -124,7 +124,7 @@ public static class Program {
             ("exit", "terminate the session"),
             ("clear", "clears the output console"),
             ("parse", "show internal parse trees for source"),
-            ("program", "show internal bound tree for source")
+            ("binding", "show internal bound tree for source")
         };
 
         foreach (var c in commands) {

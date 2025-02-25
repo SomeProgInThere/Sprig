@@ -17,7 +17,7 @@ internal abstract class BoundNodeExtensions {
             Console.ForegroundColor = node switch {
                 BoundExpression => ConsoleColor.DarkBlue,
                 BoundStatement => ConsoleColor.DarkCyan,
-            _ => ConsoleColor.Yellow,
+                _ => ConsoleColor.Yellow,
             };
         }
 
@@ -65,7 +65,7 @@ internal abstract class BoundNodeExtensions {
             if (consoleOut)
                 Console.ForegroundColor = ConsoleColor.DarkGray;
             
-            writer.Write(" => ");
+            writer.Write(": ");
             
             if (consoleOut)
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
