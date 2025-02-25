@@ -1,4 +1,3 @@
-
 using Sprig.Code.Source;
 
 namespace Sprig.Code.Syntax;

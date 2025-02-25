@@ -1,4 +1,3 @@
-
 using System.Reflection;
 
 namespace Sprig.Code.Binding;

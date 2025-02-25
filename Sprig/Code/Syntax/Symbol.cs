@@ -1,4 +1,3 @@
-
 namespace Sprig.Code.Syntax;
 
 public sealed class VariableSymbol(string name, bool mutable, Type type) {

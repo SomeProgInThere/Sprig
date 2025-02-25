@@ -1,5 +1,5 @@
-
 using System.Collections.Immutable;
+
 using Sprig.Code.Binding;
 using Sprig.Code.Lowering;
 using Sprig.Code.Syntax;

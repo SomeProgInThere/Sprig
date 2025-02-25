@@ -1,4 +1,3 @@
-
 namespace Sprig.Code.Syntax;
 
 internal sealed class SyntaxNodeExtensions {

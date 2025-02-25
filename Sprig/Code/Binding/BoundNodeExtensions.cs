@@ -1,5 +1,3 @@
-
-
 namespace Sprig.Code.Binding;
 
 internal abstract class BoundNodeExtensions {

@@ -1,4 +1,3 @@
-
 namespace Sprig.Code.Syntax;
 
 public abstract class Clause : SyntaxNode {}

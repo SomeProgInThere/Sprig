@@ -1,5 +1,5 @@
-
 using System.Collections.Immutable;
+
 using Sprig.Code.Source;
 
 namespace Sprig.Code.Syntax;

@@ -1,4 +1,3 @@
-
 namespace Sprig.Code.Source;
 
 public readonly struct TextSpan(int start, int length) {
