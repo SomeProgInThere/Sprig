@@ -45,8 +45,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUndefinedName(TextSpan span, string literal) {
-        var literalString = literal == "\0" ? "<null>" : $"'{literal}'";
-        var message = $"Symbol {literalString} is not defined";
+        var message = $"Symbol '{literal}' is not defined";
         Report(span, message);
     }
 

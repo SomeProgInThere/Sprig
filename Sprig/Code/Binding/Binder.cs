@@ -50,7 +50,7 @@ internal sealed class Binder(BoundScope? parent) {
         var name = syntax.Identifier.LiteralOrEmpty;
         var expression = BindExpression(syntax.Expression);
 
-        if (!Scope.TryLookup(name, out var variable))
+        if (!Scope.TryLookup(name, out var variable) && name != string.Empty)
             diagnostics.ReportUndefinedName(syntax.Identifier.Span, name);
         
         if (variable?.Mutable ?? false)
@@ -167,7 +167,7 @@ internal sealed class Binder(BoundScope? parent) {
         if (token.IsMissing)
             return new BoundLiteralExpression(0);
 
-        if (!Scope.TryLookup(token.LiteralOrEmpty, out var variable)) {
+        if (!Scope.TryLookup(token.LiteralOrEmpty, out var variable) && !token.IsMissing) {
             diagnostics.ReportUndefinedName(token.Span, token.LiteralOrEmpty);
             return new BoundLiteralExpression(0);
         }
@@ -182,7 +182,7 @@ internal sealed class Binder(BoundScope? parent) {
         if (syntax.IdentifierToken.IsMissing)
             return expression;
 
-        if (!Scope.TryLookup(name, out var variable)) {
+        if (!Scope.TryLookup(name, out var variable) && name != string.Empty) {
             diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
             return expression;
         }
