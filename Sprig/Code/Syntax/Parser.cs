@@ -7,9 +7,9 @@ namespace Sprig.Code.Syntax;
 internal sealed class Parser {
 
     public Parser(SourceText sourceText) {
-        var tokens = new List<Token>();
+        var tokens = new List<SyntaxToken>();
         var lexer = new Lexer(sourceText);
-        Token token;
+        SyntaxToken token;
 
         do {
             token = lexer.Lex();
@@ -232,30 +232,30 @@ internal sealed class Parser {
         return new RangeExpression(lower, rangeToken, upper);
     }
 
-    private Token Peek(int offset) {
+    private SyntaxToken Peek(int offset) {
         var index = position + offset;
         return index >= tokens.Length ? tokens[^1] : tokens[index];
     }
 
-    private Token Current => Peek(0);
-    private Token Next => Peek(1);
+    private SyntaxToken Current => Peek(0);
+    private SyntaxToken Next => Peek(1);
 
-    private Token NextToken() {
+    private SyntaxToken NextToken() {
         var current = Current;
         position++;
         return current;
     }
 
-    private Token MatchToken(SyntaxKind kind) {
+    private SyntaxToken MatchToken(SyntaxKind kind) {
         if (Current.Kind == kind)
             return NextToken();
         
         Diagnostics.ReportUnexpectedToken(Current.Span, Current.Kind, kind);
-        return new Token(kind, Current.Position, "\0");
+        return new SyntaxToken(kind, Current.Position, "\0");
     }
 
     private readonly Stack<ElseClause?> orderedClauses = new();
-    private readonly ImmutableArray<Token> tokens;
+    private readonly ImmutableArray<SyntaxToken> tokens;
 
     private int position;
 };

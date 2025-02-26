@@ -13,12 +13,12 @@ public sealed class SyntaxTree {
 
     public static SyntaxTree Parse(SourceText sourceText) => new(sourceText);
     
-    public static IEnumerable<Token> ParseTokens(string source) {
+    public static IEnumerable<SyntaxToken> ParseTokens(string source) {
         var sourceText = SourceText.FromString(source);
         return ParseTokens(sourceText);
     }
 
-    public static IEnumerable<Token> ParseTokens(SourceText source) {
+    public static IEnumerable<SyntaxToken> ParseTokens(SourceText source) {
         var lexer = new Lexer(source);
         while (true) {
             var token = lexer.Lex();
@@ -42,11 +42,11 @@ public sealed class SyntaxTree {
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; }
 }
 
-public class CompilationUnit(Statement statement, Token endOfFileToken) 
+public class CompilationUnit(Statement statement, SyntaxToken endOfFileToken) 
     : SyntaxNode {
 
     public Statement Statement { get; } = statement;
-    public Token EndOfFile { get; } = endOfFileToken;
+    public SyntaxToken EndOfFile { get; } = endOfFileToken;
 
     public override SyntaxKind Kind => SyntaxKind.CompilationUnit;
 }

@@ -34,7 +34,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindVariableDeclaration(VariableDeclarationStatement syntax) {
-        var name = syntax.Identifier.Literal;
+        var name = syntax.Identifier.LiteralOrEmpty;
         var mutable = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
         var initializer = BindExpression(syntax.Initializer);
 
@@ -47,7 +47,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindAssignOperationStatement(AssignOperationStatement syntax) {
-        var name = syntax.Identifier.Literal;
+        var name = syntax.Identifier.LiteralOrEmpty;
         var expression = BindExpression(syntax.Expression);
 
         if (!Scope.TryLookup(name, out var variable))
@@ -86,7 +86,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindForStatement(ForStatement syntax) {
-        var name = syntax.Identifier.Literal;
+        var name = syntax.Identifier.LiteralOrEmpty;
         var range = BindExpression(syntax.Range, typeof(int));
         var variable = new VariableSymbol(name, true, range.Type);
 
@@ -164,11 +164,11 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundExpression BindNameExpression(NameExpression syntax) {
         var token = syntax.IdentifierToken;
 
-        if (token.IsNull())
+        if (token.IsMissing)
             return new BoundLiteralExpression(0);
 
-        if (!Scope.TryLookup(token.Literal, out var variable)) {
-            diagnostics.ReportUndefinedName(token.Span, token.Literal);
+        if (!Scope.TryLookup(token.LiteralOrEmpty, out var variable)) {
+            diagnostics.ReportUndefinedName(token.Span, token.LiteralOrEmpty);
             return new BoundLiteralExpression(0);
         }
 
@@ -176,10 +176,10 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundExpression BindAssignmentExpression(AssignmentExpression syntax) {
-        var name = syntax.IdentifierToken.Literal;
+        var name = syntax.IdentifierToken.LiteralOrEmpty;
         var expression = BindExpression(syntax.Expression);
         
-        if (syntax.IdentifierToken.IsNull())
+        if (syntax.IdentifierToken.IsMissing)
             return expression;
 
         if (!Scope.TryLookup(name, out var variable)) {
@@ -204,7 +204,7 @@ internal sealed class Binder(BoundScope? parent) {
         var op = UnaryOperator.Bind(token.Kind, operand.Type);
 
         if (op == null) {
-            diagnostics.ReportUndefinedUnaryOperator(token.Span, token.Literal, operand.Type);
+            diagnostics.ReportUndefinedUnaryOperator(token.Span, token.LiteralOrEmpty, operand.Type);
             return operand;
         }
 
@@ -218,7 +218,7 @@ internal sealed class Binder(BoundScope? parent) {
         var op = BinaryOperator.Bind(token.Kind, left.Type, right.Type);
 
         if (op == null) {
-            diagnostics.ReportUndefinedBinaryOperator(token.Span, token.Literal, left.Type, right.Type);
+            diagnostics.ReportUndefinedBinaryOperator(token.Span, token.LiteralOrEmpty, left.Type, right.Type);
             return left;
         }
 

@@ -4,7 +4,7 @@ namespace Sprig.Code.Syntax;
 
 internal sealed class Lexer(SourceText source) {
 
-    public Token Lex() {
+    public SyntaxToken Lex() {
 
         start = position;
         kind = SyntaxKind.BadToken;
@@ -140,7 +140,7 @@ internal sealed class Lexer(SourceText source) {
         
         var length = position - start;
         var literal = kind.GetLiteral() ?? source.ToString(start, length);
-        return new Token(kind, start, literal, value);
+        return new SyntaxToken(kind, start, literal, value);
     }
 
     private void SetKind(ref SyntaxKind kind, ref int position, char l1, SyntaxKind k1, SyntaxKind k2) {

@@ -11,11 +11,11 @@ internal sealed class SyntaxNodeExtensions {
         if (consoleOut)
             Console.ForegroundColor = ConsoleColor.DarkGray;
             writer.Write(marker);
-            Console.ForegroundColor = node is Token ? ConsoleColor.Blue : ConsoleColor.DarkMagenta;
+            Console.ForegroundColor = node is SyntaxToken ? ConsoleColor.Blue : ConsoleColor.DarkMagenta;
 
         writer.Write(node.Kind);
 
-        if (node is Token token && token.Value != null)
+        if (node is SyntaxToken token && token.Value != null)
             writer.Write($" ({token.Value})");
 
         if (consoleOut)

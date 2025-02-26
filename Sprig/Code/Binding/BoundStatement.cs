@@ -22,11 +22,11 @@ internal sealed class BoundVariableDeclarationStatement(VariableSymbol variable,
     public override BoundNodeKind Kind => BoundNodeKind.VariableDeclarationStatement;
 }
 
-internal sealed class BoundAssignOperationStatement(VariableSymbol? variable, Token assignOperatorToken, BoundExpression expression)
+internal sealed class BoundAssignOperationStatement(VariableSymbol? variable, SyntaxToken assignOperatorToken, BoundExpression expression)
     : BoundStatement {
         
     public VariableSymbol? Variable { get; } = variable;
-    public Token AssignOperatorToken { get; } = assignOperatorToken;
+    public SyntaxToken AssignOperatorToken { get; } = assignOperatorToken;
     public BoundExpression Expression { get; } = expression;
 
     public override BoundNodeKind Kind => BoundNodeKind.AssignOperationStatement;
