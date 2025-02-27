@@ -45,7 +45,7 @@ internal static class SyntaxKindExtensions {
         };
     }
 
-    public static SyntaxKind GetKeywordKind(this string literal) {
+    public static SyntaxKind KeywordKind(this string literal) {
         return literal switch {
             "true"  => SyntaxKind.TrueKeyword,
             "false" => SyntaxKind.FalseKeyword,
@@ -61,7 +61,7 @@ internal static class SyntaxKindExtensions {
         };
     }
 
-    public static string? GetLiteral(this SyntaxKind kind) {
+    public static string? Literal(this SyntaxKind kind) {
         return kind switch {
             SyntaxKind.PlusToken                => "+",
             SyntaxKind.MinusToken               => "-",

@@ -32,12 +32,23 @@ internal sealed class ReplExtensions {
 
             Console.Write($"\t{prefix}");
             ColorPrint(error, ConsoleColor.Red);
-            Console.Write($"{suffix}\n");
+            Console.Write($"{suffix}\n\n");
         }
     }
 
     internal static bool IsCompleteSource(string source) {
         if (string.IsNullOrEmpty(source))
+            return true;
+
+        // Forces completion due to two consecutive blank lines
+        var forceComplete = source
+                                .Split(Environment.NewLine)
+                                .Reverse()
+                                .TakeWhile(string.IsNullOrEmpty)
+                                .Take(2)
+                                .Count() == 2;
+
+        if (forceComplete)
             return true;
 
         var syntaxTree = SyntaxTree.Parse(source);
