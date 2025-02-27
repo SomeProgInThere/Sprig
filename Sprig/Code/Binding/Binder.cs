@@ -165,11 +165,11 @@ internal sealed class Binder(BoundScope? parent) {
         var token = syntax.IdentifierToken;
 
         if (token.IsMissing)
-            return new BoundLiteralExpression(0);
+            return new BoundErrorExpression();
 
         if (!Scope.TryLookup(token.LiteralOrEmpty, out var variable) && !token.IsMissing) {
             diagnostics.ReportUndefinedName(token.Span, token.LiteralOrEmpty);
-            return new BoundLiteralExpression(0);
+            return new BoundErrorExpression();
         }
 
         return new BoundVariableExpression(variable);
@@ -201,11 +201,14 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundExpression BindUnaryExpression(UnaryExpression syntax) {
         var operand = BindExpression(syntax.Operand);
         var token = syntax.OperatorToken;
-        var op = UnaryOperator.Bind(token.Kind, operand.Type);
 
+        if (operand.Type.IsError)
+            return new BoundErrorExpression();
+
+        var op = UnaryOperator.Bind(token.Kind, operand.Type);
         if (op == null) {
             diagnostics.ReportUndefinedUnaryOperator(token.Span, token.LiteralOrEmpty, operand.Type);
-            return operand;
+            return new BoundErrorExpression();
         }
 
         return new BoundUnaryExpression(operand, op);
@@ -215,11 +218,15 @@ internal sealed class Binder(BoundScope? parent) {
         var left = BindExpression(syntax.Left);
         var right = BindExpression(syntax.Right);
         var token = syntax.OperatorToken;
-        var op = BinaryOperator.Bind(token.Kind, left.Type, right.Type);
 
+        if (left.Type.IsError || right.Type.IsError)
+            return new BoundErrorExpression();
+
+        var op = BinaryOperator.Bind(token.Kind, left.Type, right.Type);
+        
         if (op == null) {
             diagnostics.ReportUndefinedBinaryOperator(token.Span, token.LiteralOrEmpty, left.Type, right.Type);
-            return left;
+            return new BoundErrorExpression();
         }
 
         return new BoundBinaryExpression(left, right, op);

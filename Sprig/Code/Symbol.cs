@@ -19,11 +19,14 @@ public sealed class TypeSymbol : Symbol {
     public static readonly TypeSymbol Boolean = new("Boolean");
     public static readonly TypeSymbol Int = new("Int");
     public static readonly TypeSymbol String = new("String");
+    public static readonly TypeSymbol Error = new("ErrorType");
 
     private TypeSymbol(string name) 
         : base(name) 
     {}
 
+    public bool IsError => this == Error;
+    
     public override SymbolKind Kind => SymbolKind.Type;
 }
 

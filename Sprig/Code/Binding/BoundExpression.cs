@@ -6,26 +6,18 @@ internal abstract class BoundExpression : BoundNode {
     public abstract TypeSymbol Type { get; }
 }
 
-internal sealed class BoundLiteralExpression 
-    : BoundExpression {
+internal sealed class BoundLiteralExpression(object value)
+        : BoundExpression {
 
-    public BoundLiteralExpression(object value) {
-        if (value is bool)
-            Type = TypeSymbol.Boolean;
-        else if (value is int)
-            Type = TypeSymbol.Int;
-        else if (value is string)
-            Type = TypeSymbol.String;
-        else
-            throw new Exception($"Unexpected literal '{value}' of type '{value.GetType()}'");
-
-        Value = value;
-    }
-
-    public object Value { get; }
+    public object Value { get; } = value;
 
     public override BoundNodeKind Kind => BoundNodeKind.LiteralExpression;
-    public override TypeSymbol Type { get; }
+    public override TypeSymbol Type { get; } = value switch {
+        bool => TypeSymbol.Boolean,
+        int => TypeSymbol.Int,
+        string => TypeSymbol.String,
+        _ => throw new Exception($"Unexpected literal '{value}' of type '{value.GetType()}'"),
+    };
 }
 
 internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperator op)
@@ -77,4 +69,11 @@ internal sealed class BoundRangeExpression(BoundExpression lower, SyntaxToken ra
 
     public override BoundNodeKind Kind => BoundNodeKind.RangeExpression;
     public override TypeSymbol Type => Lower.Type;
+}
+
+internal sealed class BoundErrorExpression
+    : BoundExpression {
+
+    public override BoundNodeKind Kind => BoundNodeKind.ErrorExpression;
+    public override TypeSymbol Type => TypeSymbol.Error;
 }
