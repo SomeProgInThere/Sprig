@@ -37,6 +37,19 @@ public class DiagnosticsTest {
     }
 
     [Fact]
+    public void Report_UnterminatedString() {
+        var source = @"
+            [""]test_case
+        ";
+
+        var diagnostics = @"
+            Unterminated string literal
+        ";
+
+        TestAssert.AssertDiagnostics(source, diagnostics);
+    }
+
+    [Fact]
     public void Report_NoErrorForEmptySource() {
         var source = @"[]";
         var diagnostics = @"

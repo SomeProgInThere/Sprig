@@ -6,8 +6,9 @@ public enum SyntaxKind {
     EndOfFileToken,
     BadToken,
     IdentifierToken,
-
+    StringToken,
     NumberToken,
+
     PlusToken,
     MinusToken,
     StarToken,

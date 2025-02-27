@@ -1,3 +1,4 @@
+using System.Text;
 using Sprig.Code.Source;
 
 namespace Sprig.Code.Syntax;
@@ -120,6 +121,10 @@ internal sealed class Lexer(SourceText source) {
             );
             break;
 
+        case '"':
+            ReadString();
+            break;
+
         default:
             if (char.IsDigit(Current))
                 ReadNumberToken();
@@ -139,7 +144,7 @@ internal sealed class Lexer(SourceText source) {
         }
         
         var length = position - start;
-        var literal = kind.GetLiteral() ?? source.ToString(start, length);
+        var literal = kind.Literal() ?? source.ToString(start, length);
         return new SyntaxToken(kind, start, literal, value);
     }
 
@@ -152,6 +157,43 @@ internal sealed class Lexer(SourceText source) {
         if (Next == l1) { kind = k2; position += 2; return; }
         if (Next == l2) { kind = k3; position += 2; return; }
         kind = k1; position++;
+    }
+
+    private void ReadString() {
+        position++;
+        var builder = new StringBuilder();
+        var done = false;
+
+        while (!done) {
+            switch (Current) {
+                case '\0':
+                case '\r':
+                case '\n':
+                    var span = new TextSpan(start, 1);
+                    diagnostics.ReportUnterminatedString(span);
+                    done = true;
+                    break;
+
+                case '"':
+                    if (Next == '"') {
+                        builder.Append(Current);
+                        position += 2;
+                    }
+                    else {
+                        position++;
+                        done = true;
+                    }
+                    break;
+
+                default:
+                    builder.Append(Current);
+                    position++;
+                    break;
+            }
+        }
+
+        kind = SyntaxKind.StringToken;
+        value = builder.ToString();
     }
 
     private void ReadWhitespaceToken() {
@@ -181,7 +223,7 @@ internal sealed class Lexer(SourceText source) {
             
         var length = position - start;
         var literal = source.ToString(start, length);
-        kind = literal.GetKeywordKind();
+        kind = literal.KeywordKind();
     }
     
     public Diagnostics Diagnostics => diagnostics;
@@ -198,8 +240,8 @@ internal sealed class Lexer(SourceText source) {
 
     private int position;
     private int start;
-    private SyntaxKind kind;
     private object? value;
 
+    private SyntaxKind kind;
     private readonly Diagnostics diagnostics = [];
 }

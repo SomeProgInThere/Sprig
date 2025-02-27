@@ -65,6 +65,7 @@ public class SourceView {
             var isKeyword = token.Kind.ToString().EndsWith("Keyword");
             var isNumber = token.Kind == SyntaxKind.NumberToken;
             var isIdentifier = token.Kind == SyntaxKind.IdentifierToken;
+            var isString = token.Kind == SyntaxKind.StringToken;
 
             if (isKeyword)
                 Console.ForegroundColor = ConsoleColor.Blue;
@@ -72,6 +73,8 @@ public class SourceView {
                 Console.ForegroundColor = ConsoleColor.White;
             else if (isNumber)
                 Console.ForegroundColor = ConsoleColor.Cyan;
+            else if (isString)
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
             else
                 Console.ForegroundColor = ConsoleColor.DarkGray;
 

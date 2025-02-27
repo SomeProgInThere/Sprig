@@ -26,9 +26,14 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(new TextSpan(position, 1), message);
     }
 
+    public void ReportUnterminatedString(TextSpan span) {
+        var message = "Unterminated string literal";
+        Report(span, message);
+    }
+
     public void ReportUnexpectedToken(TextSpan span, SyntaxKind actual, SyntaxKind expected) {
-        var actualString = actual.GetLiteral() is null ? $"<{actual}>" : $"'{actual.GetLiteral()}'";
-        var expectedString = expected.GetLiteral() is null ? $"<{expected}>" : $"'{expected.GetLiteral()}'";
+        var actualString = actual.Literal() is null ? $"<{actual}>" : $"'{actual.Literal()}'";
+        var expectedString = expected.Literal() is null ? $"<{expected}>" : $"'{expected.Literal()}'";
         var message = $"Unexpected token {actualString}, expected {expectedString}";
         
         Report(span, message);
@@ -70,7 +75,5 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-
     private readonly List<DiagnosticMessage> diagnostics = [];
 }
