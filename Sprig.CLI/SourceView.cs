@@ -64,11 +64,16 @@ public class SourceView {
         foreach (var token in tokens) {
             var isKeyword = token.Kind.ToString().EndsWith("Keyword");
             var isNumber = token.Kind == SyntaxKind.NumberToken;
+            var isIdentifier = token.Kind == SyntaxKind.IdentifierToken;
 
             if (isKeyword)
                 Console.ForegroundColor = ConsoleColor.Blue;
+            else if (isIdentifier)
+                Console.ForegroundColor = ConsoleColor.White;
             else if (isNumber)
-                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            else
+                Console.ForegroundColor = ConsoleColor.DarkGray;
 
             Console.Write(token.Literal);
             Console.ResetColor();

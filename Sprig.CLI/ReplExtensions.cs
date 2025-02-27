@@ -70,6 +70,7 @@ internal sealed class ReplExtensions {
             view.CurrentLine--;
             document[view.CurrentLine] = previousLine + currentLine;
             view.CurrentChar = previousLine.Length;
+            return;
         }
 
         var lineIndex = view.CurrentLine;

@@ -38,6 +38,8 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 	}
 
     /*
+		If statement						|	If-Else statement
+											|
         HL-IR:                          	|   HL-IR:
             if <condition>              	|       if <condition>        
                 <then-body>             	|           <then-body>
@@ -77,8 +79,10 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 			return RewriteStatement(result);
 		}
     }
-
+	
 	/*
+		While-statement
+
 		HL-IR:
 			while <condition>
 				<body>
@@ -111,6 +115,8 @@ internal sealed class Lowerer() : BoundTreeRewriter {
     }
 
     /*  
+		For-statement
+
         HL-IR:
             for <var> in <lower>..<upper>
                 <body>
