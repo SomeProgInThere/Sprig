@@ -29,7 +29,7 @@ public class EvaluationTest {
         ";
 
         var diagnostics = @"
-            Cannot convert type 'System.Int32' to 'System.Boolean'
+            Cannot convert type 'Int' to 'Boolean'
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);
@@ -46,7 +46,7 @@ public class EvaluationTest {
         ";
 
         var diagnostics = @"
-            Cannot convert type 'System.Int32' to 'System.Boolean'
+            Cannot convert type 'Int' to 'Boolean'
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);
@@ -63,7 +63,7 @@ public class EvaluationTest {
         ";
 
         var diagnostics = @"
-            Cannot convert type 'System.Int32' to 'System.Boolean'
+            Cannot convert type 'Int' to 'Boolean'
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);

@@ -133,13 +133,13 @@ internal sealed class Lowerer() : BoundTreeRewriter {
         var variableDeclaration = new BoundVariableDeclarationStatement(node.Variable, range.Lower);
         var variable = new BoundVariableExpression(node.Variable);
 
-		var upperBoundSymbol = new VariableSymbol("upperBound", true, typeof(int));
+		var upperBoundSymbol = new VariableSymbol("upperBound", true, TypeSymbol.Int);
 		var upperBoundDeclaration = new BoundVariableDeclarationStatement(upperBoundSymbol, range.Upper);
 
         var condition = new BoundBinaryExpression(
             variable,
             new BoundVariableExpression(upperBoundSymbol),
-            BinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, typeof(int), typeof(int)) 
+            BinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int, TypeSymbol.Int) 
                 ?? throw new Exception("Invaild binary operation")
         );
 
@@ -147,7 +147,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
             new BoundAssignmentExpression(node.Variable, new BoundBinaryExpression(
                     variable,
                     new BoundLiteralExpression(1),
-                    BinaryOperator.Bind(SyntaxKind.PlusToken, typeof(int), typeof(int))
+                    BinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int, TypeSymbol.Int)
                         ?? throw new Exception("Invalid binary operation")
                 )
             )

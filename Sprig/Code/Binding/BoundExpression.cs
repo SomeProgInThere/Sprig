@@ -3,16 +3,29 @@ using Sprig.Code.Syntax;
 namespace Sprig.Code.Binding;
 
 internal abstract class BoundExpression : BoundNode {
-    public abstract Type Type { get; }
+    public abstract TypeSymbol Type { get; }
 }
 
-internal sealed class BoundLiteralExpression(object value) 
+internal sealed class BoundLiteralExpression 
     : BoundExpression {
 
-    public object Value { get; } = value;
+    public BoundLiteralExpression(object value) {
+        if (value is bool)
+            Type = TypeSymbol.Boolean;
+        else if (value is int)
+            Type = TypeSymbol.Int;
+        else if (value is string)
+            Type = TypeSymbol.String;
+        else
+            throw new Exception($"Unexpected literal '{value}' of type '{value.GetType()}'");
+
+        Value = value;
+    }
+
+    public object Value { get; }
 
     public override BoundNodeKind Kind => BoundNodeKind.LiteralExpression;
-    public override Type Type => Value.GetType();
+    public override TypeSymbol Type { get; }
 }
 
 internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperator op)
@@ -22,7 +35,7 @@ internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperato
     public BoundExpression Operand { get; } = operand;
 
     public override BoundNodeKind Kind => BoundNodeKind.UnaryExpression;
-    public override Type Type => Operand.Type;
+    public override TypeSymbol Type => Operand.Type;
 }
 
 internal sealed class BoundVariableExpression(VariableSymbol? variable)
@@ -31,7 +44,7 @@ internal sealed class BoundVariableExpression(VariableSymbol? variable)
     public VariableSymbol? Variable { get; } = variable;
     
     public override BoundNodeKind Kind => BoundNodeKind.VariableExpression;
-    public override Type Type => Variable?.Type ?? typeof(void);
+    public override TypeSymbol Type => Variable?.Type ?? TypeSymbol.Int;
 }
 
 internal sealed class BoundAssignmentExpression(VariableSymbol variable, BoundExpression expression)
@@ -41,7 +54,7 @@ internal sealed class BoundAssignmentExpression(VariableSymbol variable, BoundEx
     public BoundExpression Expression { get; } = expression;
 
     public override BoundNodeKind Kind => BoundNodeKind.AssignmentExpression;
-    public override Type Type => Expression.Type;
+    public override TypeSymbol Type => Expression.Type;
 }
 
 internal sealed class BoundBinaryExpression(BoundExpression left, BoundExpression right, BinaryOperator op) 
@@ -52,7 +65,7 @@ internal sealed class BoundBinaryExpression(BoundExpression left, BoundExpressio
     public BoundExpression Right { get; } = right;
 
     public override BoundNodeKind Kind => BoundNodeKind.BinaryExpression;
-    public override Type Type => Operator.ResultType;
+    public override TypeSymbol Type => Operator.ResultType;
 }
 
 internal sealed class BoundRangeExpression(BoundExpression lower, SyntaxToken rangeToken, BoundExpression upper)
@@ -63,5 +76,5 @@ internal sealed class BoundRangeExpression(BoundExpression lower, SyntaxToken ra
     public BoundExpression Upper { get; } = upper;
 
     public override BoundNodeKind Kind => BoundNodeKind.RangeExpression;
-    public override Type Type => Lower.Type;
+    public override TypeSymbol Type => Lower.Type;
 }

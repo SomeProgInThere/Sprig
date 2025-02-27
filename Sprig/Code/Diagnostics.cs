@@ -9,7 +9,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     
     public IEnumerator<DiagnosticMessage> GetEnumerator() => diagnostics.GetEnumerator();
 
-    public void ReportInvalidNumber(TextSpan span, string literal, Type type) {
+    public void ReportInvalidNumber(TextSpan span, string literal, TypeSymbol type) {
         var message = $"Number '{literal}' is not valid '{type}'";
         Report(span, message);
     }
@@ -32,12 +32,12 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
-    public void ReportUndefinedUnaryOperator(TextSpan span, string literal, Type type) {
+    public void ReportUndefinedUnaryOperator(TextSpan span, string literal, TypeSymbol type) {
         var message = $"Unary operator '{literal}' is not defined for type '{type}'";
         Report(span, message);
     }
 
-    public void ReportUndefinedBinaryOperator(TextSpan span, string literal, Type left, Type right) {
+    public void ReportUndefinedBinaryOperator(TextSpan span, string literal, TypeSymbol left, TypeSymbol right) {
         var message = $"Binary operator '{literal}' is not defined for types '{left}' and '{right}'";
         Report(span, message);
     }
@@ -52,7 +52,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
-    public void ReportCannotConvert(TextSpan span, Type actual, Type? expected) {
+    public void ReportCannotConvert(TextSpan span, TypeSymbol actual, TypeSymbol? expected) {
         var message = $"Cannot convert type '{actual}' to '{expected}'";
         Report(span, message);
     }

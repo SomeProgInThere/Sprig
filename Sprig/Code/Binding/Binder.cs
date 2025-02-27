@@ -68,7 +68,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindIfStatement(IfStatement syntax) {
-        var condition = BindExpression(syntax.Condition, typeof(bool));
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
         var body = BindStatement(syntax.Body);
         
         var elseBody = syntax.ElseClause switch {
@@ -80,14 +80,14 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindWhileStatement(WhileStatement syntax) {
-        var condition = BindExpression(syntax.Condition, typeof(bool));
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
         var body = BindStatement(syntax.Body);
         return new BoundWhileStatement(condition, body);
     }
 
     private BoundStatement BindForStatement(ForStatement syntax) {
         var name = syntax.Identifier.LiteralOrEmpty;
-        var range = BindExpression(syntax.Range, typeof(int));
+        var range = BindExpression(syntax.Range, TypeSymbol.Int);
         var variable = new VariableSymbol(name, true, range.Type);
 
         if (!Scope.TryDeclare(variable))
@@ -112,7 +112,7 @@ internal sealed class Binder(BoundScope? parent) {
         };
     }
 
-    private BoundExpression BindExpression(Expression syntax, Type targetType) {
+    private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {
         var result = BindExpression(syntax);
         if (result.Type != targetType)
             diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);

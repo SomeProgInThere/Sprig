@@ -28,15 +28,21 @@ internal enum BinaryOperatorKind {
     LesserThanEqualsTo,
 }
 
-internal sealed class BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind kind, Type leftType, Type rightType, Type resultType) {
+internal sealed class BinaryOperator(
+    SyntaxKind syntaxKind, 
+    BinaryOperatorKind kind, 
+    TypeSymbol leftType, 
+    TypeSymbol rightType, 
+    TypeSymbol resultType
+) {
 
-    public BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind operatorKind, Type type, Type resultType)
+    public BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind operatorKind, TypeSymbol type, TypeSymbol resultType)
         : this(syntaxKind, operatorKind, type, type, resultType) {}
 
-    public BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind operatorKind, Type type)
+    public BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind operatorKind, TypeSymbol type)
         : this(syntaxKind, operatorKind, type, type, type) {}
 
-    public static BinaryOperator? Bind(SyntaxKind kind, Type leftType, Type rightType) {
+    public static BinaryOperator? Bind(SyntaxKind kind, TypeSymbol leftType, TypeSymbol rightType) {
         foreach (var op in operators) {
             if (op.SyntaxKind == kind && op.LeftType == leftType && op.RightType == rightType) {
                 return op;
@@ -48,37 +54,37 @@ internal sealed class BinaryOperator(SyntaxKind syntaxKind, BinaryOperatorKind k
 
     public SyntaxKind SyntaxKind { get; } = syntaxKind;
     public BinaryOperatorKind Kind { get; } = kind;
-    public Type LeftType { get; } = leftType;
-    public Type RightType { get; } = rightType;
-    public Type ResultType { get; } = resultType;
+    public TypeSymbol LeftType { get; } = leftType;
+    public TypeSymbol RightType { get; } = rightType;
+    public TypeSymbol ResultType { get; } = resultType;
 
     private static readonly BinaryOperator[] operators = [
-        new BinaryOperator(SyntaxKind.PlusToken,                BinaryOperatorKind.Add,         typeof(int)),
-        new BinaryOperator(SyntaxKind.MinusToken,               BinaryOperatorKind.Substact,    typeof(int)),
-        new BinaryOperator(SyntaxKind.StarToken,                BinaryOperatorKind.Multiply,    typeof(int)),
-        new BinaryOperator(SyntaxKind.SlashToken,               BinaryOperatorKind.Divide,      typeof(int)),
-        new BinaryOperator(SyntaxKind.PercentToken,             BinaryOperatorKind.Modulus,     typeof(int)),
-        new BinaryOperator(SyntaxKind.DoubleSlashToken,         BinaryOperatorKind.Remainder,   typeof(int)),
-        new BinaryOperator(SyntaxKind.DoubleStarToken,          BinaryOperatorKind.RaisePower,  typeof(int)),
+        new BinaryOperator(SyntaxKind.PlusToken,                BinaryOperatorKind.Add,         TypeSymbol.Int),
+        new BinaryOperator(SyntaxKind.MinusToken,               BinaryOperatorKind.Substact,    TypeSymbol.Int),
+        new BinaryOperator(SyntaxKind.StarToken,                BinaryOperatorKind.Multiply,    TypeSymbol.Int),
+        new BinaryOperator(SyntaxKind.SlashToken,               BinaryOperatorKind.Divide,      TypeSymbol.Int),
+        new BinaryOperator(SyntaxKind.PercentToken,             BinaryOperatorKind.Modulus,     TypeSymbol.Int),
+        new BinaryOperator(SyntaxKind.DoubleSlashToken,         BinaryOperatorKind.Remainder,   TypeSymbol.Int),
+        new BinaryOperator(SyntaxKind.DoubleStarToken,          BinaryOperatorKind.RaisePower,  TypeSymbol.Int),
         
-        new BinaryOperator(SyntaxKind.TildeToken,               BinaryOperatorKind.BitwiseNot,  typeof(int)),
-        new BinaryOperator(SyntaxKind.AmpersandToken,           BinaryOperatorKind.BitwiseAnd,  typeof(int)), 
-        new BinaryOperator(SyntaxKind.PipeToken,                BinaryOperatorKind.BitwiseOr,   typeof(int)), 
-        new BinaryOperator(SyntaxKind.CircumflexToken,          BinaryOperatorKind.BitwiseXor,  typeof(int)),
+        new BinaryOperator(SyntaxKind.TildeToken,               BinaryOperatorKind.BitwiseNot,  TypeSymbol.Int),
+        new BinaryOperator(SyntaxKind.AmpersandToken,           BinaryOperatorKind.BitwiseAnd,  TypeSymbol.Int), 
+        new BinaryOperator(SyntaxKind.PipeToken,                BinaryOperatorKind.BitwiseOr,   TypeSymbol.Int), 
+        new BinaryOperator(SyntaxKind.CircumflexToken,          BinaryOperatorKind.BitwiseXor,  TypeSymbol.Int),
          
-        new BinaryOperator(SyntaxKind.DoubleLeftArrowToken,     BinaryOperatorKind.BitshiftLeft,   typeof(int)), 
-        new BinaryOperator(SyntaxKind.DoubleRightArrowToken,    BinaryOperatorKind.BitshiftRight,  typeof(int)), 
+        new BinaryOperator(SyntaxKind.DoubleLeftArrowToken,     BinaryOperatorKind.BitshiftLeft,   TypeSymbol.Int), 
+        new BinaryOperator(SyntaxKind.DoubleRightArrowToken,    BinaryOperatorKind.BitshiftRight,  TypeSymbol.Int), 
 
-        new BinaryOperator(SyntaxKind.DoubleEqualsToken,        BinaryOperatorKind.Equals,                  typeof(int), typeof(bool)),
-        new BinaryOperator(SyntaxKind.BangEqualsToken,          BinaryOperatorKind.NotEquals,               typeof(int), typeof(bool)),
-        new BinaryOperator(SyntaxKind.LeftArrowToken,           BinaryOperatorKind.GreaterThan,             typeof(int), typeof(bool)),
-        new BinaryOperator(SyntaxKind.LeftArrowEqualsToken,     BinaryOperatorKind.GreaterThanEqualsTo,     typeof(int), typeof(bool)),
-        new BinaryOperator(SyntaxKind.RightArrowToken,          BinaryOperatorKind.LesserThan,              typeof(int), typeof(bool)),
-        new BinaryOperator(SyntaxKind.RightArrowEqualsToken,    BinaryOperatorKind.LesserThanEqualsTo,      typeof(int), typeof(bool)),
+        new BinaryOperator(SyntaxKind.DoubleEqualsToken,        BinaryOperatorKind.Equals,                  TypeSymbol.Int, TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.BangEqualsToken,          BinaryOperatorKind.NotEquals,               TypeSymbol.Int, TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.LeftArrowToken,           BinaryOperatorKind.GreaterThan,             TypeSymbol.Int, TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.LeftArrowEqualsToken,     BinaryOperatorKind.GreaterThanEqualsTo,     TypeSymbol.Int, TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.RightArrowToken,          BinaryOperatorKind.LesserThan,              TypeSymbol.Int, TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.RightArrowEqualsToken,    BinaryOperatorKind.LesserThanEqualsTo,      TypeSymbol.Int, TypeSymbol.Boolean),
 
-        new BinaryOperator(SyntaxKind.DoubleAmpersandToken,     BinaryOperatorKind.LogicalAnd,  typeof(bool)),
-        new BinaryOperator(SyntaxKind.DoublePipeToken,          BinaryOperatorKind.LogicalOr,   typeof(bool)),
-        new BinaryOperator(SyntaxKind.DoubleEqualsToken,        BinaryOperatorKind.Equals,      typeof(bool)),
-        new BinaryOperator(SyntaxKind.BangEqualsToken,          BinaryOperatorKind.NotEquals,   typeof(bool)),
+        new BinaryOperator(SyntaxKind.DoubleAmpersandToken,     BinaryOperatorKind.LogicalAnd,  TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.DoublePipeToken,          BinaryOperatorKind.LogicalOr,   TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.DoubleEqualsToken,        BinaryOperatorKind.Equals,      TypeSymbol.Boolean),
+        new BinaryOperator(SyntaxKind.BangEqualsToken,          BinaryOperatorKind.NotEquals,   TypeSymbol.Boolean),
     ];
 }
