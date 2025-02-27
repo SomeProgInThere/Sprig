@@ -44,7 +44,7 @@ public abstract class SyntaxNode {
 
     public void WriteTo(TextWriter writer) {
         writer.WriteLine("ParseTree");
-        SyntaxNodeExtensions.PrettyPrint(writer, this);
+        SyntaxNodeExtension.PrettyPrint(writer, this);
         writer.WriteLine();
     }
 

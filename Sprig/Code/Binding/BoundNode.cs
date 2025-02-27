@@ -44,7 +44,7 @@ internal abstract class BoundNode {
 
     public void WriteTo(TextWriter writer) {
         writer.WriteLine("BoundTree");
-        BoundNodeExtensions.PrettyPrint(writer, this);
+        BoundNodeExtension.PrettyPrint(writer, this);
         writer.WriteLine();
     }
 

@@ -1,6 +1,6 @@
 namespace Sprig.Code.Syntax;
 
-internal static class SyntaxKindExtensions {
+internal static class SyntaxKindExtension {
     
     public static int UnaryOperatorPrecedence(this SyntaxKind kind) {
         return kind switch {

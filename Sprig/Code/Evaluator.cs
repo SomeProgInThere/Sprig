@@ -5,12 +5,12 @@ using Sprig.Code.Syntax;
 
 namespace Sprig.Code;
 
-internal sealed class Evaluator(BoundBlockStatement? root, Dictionary<VariableSymbol, object> variables) {
+internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSymbol, object> variables) {
     
     public object? Evaluate() {
         var labelMap = new Dictionary<LabelSymbol, int>();
 
-        for (var i = 0; i < root?.Statements.Length; i++) {
+        for (var i = 0; i < root.Statements.Length; i++) {
             if (root.Statements[i] is BoundLableStatement statement)
                 labelMap.Add(statement.Label, i + 1);
         }

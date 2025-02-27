@@ -5,13 +5,6 @@ using Sprig.Code.Syntax;
 
 namespace Sprig.Code;
 
-public sealed class DiagnosticMessage(TextSpan span, string message) {
-    public TextSpan Span { get; } = span;
-    public string Message { get; } = message;
-
-    public override string ToString() => Message;
-}
-
 public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     
     public IEnumerator<DiagnosticMessage> GetEnumerator() => diagnostics.GetEnumerator();
@@ -76,4 +69,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     private readonly List<DiagnosticMessage> diagnostics = [];
+}
+
+public sealed class DiagnosticMessage(TextSpan span, string message) {
+    public TextSpan Span { get; } = span;
+    public string Message { get; } = message;
+
+    public override string ToString() => Message;
 }

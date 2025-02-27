@@ -1,6 +1,6 @@
 namespace Sprig.Code.Binding;
 
-internal abstract class BoundNodeExtensions {
+internal abstract class BoundNodeExtension {
     public static void PrettyPrint(TextWriter writer, BoundNode node, string indent = "", bool last = true) {
         var consoleOut = writer == Console.Out;
         var marker = last ? "└──" : "├──";

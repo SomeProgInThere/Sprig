@@ -1,6 +1,6 @@
 namespace Sprig.Code.Syntax;
 
-internal sealed class SyntaxNodeExtensions {
+internal sealed class SyntaxNodeExtension {
     public static void PrettyPrint(TextWriter writer, SyntaxNode node, string indent = "", bool last = true) {
         var consoleOut = writer == Console.Out;
         var marker = last ? "└──" : "├──";
