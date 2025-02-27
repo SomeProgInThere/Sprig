@@ -35,6 +35,13 @@ public abstract class SyntaxNode {
         }
     }
 
+    public SyntaxToken LastToken() {
+        if (this is SyntaxToken token)
+            return token;
+
+        return Children().Last().LastToken();
+    }
+
     public void WriteTo(TextWriter writer) {
         writer.WriteLine("ParseTree");
         SyntaxNodeExtensions.PrettyPrint(writer, this);

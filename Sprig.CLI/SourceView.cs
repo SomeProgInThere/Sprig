@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+
 using Sprig.Code.Syntax;
 
 namespace Sprig.CLI;
@@ -14,28 +15,6 @@ public class SourceView {
         RenderDocument();
     }
 
-    public int CurrentLine { 
-        get => currentLine; 
-        set {
-            if (currentLine != value) {
-                currentLine = value;
-                currentChar = Math.Min(sourceDocument[currentLine].Length, currentChar);
-
-                UpdateCursorPosition();
-            }
-        } 
-    }
-    
-    public int CurrentChar { 
-        get => currentChar; 
-        set { 
-            if (currentChar != value) {
-                currentChar = value;
-                UpdateCursorPosition();
-            }
-        }
-    }
-
     private void SourceDocumentChanged(object? sender, NotifyCollectionChangedEventArgs e) {
         RenderDocument();
     }
@@ -45,15 +24,22 @@ public class SourceView {
         var lineCount = 0;
 
         foreach (var line in sourceDocument) {
-            Console.SetCursorPosition(0, cursorTop + lineCount);
+            if (cursorTop + lineCount >= Console.WindowHeight) {
+                Console.SetCursorPosition(0, Console.WindowHeight - 1);
+                Console.WriteLine();
 
-            if (lineCount == 0)
-                ColorPrint("» ", ConsoleColor.Cyan);
-            else
-                ColorPrint(". ", ConsoleColor.DarkGray);
+                if (cursorTop > 0)
+                    cursorTop--;
+            }
+
+            Console.SetCursorPosition(0, cursorTop + lineCount);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write(lineCount == 0 ? "» " : ". ");
+
+            Console.ResetColor();
 
             RenderLine(line);
-            Console.WriteLine(new string(' ', Console.WindowWidth - line.Length));
+            Console.Write(new string(' ', Console.WindowWidth - line.Length - 2));
             lineCount++;
         }
 
@@ -90,19 +76,36 @@ public class SourceView {
     }
 
     private void UpdateCursorPosition() {
-        Console.CursorTop = cursorTop + CurrentLine;
-        Console.CursorLeft = 2 + CurrentChar;
+        Console.CursorTop = cursorTop + currentLine;
+        Console.CursorLeft = 2 + currentChar;
     }
 
-    private static void ColorPrint(string value, ConsoleColor color) {
-        Console.ForegroundColor = color;
-        Console.Write(value);
-        Console.ResetColor();
+    public int CurrentLine { 
+        get => currentLine; 
+        set {
+            if (currentLine != value) {
+                currentLine = value;
+                currentChar = Math.Min(sourceDocument[currentLine].Length, currentChar);
+
+                UpdateCursorPosition();
+            }
+        } 
+    }
+    
+    public int CurrentChar { 
+        get => currentChar; 
+        set { 
+            if (currentChar != value) {
+                currentChar = value;
+                UpdateCursorPosition();
+            }
+        }
     }
 
     private readonly ObservableCollection<string> sourceDocument = [];
+
     private int renderedLineCount;
     private int currentLine;
     private int currentChar;
-    private readonly int cursorTop;
+    private int cursorTop;
 }

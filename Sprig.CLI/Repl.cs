@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-
 using Sprig.Code;
 using Sprig.Code.Syntax;
 
@@ -7,8 +6,8 @@ namespace Sprig.CLI;
 
 internal sealed class Repl {
 
-    public void Run() {
-        ReplExtensions.ColorPrint($"\n{ReplExtensions.StartupMessage}\n", ConsoleColor.DarkCyan);
+    public void Run() {        
+        ReplExtensions.ColorPrint($"\n{ReplExtensions.StartupMessage}\n\n", ConsoleColor.DarkCyan);
         showParsing = false;
         showBinding = false;
 
@@ -29,7 +28,7 @@ internal sealed class Repl {
 
     private string EditSource() {
         done = false;
-        var document = new ObservableCollection<string>() { string.Empty };
+        var document = new ObservableCollection<string>() { "" };
         var view = new SourceView(document);
         
         while (!done) {
@@ -48,7 +47,7 @@ internal sealed class Repl {
         if (key.Modifiers == default) {
             switch (key.Key) {
                 case ConsoleKey.Enter:
-                    ReplExtensions.HandleEnter(document, view, ref done);
+                    HandleEnter(document, view);
                     break;
 
                 case ConsoleKey.Tab:
@@ -114,8 +113,18 @@ internal sealed class Repl {
             }
         }
 
-        if (key.KeyChar >= ' ')
+        if (key.Key != ConsoleKey.Backspace && key.KeyChar >= ' ')
             ReplExtensions.HandleTyping(document, view, key.KeyChar.ToString());
+    }
+
+    private void HandleEnter(ObservableCollection<string> document, SourceView view) {
+        var sourceText = string.Join(Environment.NewLine, document);
+        if (sourceText.StartsWith('!') || ReplExtensions.IsCompleteSource(sourceText)) {
+            done = true;
+            return;
+        }
+
+        ReplExtensions.InsertLine(document, view);
     }
 
     private void HandleNextHistory(ObservableCollection<string> document, SourceView view) {
@@ -135,6 +144,9 @@ internal sealed class Repl {
     }
 
     private void UpdateDocumentFromHistory(ObservableCollection<string> document, SourceView view) {
+        if (sourceHistory.Count == 0)
+            return;
+
         document.Clear();
         var historySource = sourceHistory[sourceHistoryIndex];
         var lines = historySource.Split(Environment.NewLine);
@@ -199,7 +211,7 @@ internal sealed class Repl {
         var result = compilation.Evaluate(variables);
         
         if (!result.Diagnostics.Any()) {
-            ReplExtensions.ColorPrint($"{result.Result}\n", ConsoleColor.Blue);
+            ReplExtensions.ColorPrint($"{result.Result}\n\n", ConsoleColor.Blue);
             previous = compilation;
         }
         else {

@@ -41,22 +41,10 @@ internal sealed class ReplExtensions {
             return true;
 
         var syntaxTree = SyntaxTree.Parse(source);
-        if (syntaxTree.Diagnostics.Any())
+        if (syntaxTree.Root.Statement.LastToken().IsMissing)
             return false;
 
         return true;
-    }
-
-    internal static void HandleEnter(ObservableCollection<string> document, SourceView view, ref bool done)
-    {
-        var sourceText = string.Join(Environment.NewLine, document);
-        if (sourceText.StartsWith('!') || IsCompleteSource(sourceText))
-        {
-            done = true;
-            return;
-        }
-
-        InsertLine(document, view);
     }
 
     internal static void HandleTab(ObservableCollection<string> document, SourceView view) {
@@ -82,8 +70,6 @@ internal sealed class ReplExtensions {
             view.CurrentLine--;
             document[view.CurrentLine] = previousLine + currentLine;
             view.CurrentChar = previousLine.Length;
-
-            return;
         }
 
         var lineIndex = view.CurrentLine;
@@ -150,8 +136,7 @@ internal sealed class ReplExtensions {
     }
 
     internal static readonly string StartupMessage = $"""
-    Sprig
-    {RuntimeInformation.OSDescription} ({RuntimeInformation.ProcessArchitecture}) 
+    Sprig [{RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture}]
     Type "!help" for list of commands
     """;
 }
