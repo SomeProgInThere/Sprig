@@ -1,5 +1,6 @@
 ﻿
 using Sprig.Code;
+using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
 namespace Sprig.Tests;
