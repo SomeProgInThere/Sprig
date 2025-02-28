@@ -1,12 +1,11 @@
 using System.Collections.Immutable;
-
-using Sprig.Code.Syntax;
+using Sprig.Code.Symbols;
 
 namespace Sprig.Code.Binding;
 
 internal sealed class BoundScope(BoundScope? parent = null) {
 
-    public bool TryDeclare(VariableSymbol variable) {
+    public bool TryDeclareVariable(VariableSymbol variable) {
         if (variables.ContainsKey(variable.Name))
             return false;
         
@@ -14,11 +13,11 @@ internal sealed class BoundScope(BoundScope? parent = null) {
         return true;
     }
 
-    public bool TryLookup(string name, out VariableSymbol? variable) {
+    public bool TryLookupVariable(string name, out VariableSymbol? variable) {
         if (variables.TryGetValue(name, out variable))
             return true;
 
-        return Parent is not null && Parent.TryLookup(name, out variable);
+        return Parent is not null && Parent.TryLookupVariable(name, out variable);
     }
 
     public ImmutableArray<VariableSymbol> Variables => [..variables.Values];

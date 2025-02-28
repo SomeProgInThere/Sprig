@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-
+using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
 namespace Sprig.Code.Binding;
@@ -45,7 +45,7 @@ internal sealed class Binder(BoundScope? parent) {
         var name = syntax.Identifier.LiteralOrEmpty;
         var expression = BindExpression(syntax.Expression);
 
-        if (!Scope.TryLookup(name, out var variable) && name != string.Empty)
+        if (!Scope.TryLookupVariable(name, out var variable) && name != string.Empty)
             diagnostics.ReportUndefinedName(syntax.Identifier.Span, name);
         
         if (variable?.Mutable ?? false)
@@ -203,7 +203,7 @@ internal sealed class Binder(BoundScope? parent) {
             var scope = new BoundScope(parent);
             
             foreach (var variable in previous.Variables)
-                scope.TryDeclare(variable);
+                scope.TryDeclareVariable(variable);
 
             parent = scope;
         }
@@ -225,7 +225,7 @@ internal sealed class Binder(BoundScope? parent) {
         if (token.IsMissing)
             return new BoundErrorExpression();
 
-        if (!Scope.TryLookup(token.LiteralOrEmpty, out var variable) && !token.IsMissing) {
+        if (!Scope.TryLookupVariable(token.LiteralOrEmpty, out var variable) && !token.IsMissing) {
             diagnostics.ReportUndefinedName(token.Span, token.LiteralOrEmpty);
             return new BoundErrorExpression();
         }
@@ -240,7 +240,7 @@ internal sealed class Binder(BoundScope? parent) {
         if (syntax.IdentifierToken.IsMissing)
             return expression;
 
-        if (!Scope.TryLookup(name, out var variable) && name != string.Empty) {
+        if (!Scope.TryLookupVariable(name, out var variable) && name != string.Empty) {
             diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
             return expression;
         }
@@ -311,7 +311,7 @@ internal sealed class Binder(BoundScope? parent) {
         var declare = !identifier.IsMissing;
 
         var variable = new VariableSymbol(name, mutable, type);
-        if (declare && !Scope.TryDeclare(variable))
+        if (declare && !Scope.TryDeclareVariable(variable))
             diagnostics.ReportVariableRedeclaration(identifier.Span, name);
         
         return variable;

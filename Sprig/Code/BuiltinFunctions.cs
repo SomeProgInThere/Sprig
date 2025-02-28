@@ -1,4 +1,5 @@
 using System.Reflection;
+using Sprig.Code.Symbols;
 
 namespace Sprig.Code;
 

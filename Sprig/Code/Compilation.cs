@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 
 using Sprig.Code.Binding;
 using Sprig.Code.Lowering;
+using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
 namespace Sprig.Code;

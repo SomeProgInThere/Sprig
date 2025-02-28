@@ -1,5 +1,6 @@
 using System.Text;
 using Sprig.Code.Source;
+using Sprig.Code.Symbols;
 
 namespace Sprig.Code.Syntax;
 

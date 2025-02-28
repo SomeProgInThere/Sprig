@@ -1,6 +1,7 @@
 using System.Collections;
 
 using Sprig.Code.Source;
+using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
 namespace Sprig.Code;
