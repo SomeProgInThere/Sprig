@@ -86,5 +86,8 @@ internal sealed class BinaryOperator(
         new BinaryOperator(SyntaxKind.DoublePipeToken,          BinaryOperatorKind.LogicalOr,   TypeSymbol.Boolean),
         new BinaryOperator(SyntaxKind.DoubleEqualsToken,        BinaryOperatorKind.Equals,      TypeSymbol.Boolean),
         new BinaryOperator(SyntaxKind.BangEqualsToken,          BinaryOperatorKind.NotEquals,   TypeSymbol.Boolean),
+
+        new BinaryOperator(SyntaxKind.PlusToken, BinaryOperatorKind.Add, TypeSymbol.String),
+        new BinaryOperator(SyntaxKind.StarToken, BinaryOperatorKind.Multiply, TypeSymbol.String, TypeSymbol.Int, TypeSymbol.String),
     ];
 }

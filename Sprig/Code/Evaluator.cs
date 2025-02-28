@@ -169,35 +169,80 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
         var left = EvaluateExpression(node.Left);
         var right = EvaluateExpression(node.Right);
 
-        return node.Operator.Kind switch {
-            BinaryOperatorKind.Add      => (int)left + (int)right,
-            BinaryOperatorKind.Substact => (int)left - (int)right,
-            BinaryOperatorKind.Multiply => (int)left * (int)right,
-            BinaryOperatorKind.Divide   => (int)left / (int)right,
-            BinaryOperatorKind.Modulus  => (int)left % (int)right,
+        switch (node.Operator.Kind) {
+            case BinaryOperatorKind.Add: 
+                if (node.Type == TypeSymbol.String)
+                    return (string)left + (string)right;
 
-            BinaryOperatorKind.Remainder    => Math.DivRem((int)left, (int)right).Remainder,
-            BinaryOperatorKind.RaisePower   => (int)Math.Pow((int)left, (int)right),
+                return (int)left + (int)right;
+            
+            case BinaryOperatorKind.Substact: 
+                return (int)left - (int)right;
+            
+            case BinaryOperatorKind.Multiply: 
+                if (node.Type == TypeSymbol.String) {
+                    var str = (string)left;
+                    for (var i = 1; i < (int)right; i++)
+                        str += (string)left;
 
-            BinaryOperatorKind.LogicalAnd => (bool)left && (bool)right,
-            BinaryOperatorKind.LogicalOr  => (bool)left || (bool)right,
+                    return str;
+                }
 
-            BinaryOperatorKind.BitwiseAnd => (int)left & (int)right,
-            BinaryOperatorKind.BitwiseOr  => (int)left | (int)right,
-            BinaryOperatorKind.BitwiseXor => (int)left ^ (int)right,
+                return (int)left * (int)right;
 
-            BinaryOperatorKind.BitshiftLeft  => (int)left >> (int)right,
-            BinaryOperatorKind.BitshiftRight => (int)left << (int)right,
+            case BinaryOperatorKind.Divide: 
+                return (int)left / (int)right;
+            
+            case BinaryOperatorKind.Modulus: 
+                return (int)left % (int)right;
+            
+            case BinaryOperatorKind.Remainder: 
+                return Math.DivRem((int)left, (int)right).Remainder;
+            
+            case BinaryOperatorKind.RaisePower: 
+                return (int)Math.Pow((int)left, (int)right);
+             
+            case BinaryOperatorKind.LogicalAnd: 
+                return (bool)left && (bool)right;
+            
+            case BinaryOperatorKind.LogicalOr: 
+                return (bool)left || (bool)right;
 
-            BinaryOperatorKind.GreaterThan          => (int)left >  (int)right,
-            BinaryOperatorKind.GreaterThanEqualsTo  => (int)left >= (int)right,
-            BinaryOperatorKind.LesserThan           => (int)left <  (int)right,
-            BinaryOperatorKind.LesserThanEqualsTo   => (int)left <= (int)right,
+            case BinaryOperatorKind.BitwiseAnd: 
+                return (int)left & (int)right;
+            
+            case BinaryOperatorKind.BitwiseOr: 
+                return (int)left | (int)right;
+            
+            case BinaryOperatorKind.BitwiseXor: 
+                return (int)left ^ (int)right;
+            
+            case BinaryOperatorKind.BitshiftLeft: 
+                return (int)left >> (int)right;
+            
+            case BinaryOperatorKind.BitshiftRight: 
+                return (int)left << (int)right;
 
-            BinaryOperatorKind.Equals    => Equals(left, right),
-            BinaryOperatorKind.NotEquals => !Equals(left, right),
+            case BinaryOperatorKind.GreaterThan: 
+                return (int)left > (int)right;
+            
+            case BinaryOperatorKind.GreaterThanEqualsTo: 
+                return (int)left >= (int)right;
+            
+            case BinaryOperatorKind.LesserThan:
+                return (int)left < (int)right;
+            
+            case BinaryOperatorKind.LesserThanEqualsTo: 
+                return (int)left <= (int)right;
 
-            _ => throw new Exception($"Unexpected Binary operator: {node.Operator}"),
+            case BinaryOperatorKind.Equals: 
+                return Equals(left, right);
+            
+            case BinaryOperatorKind.NotEquals: 
+                return !Equals(left, right);
+
+            default: 
+                throw new Exception($"Unexpected Binary operator: {node.Operator}");
         };
     }
 

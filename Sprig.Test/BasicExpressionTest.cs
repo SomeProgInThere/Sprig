@@ -27,7 +27,11 @@ public class BasixExpressionTest {
             TestExpression.CreateExpression("5 - 3", 2),
             TestExpression.CreateExpression("4 * 3", 12),
             TestExpression.CreateExpression("8 / 2", 4),
-            
+
+            // String Operations
+            TestExpression.CreateExpression("\"test\" + \" case\"", "test case"),
+            TestExpression.CreateExpression("\"test \" * 3", "test test test "),
+
             // Parentheses
             TestExpression.CreateExpression("2 * (3 + (4 * 2))", 22),
             TestExpression.CreateExpression("((8 + 4) * 2) - 6", 18),
