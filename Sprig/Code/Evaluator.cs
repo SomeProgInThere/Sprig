@@ -102,6 +102,7 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
             BoundNodeKind.BinaryExpression      => EvaluateBinaryExpression((BoundBinaryExpression)node),
             BoundNodeKind.RangeExpression       => EvaluateRangeExpression((BoundRangeExpression)node),
             BoundNodeKind.CallExpression        => EvaluateCallExpression((BoundCallExpression)node),
+            BoundNodeKind.CastExpression        => EvaluateCastExpression((BoundCastExpression)node),
             
             _ => throw new Exception($"Undefined node: {node?.Kind}"),
         };
@@ -276,6 +277,21 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
         else {
             throw new Exception($"Unexpected function: {node.Function}");
         }
+    }
+
+    private object EvaluateCastExpression(BoundCastExpression node) {
+        var value = EvaluateExpression(node.Expression);
+        
+        if (node.Type == TypeSymbol.Boolean)
+            return Convert.ToBoolean(value);
+        
+        else if (node.Type == TypeSymbol.Int)
+            return Convert.ToInt32(value);
+        
+        else if (node.Type == TypeSymbol.String)
+            return Convert.ToString(value) ?? "";
+        else
+            throw new Exception($"Undefined type: {node.Type}");
     }
 
     private Random? random;

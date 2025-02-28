@@ -9,6 +9,7 @@ internal enum BoundNodeKind {
     BinaryExpression,
     RangeExpression,
     CallExpression,
+    CastExpression,
     ErrorExpression,
 
     // Statements

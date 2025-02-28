@@ -121,6 +121,7 @@ internal abstract class BoundTreeRewriter {
         BoundNodeKind.BinaryExpression          => RewriteBinaryExpression((BoundBinaryExpression)node),
         BoundNodeKind.RangeExpression           => RewriteRangeExpression((BoundRangeExpression)node),
         BoundNodeKind.CallExpression            => RewriteCallExpression((BoundCallExpression)node),
+        BoundNodeKind.CastExpression            => RewriteCastExpression((BoundCastExpression)node),
         
         _ => throw new Exception($"Unexpected node: {node.Kind}"),
     };
@@ -185,5 +186,13 @@ internal abstract class BoundTreeRewriter {
         }
 
         return builder is null ? node : new BoundCallExpression(node.Function, builder.MoveToImmutable());
+    }
+
+    protected virtual BoundExpression RewriteCastExpression(BoundCastExpression node) {
+        var expression = RewriteExpression(node.Expression);
+        if (expression.Type != node.Type)
+            return node;
+        
+        return new BoundCastExpression(node.Type, expression);
     }
 }
