@@ -81,7 +81,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindForStatement(ForStatement syntax) {
-        var range = BindExpression(syntax.Range, TypeSymbol.Int);
+        var range = BindExpression(syntax.Range);
 
         Scope = new BoundScope(Scope);
 
@@ -110,6 +110,7 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {
         var result = BindExpression(syntax);
+        
         if (result.Type != targetType) {
             diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
             return new BoundErrorExpression();
@@ -238,8 +239,8 @@ internal sealed class Binder(BoundScope? parent) {
         if (lower.Type.IsError || upper.Type.IsError)
             return new BoundErrorExpression();
 
-        if (lower.Type != upper.Type) {
-            diagnostics.ReportCannotConvert(syntax.UpperBound.Span, upper.Type, lower.Type);
+        if (lower.Type != TypeSymbol.Int) {
+            diagnostics.ReportNonIntegerRange(syntax.LowerBound.Span);
             return new BoundErrorExpression();
         }
 

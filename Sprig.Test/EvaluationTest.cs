@@ -57,13 +57,13 @@ public class EvaluationTest {
         var source = @" 
             {
                 var x = 0
-                for i in false..[10]
+                for i in [false]..10
                     x += i
             }
         ";
 
         var diagnostics = @"
-            Cannot convert type 'Int' to 'Boolean'
+            Range expression initialized with non-integer type
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);

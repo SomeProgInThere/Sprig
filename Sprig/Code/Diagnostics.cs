@@ -62,6 +62,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
+    public void ReportNonIntegerRange(TextSpan span) {
+        var message = $"Range expression initialized with non-integer type";
+        Report(span, message);
+    }
+
     private void Report(TextSpan span, string message) {
         var diagnostic = new DiagnosticMessage(span, message);
         diagnostics.Add(diagnostic);
