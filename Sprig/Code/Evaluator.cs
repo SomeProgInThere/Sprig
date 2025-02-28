@@ -265,11 +265,20 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
             return "";
         }
 
+        else if (node.Function == BuiltinFunctions.Random) {
+            var min = (int)EvaluateExpression(node.Arguments[0]);
+            var max = (int)EvaluateExpression(node.Arguments[1]);
+            
+            random ??= new Random();
+            return random.Next(min, max);
+        }
+
         else {
             throw new Exception($"Unexpected function: {node.Function}");
         }
     }
 
+    private Random? random;
     private object? lastValue;
 }
 

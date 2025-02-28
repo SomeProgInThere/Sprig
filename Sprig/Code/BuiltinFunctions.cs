@@ -17,6 +17,12 @@ internal static class BuiltinFunctions {
         TypeSymbol.String
     );
 
+    public static readonly FunctionSymbol Random = new(
+        "rand",
+        [new ParameterSymbol("min", TypeSymbol.Int), new ParameterSymbol("max", TypeSymbol.Int)], 
+        TypeSymbol.Int
+    );
+
     internal static IEnumerable<FunctionSymbol?> All()
         => typeof(BuiltinFunctions)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
