@@ -197,7 +197,7 @@ internal sealed class Parser {
             SyntaxKind.FalseKeyword or SyntaxKind.TrueKeyword   => ParseBooleanLiteral(),
             SyntaxKind.NumberToken                              => ParseNumberLiteral(),
             SyntaxKind.StringToken                              => ParseStringLiteral(),
-            SyntaxKind.IdentifierToken or _                     => ParseNameExpression(),
+            SyntaxKind.IdentifierToken or _                     => ParseNameOrCallExpression(),
         };
     }
 
@@ -215,9 +215,34 @@ internal sealed class Parser {
         return new LiteralExpression(keywordToken, value);
     }
 
-    private Expression ParseNameExpression() {
+    private Expression ParseNameOrCallExpression() {
+        if (Current.Kind == SyntaxKind.IdentifierToken && Next.Kind == SyntaxKind.OpenParenthesisToken) {
+            var identifier = MatchToken(SyntaxKind.IdentifierToken);
+            var openParenthesisToken = MatchToken(SyntaxKind.OpenParenthesisToken);
+            var arguments = ParseArguments();
+            var closedParenthesisToken = MatchToken(SyntaxKind.ClosedParenthesisToken);
+
+            return new CallExpression(identifier, openParenthesisToken, arguments, closedParenthesisToken);
+        }
+
         var identifierToken = MatchToken(SyntaxKind.IdentifierToken);
         return new NameExpression(identifierToken);
+    }
+
+    private SeparatedSyntaxList<Expression> ParseArguments() {
+        var nodesWithSeperators = ImmutableArray.CreateBuilder<SyntaxNode>();
+
+        while (Current.Kind != SyntaxKind.EndOfFileToken && Current.Kind != SyntaxKind.ClosedParenthesisToken) {
+            var expression = ParseAssignmentExpression();
+            nodesWithSeperators.Add(expression);
+
+            if (Current.Kind != SyntaxKind.ClosedParenthesisToken) {
+                var comma = MatchToken(SyntaxKind.CommaToken);
+                nodesWithSeperators.Add(comma);
+            }
+        }
+        
+        return new SeparatedSyntaxList<Expression>(nodesWithSeperators.ToImmutable());
     }
 
     private Expression ParseNumberLiteral() {

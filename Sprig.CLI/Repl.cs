@@ -211,7 +211,9 @@ internal sealed class Repl {
         var result = compilation.Evaluate(variables);
         
         if (!result.Diagnostics.Any()) {
-            ReplExtensions.ColorPrint($"{result.Result}\n\n", ConsoleColor.Blue);
+            if (result.Result is not null and not (object)"")
+                ReplExtensions.ColorPrint($"{result.Result}\n\n", ConsoleColor.Blue);
+            
             previous = compilation;
         }
         else {

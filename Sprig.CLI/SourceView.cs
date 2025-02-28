@@ -68,13 +68,13 @@ public class SourceView {
             var isString = token.Kind == SyntaxKind.StringToken;
 
             if (isKeyword)
-                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.ForegroundColor = ConsoleColor.Magenta;
             else if (isIdentifier)
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = ConsoleColor.Blue;
             else if (isNumber)
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Yellow;
             else if (isString)
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.ForegroundColor = ConsoleColor.Green;
             else
                 Console.ForegroundColor = ConsoleColor.DarkGray;
 

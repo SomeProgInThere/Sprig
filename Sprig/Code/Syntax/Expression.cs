@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Collections.Immutable;
+
 namespace Sprig.Code.Syntax;
 
 public abstract class Expression : SyntaxNode {}
@@ -69,4 +72,20 @@ internal sealed class RangeExpression(Expression lowerBound, SyntaxToken rangeTo
     public Expression UpperBound { get; } = upperBound;
 
     public override SyntaxKind Kind => SyntaxKind.RangeExpression;
+}
+
+internal sealed class CallExpression(
+    SyntaxToken identifier, 
+    SyntaxToken openParenthesisToken,
+    SeparatedSyntaxList<Expression> arguments,
+    SyntaxToken closedParenthesisToken
+)
+    : Expression {
+
+    public SyntaxToken Identifier { get; } = identifier;
+    public SyntaxToken OpenParenthesisToken { get; } = openParenthesisToken;
+    public SeparatedSyntaxList<Expression> Arguments { get; } = arguments;
+    public SyntaxToken ClosedParenthesisToken { get; } = closedParenthesisToken;
+
+    public override SyntaxKind Kind => SyntaxKind.CallExpression;
 }

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Sprig.Code.Syntax;
 
 namespace Sprig.Code.Binding;
@@ -69,6 +70,16 @@ internal sealed class BoundRangeExpression(BoundExpression lower, SyntaxToken ra
 
     public override BoundNodeKind Kind => BoundNodeKind.RangeExpression;
     public override TypeSymbol Type => Lower.Type;
+}
+
+internal sealed class BoundCallExpression(FunctionSymbol function, ImmutableArray<BoundExpression> arguments)
+    : BoundExpression {
+
+    public FunctionSymbol Function { get; } = function;
+    public ImmutableArray<BoundExpression> Arguments { get; } = arguments;
+
+    public override BoundNodeKind Kind => BoundNodeKind.CallExpression;
+    public override TypeSymbol Type => Function.Type;
 }
 
 internal sealed class BoundErrorExpression

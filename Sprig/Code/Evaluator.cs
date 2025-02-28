@@ -100,6 +100,7 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
             BoundNodeKind.UnaryExpression       => EvaluateUnaryExpression((BoundUnaryExpression)node),
             BoundNodeKind.BinaryExpression      => EvaluateBinaryExpression((BoundBinaryExpression)node),
             BoundNodeKind.RangeExpression       => EvaluateRangeExpression((BoundRangeExpression)node),
+            BoundNodeKind.CallExpression        => EvaluateCallExpression((BoundCallExpression)node),
             
             _ => throw new Exception($"Undefined node: {node?.Kind}"),
         };
@@ -250,6 +251,22 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
         var lower = EvaluateExpression(node.Lower);
         var upper = EvaluateExpression(node.Upper);
         return (lower, upper);
+    }
+
+    private object EvaluateCallExpression(BoundCallExpression node) {
+        if (node.Function == BuiltinFunctions.Input) {
+            return Console.ReadLine() ?? "";
+        }
+
+        else if (node.Function == BuiltinFunctions.Print) {
+            var message = (string)EvaluateExpression(node.Arguments[0]);
+            Console.WriteLine(message);
+            return "";
+        }
+
+        else {
+            throw new Exception($"Unexpected function: {node.Function}");
+        }
     }
 
     private object? lastValue;

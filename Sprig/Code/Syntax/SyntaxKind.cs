@@ -23,6 +23,7 @@ public enum SyntaxKind {
     LeftArrowToken,
     RightArrowToken,
     DotToken,
+    CommaToken,
 
     DoubleAmpersandToken,
     DoublePipeToken,
@@ -70,6 +71,7 @@ public enum SyntaxKind {
     BinaryExpression,
     ParenthesizedExpression,
     RangeExpression,
+    CallExpression,
     
     // Nodes
     CompilationUnit,

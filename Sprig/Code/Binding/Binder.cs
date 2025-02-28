@@ -57,11 +57,6 @@ internal sealed class Binder(BoundScope? parent) {
         return new BoundAssignOperationStatement(variable, syntax.AssignOperatorToken, expression);
     }
 
-    private BoundStatement BindExpressionStatement(ExpressionStatement syntax) {
-        var expression = BindExpression(syntax.Expression);
-        return new BoundExpressionStatement(expression);
-    }
-
     private BoundStatement BindIfStatement(IfStatement syntax) {
         var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
         var body = BindStatement(syntax.Body);
@@ -94,18 +89,82 @@ internal sealed class Binder(BoundScope? parent) {
         return new BoundForStatement(variable, range, body);
     }
 
-    private BoundExpression BindExpression(Expression syntax) {
+    private BoundStatement BindExpressionStatement(ExpressionStatement syntax) {
+        var expression = BindExpression(syntax.Expression, true);
+        return new BoundExpressionStatement(expression);
+    }
+
+    private BoundExpression BindExpression(Expression syntax, bool isVoid = false) {
+        var result = BindExpressionInternal(syntax);
+
+        if (!isVoid && result.Type == TypeSymbol.Void) {
+            diagnostics.ReportVoidExpression(syntax.Span);
+            return new BoundErrorExpression();
+        }
+
+        return result;
+    }
+
+    private BoundExpression BindExpressionInternal(Expression syntax) {
         return syntax.Kind switch {
-            SyntaxKind.LiteralExpression       => BindLiteralExpression((LiteralExpression)syntax),
-            SyntaxKind.NameExpression          => BindNameExpression((NameExpression)syntax),
-            SyntaxKind.AssignmentExpression    => BindAssignmentExpression((AssignmentExpression)syntax),
-            SyntaxKind.UnaryExpression         => BindUnaryExpression((UnaryExpression)syntax),
-            SyntaxKind.BinaryExpression        => BindBinaryExpression((BinaryExpression)syntax),
-            SyntaxKind.RangeExpression         => BindRangeExpression((RangeExpression)syntax),
-            SyntaxKind.ParenthesizedExpression => BindExpression(((ParenthesizedExpression)syntax).Expression),
+            SyntaxKind.LiteralExpression        => BindLiteralExpression((LiteralExpression)syntax),
+            SyntaxKind.NameExpression           => BindNameExpression((NameExpression)syntax),
+            SyntaxKind.AssignmentExpression     => BindAssignmentExpression((AssignmentExpression)syntax),
+            SyntaxKind.UnaryExpression          => BindUnaryExpression((UnaryExpression)syntax),
+            SyntaxKind.BinaryExpression         => BindBinaryExpression((BinaryExpression)syntax),
+            SyntaxKind.RangeExpression          => BindRangeExpression((RangeExpression)syntax),
+            SyntaxKind.ParenthesizedExpression  => BindExpression(((ParenthesizedExpression)syntax).Expression),
+            SyntaxKind.CallExpression           => BindCallExpression((CallExpression)syntax),
             
             _ => throw new Exception($"Unexpected expression: {syntax.Kind}"),
         };
+    }
+
+    private BoundExpression BindCallExpression(CallExpression syntax) {
+        var boundArguments = ImmutableArray.CreateBuilder<BoundExpression>();
+
+        foreach (var argument in syntax.Arguments) {
+            var boundArgument = BindExpression(argument);
+            boundArguments.Add(boundArgument);
+        }
+
+        var functions = BuiltinFunctions.All();
+        var function = functions.SingleOrDefault(f => f?.Name == syntax.Identifier.Literal);
+
+        if (function is null) {
+            diagnostics.ReportUndefinedFunctionCall(syntax.Identifier.Span, syntax.Identifier.LiteralOrEmpty);
+            return new BoundErrorExpression();
+        }
+
+        if (syntax.Arguments.Count != function.Parameters.Length) {
+            diagnostics.ReportIncorrectArgumentCount(
+                syntax.Span, 
+                function.Name, 
+                function.Parameters.Length, 
+                syntax.Arguments.Count
+            );
+            
+            return new BoundErrorExpression();
+        }
+
+        for (var i = 0; i < boundArguments.Count; i++) {
+            var parameter = function.Parameters[i];
+            var argument = boundArguments[i];
+            
+            if (argument.Type != parameter.Type) {
+
+                diagnostics.ReportIncorrectArgumentType(
+                    syntax.Span, 
+                    parameter.Name,
+                    parameter.Type,
+                    argument.Type
+                );
+                
+                return new BoundErrorExpression();
+            }
+        }
+
+        return new BoundCallExpression(function, boundArguments.ToImmutableArray());
     }
 
     private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {

@@ -78,6 +78,7 @@ internal static class SyntaxKindExtension {
             SyntaxKind.ClosedParenthesisToken   => ")",
             SyntaxKind.OpenBraceToken           => "{",
             SyntaxKind.ClosedBraceToken         => "}",
+            SyntaxKind.CommaToken               => ",",
 
             SyntaxKind.DoublePlusToken          => "++",
             SyntaxKind.DoubleMinusToken         => "--",

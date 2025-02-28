@@ -44,6 +44,7 @@ internal abstract class BoundTreeRewriter {
 
             if (newStatement != oldStatement && builder is null) {
                 builder = ImmutableArray.CreateBuilder<BoundStatement>(node.Statements.Length);
+                
                 for (var j = 0; j < i; j++) {
                     builder.Add(node.Statements[j]);
                 }
@@ -112,13 +113,14 @@ internal abstract class BoundTreeRewriter {
     }
 
     public virtual BoundExpression RewriteExpression(BoundExpression node) => node.Kind switch {
-        BoundNodeKind.ErrorExpression         => RewriteErrorExpression((BoundErrorExpression)node),
-        BoundNodeKind.LiteralExpression       => RewriteLiteralExpression((BoundLiteralExpression)node),
-        BoundNodeKind.VariableExpression      => RewriteVariableExpression((BoundVariableExpression)node),
-        BoundNodeKind.AssignmentExpression    => RewriteAssignmentExpression((BoundAssignmentExpression)node),
-        BoundNodeKind.UnaryExpression         => RewriteUnaryExpression((BoundUnaryExpression)node),
-        BoundNodeKind.BinaryExpression        => RewriteBinaryExpression((BoundBinaryExpression)node),
-        BoundNodeKind.RangeExpression         => RewriteRangeExpression((BoundRangeExpression)node),
+        BoundNodeKind.ErrorExpression           => RewriteErrorExpression((BoundErrorExpression)node),
+        BoundNodeKind.LiteralExpression         => RewriteLiteralExpression((BoundLiteralExpression)node),
+        BoundNodeKind.VariableExpression        => RewriteVariableExpression((BoundVariableExpression)node),
+        BoundNodeKind.AssignmentExpression      => RewriteAssignmentExpression((BoundAssignmentExpression)node),
+        BoundNodeKind.UnaryExpression           => RewriteUnaryExpression((BoundUnaryExpression)node),
+        BoundNodeKind.BinaryExpression          => RewriteBinaryExpression((BoundBinaryExpression)node),
+        BoundNodeKind.RangeExpression           => RewriteRangeExpression((BoundRangeExpression)node),
+        BoundNodeKind.CallExpression            => RewriteCallExpression((BoundCallExpression)node),
         
         _ => throw new Exception($"Unexpected node: {node.Kind}"),
     };
@@ -163,5 +165,25 @@ internal abstract class BoundTreeRewriter {
             return node;
 
         return new BoundRangeExpression(lower, node.RangeToken, upper);
+    }
+
+    protected virtual BoundExpression RewriteCallExpression(BoundCallExpression node) {
+        ImmutableArray<BoundExpression>.Builder? builder = null;
+
+        for (var i = 0; i < node.Arguments.Length; i++) {
+            var oldArgument = node.Arguments[i];
+            var newArgument = RewriteExpression(oldArgument);
+
+            if (newArgument != oldArgument && builder is null) {
+                builder = ImmutableArray.CreateBuilder<BoundExpression>(node.Arguments.Length);
+                
+                for (var j = 0; j < i; j++) {
+                    builder.Add(node.Arguments[j]);
+                }
+            }
+            builder?.Add(newArgument);
+        }
+
+        return builder is null ? node : new BoundCallExpression(node.Function, builder.MoveToImmutable());
     }
 }

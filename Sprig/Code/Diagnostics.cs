@@ -14,9 +14,9 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
-    public void ReportBadCharacter(int position, char character) {
+    public void ReportBadCharacter(TextSpan span, char character) {
         var message = $"Bad character input: '{character}'";
-        Report(new TextSpan(position, 1), message);
+        Report(span, message);
     }
 
     public void ReportUnterminatedString(TextSpan span) {
@@ -64,6 +64,26 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
 
     public void ReportNonIntegerRange(TextSpan span) {
         var message = $"Range expression initialized with non-integer type";
+        Report(span, message);
+    }
+
+    public void ReportUndefinedFunctionCall(TextSpan span, string name) {
+        var message = $"Function '{name}' is not defined";
+        Report(span, message);
+    }
+
+    public void ReportIncorrectArgumentCount(TextSpan span, string name, int expected, int actual) {
+        var message = $"Function '{name}' needs '{expected}' argument(s), but '{actual}' were provided";
+        Report(span, message);
+    }
+
+    public void ReportIncorrectArgumentType(TextSpan span, string name, TypeSymbol expected, TypeSymbol actual) {
+        var message = $"Parameter '{name}' cannot be converted from '{actual}' to '{expected}'";
+        Report(span, message);
+    }
+
+    public void ReportVoidExpression(TextSpan span) {
+        var message = $"Expression must have a return value";
         Report(span, message);
     }
 

@@ -19,6 +19,7 @@ internal sealed class Lexer(SourceText source) {
             case '{': kind = SyntaxKind.OpenBraceToken;         position++; break; 
             case '}': kind = SyntaxKind.ClosedBraceToken;       position++; break;
             case '~': kind = SyntaxKind.TildeToken;             position++; break;
+            case ',': kind = SyntaxKind.CommaToken;             position++; break;
 
             case '+':
                 SetKind(
@@ -136,7 +137,7 @@ internal sealed class Lexer(SourceText source) {
                     ReadWhitespaceToken();
                 
                 else {
-                    diagnostics.ReportBadCharacter(position, Current);
+                    diagnostics.ReportBadCharacter(new TextSpan(position, 1), Current);
                     position++;
                 }
 
