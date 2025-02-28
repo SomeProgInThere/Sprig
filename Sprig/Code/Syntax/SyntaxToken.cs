@@ -8,7 +8,7 @@ public sealed class SyntaxToken(SyntaxKind kind, int position, string literal, o
     public int Position { get; } = position;
     public string? Literal { get; } = literal;
     public object? Value { get; } = value;
-    public bool IsMissing => Literal == "\0";
+    public bool IsMissing => Literal == "";
 
     public string LiteralOrEmpty => Literal ?? "?";
 

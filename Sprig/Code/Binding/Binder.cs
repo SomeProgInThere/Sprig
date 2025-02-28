@@ -110,8 +110,10 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {
         var result = BindExpression(syntax);
-        if (result.Type != targetType)
+        if (result.Type != targetType) {
             diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
+            return new BoundErrorExpression();
+        }
         
         return result;
     }

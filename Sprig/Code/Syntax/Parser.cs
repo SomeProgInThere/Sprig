@@ -257,7 +257,7 @@ internal sealed class Parser {
             return NextToken();
         
         Diagnostics.ReportUnexpectedToken(Current.Span, Current.Kind, kind);
-        return new SyntaxToken(kind, Current.Position, "\0");
+        return new SyntaxToken(kind, Current.Position, "");
     }
 
     private readonly Stack<ElseClause?> orderedClauses = new();
