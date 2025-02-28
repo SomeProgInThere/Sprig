@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Sprig.Code;
+using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
 namespace Sprig.CLI;

@@ -128,19 +128,16 @@ internal sealed class Binder(BoundScope? parent) {
             boundArguments.Add(boundArgument);
         }
 
-        var functions = BuiltinFunctions.All();
-        var function = functions.SingleOrDefault(f => f?.Name == syntax.Identifier.Literal);
-
-        if (function is null) {
+        if (!Scope.TryLookupFunction(syntax.Identifier.LiteralOrEmpty, out var function)) {
             diagnostics.ReportUndefinedFunctionCall(syntax.Identifier.Span, syntax.Identifier.LiteralOrEmpty);
             return new BoundErrorExpression();
         }
 
-        if (syntax.Arguments.Count != function.Parameters.Length) {
+        if (syntax.Arguments.Count != function?.Parameters.Length) {
             diagnostics.ReportIncorrectArgumentCount(
                 syntax.Span, 
-                function.Name, 
-                function.Parameters.Length, 
+                function?.Name ?? "", 
+                function?.Parameters.Length ?? 0, 
                 syntax.Arguments.Count
             );
             
@@ -197,7 +194,8 @@ internal sealed class Binder(BoundScope? parent) {
             previous = previous.Previous;
         }
 
-        BoundScope? parent = null;
+        var parent = CreateRootScope();
+
         while (stack.Count > 0) {
             previous = stack.Pop();
             var scope = new BoundScope(parent);
@@ -209,6 +207,15 @@ internal sealed class Binder(BoundScope? parent) {
         }
 
         return parent;
+    }
+
+    private static BoundScope? CreateRootScope() {
+        var result = new BoundScope(null);
+        
+        foreach (var function in BuiltinFunctions.All())
+            result.TryDeclareFunction(function);
+
+        return result;
     }
 
     public Diagnostics Diagnostics => diagnostics;

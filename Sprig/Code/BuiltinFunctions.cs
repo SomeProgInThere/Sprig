@@ -17,7 +17,7 @@ internal static class BuiltinFunctions {
         TypeSymbol.String
     );
 
-    internal static IEnumerable<FunctionSymbol?> All() 
+    internal static IEnumerable<FunctionSymbol?> All()
         => typeof(BuiltinFunctions)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(FunctionSymbol))

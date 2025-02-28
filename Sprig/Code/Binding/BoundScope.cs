@@ -6,6 +6,7 @@ namespace Sprig.Code.Binding;
 internal sealed class BoundScope(BoundScope? parent = null) {
 
     public bool TryDeclareVariable(VariableSymbol variable) {
+        variables ??= [];
         if (variables.ContainsKey(variable.Name))
             return false;
         
@@ -14,16 +15,37 @@ internal sealed class BoundScope(BoundScope? parent = null) {
     }
 
     public bool TryLookupVariable(string name, out VariableSymbol? variable) {
-        if (variables.TryGetValue(name, out variable))
+        variable = null;
+        if (variables != null && variables.TryGetValue(name, out variable))
             return true;
 
-        return Parent is not null && Parent.TryLookupVariable(name, out variable);
+        return Parent != null && Parent.TryLookupVariable(name, out variable);
     }
 
-    public ImmutableArray<VariableSymbol> Variables => [..variables.Values];
+    public bool TryDeclareFunction(FunctionSymbol function) {
+        functions ??= [];
+        if (functions.ContainsKey(function.Name))
+            return false;
+        
+        functions.Add(function.Name, function);
+        return true;
+    }
+
+    public bool TryLookupFunction(string name, out FunctionSymbol? function) {
+        function = null;
+        if (functions != null && functions.TryGetValue(name, out function))
+            return true;
+
+        return Parent is not null && Parent.TryLookupFunction(name, out function);
+    }
+
+    public ImmutableArray<VariableSymbol> Variables => variables is null ? [] : [..variables.Values];
+    public ImmutableArray<FunctionSymbol> Functions => functions is null ? [] : [..functions.Values];
+
     public BoundScope? Parent { get; } = parent;
 
-    private readonly Dictionary<string, VariableSymbol> variables = [];
+    private Dictionary<string, VariableSymbol>? variables;
+    private Dictionary<string, FunctionSymbol>? functions;
 }
 
 internal sealed class BoundGlobalScope(
