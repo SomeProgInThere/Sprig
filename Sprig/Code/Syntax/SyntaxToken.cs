@@ -10,7 +10,7 @@ public sealed class SyntaxToken(SyntaxKind kind, int position, string literal, o
     public object? Value { get; } = value;
     public bool IsMissing => Literal == "\0";
 
-    public string LiteralOrEmpty => Literal ?? string.Empty;
+    public string LiteralOrEmpty => Literal ?? "?";
 
     public override TextSpan Span => new(Position, Literal?.Length ?? 0);
     public override SyntaxKind Kind { get; } = kind;

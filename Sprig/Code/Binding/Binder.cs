@@ -34,14 +34,9 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindVariableDeclaration(VariableDeclarationStatement syntax) {
-        var name = syntax.Identifier.LiteralOrEmpty;
         var mutable = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
         var initializer = BindExpression(syntax.Initializer);
-
-        var variable = new VariableSymbol(name, mutable, initializer.Type);
-
-        if (!Scope.TryDeclare(variable))
-            diagnostics.ReportVariableRedeclaration(syntax.Identifier.Span, name);
+        var variable = BindVariable(syntax.Identifier, mutable, initializer.Type);
 
         return new BoundVariableDeclarationStatement(variable, initializer);
     }
@@ -86,14 +81,15 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindForStatement(ForStatement syntax) {
-        var name = syntax.Identifier.LiteralOrEmpty;
         var range = BindExpression(syntax.Range, TypeSymbol.Int);
-        var variable = new VariableSymbol(name, true, range.Type);
 
-        if (!Scope.TryDeclare(variable))
-            diagnostics.ReportVariableRedeclaration(syntax.Identifier.Span, name);
-        
+        Scope = new BoundScope(Scope);
+
+        var variable = BindVariable(syntax.Identifier, true, TypeSymbol.Int);
         var body = BindStatement(syntax.Body);
+
+        if (Scope.Parent != null)
+            Scope = Scope.Parent;
 
         return new BoundForStatement(variable, range, body);
     }
@@ -237,12 +233,26 @@ internal sealed class Binder(BoundScope? parent) {
         var rangeToken = syntax.RangeToken;
         var upper = BindExpression(syntax.UpperBound);
 
+        if (lower.Type.IsError || upper.Type.IsError)
+            return new BoundErrorExpression();
+
         if (lower.Type != upper.Type) {
             diagnostics.ReportCannotConvert(syntax.UpperBound.Span, upper.Type, lower.Type);
-            return upper;
+            return new BoundErrorExpression();
         }
 
         return new BoundRangeExpression(lower, rangeToken, upper);
+    }
+
+    private VariableSymbol BindVariable(SyntaxToken identifier, bool mutable, TypeSymbol type) {
+        var name = identifier.LiteralOrEmpty;
+        var declare = !identifier.IsMissing;
+
+        var variable = new VariableSymbol(name, mutable, type);
+        if (declare && !Scope.TryDeclare(variable))
+            diagnostics.ReportVariableRedeclaration(identifier.Span, name);
+        
+        return variable;
     }
 
     private readonly Diagnostics diagnostics = [];

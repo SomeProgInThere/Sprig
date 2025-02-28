@@ -12,135 +12,135 @@ internal sealed class Lexer(SourceText source) {
         value = null;
         
         switch (Current) {
-        case '\0': kind = SyntaxKind.EndOfFileToken; break;
-        
-        case '(': kind = SyntaxKind.OpenParenthesisToken;   position++; break; 
-        case ')': kind = SyntaxKind.ClosedParenthesisToken; position++; break;
-        case '{': kind = SyntaxKind.OpenBraceToken;         position++; break; 
-        case '}': kind = SyntaxKind.ClosedBraceToken;       position++; break;
-        case '~': kind = SyntaxKind.TildeToken;             position++; break;
-
-        case '+':
-            SetKind(
-                ref kind, ref position, 
-                '=', '+', 
-                SyntaxKind.PlusToken, SyntaxKind.PlusEqualsToken, SyntaxKind.DoublePlusToken
-            );
-            break;
-
-        case '-':
-            SetKind(
-                ref kind, ref position, 
-                '=', '-', 
-                SyntaxKind.MinusToken, SyntaxKind.MinusEqualsToken, SyntaxKind.DoubleMinusToken
-            );
-            break;
-
-        case '*':
-            SetKind(
-                ref kind, ref position, 
-                '=', '*', 
-                SyntaxKind.StarToken, SyntaxKind.StarEqualsToken, SyntaxKind.DoubleStarToken
-            );
-            break;
-
-        case '/':
-            SetKind(
-                ref kind, ref position, 
-                '=', '/', 
-                SyntaxKind.SlashToken, SyntaxKind.SlashEqualsToken, SyntaxKind.DoubleSlashToken
-            );
-            break;
-
-        case '%':
-            SetKind(
-                ref kind, ref position, 
-                '=', 
-                SyntaxKind.PercentToken, SyntaxKind.PercentEqualsToken
-            );
-            break;
-
-        case '!':
-            SetKind(
-                ref kind, ref position, 
-                '=', SyntaxKind.BangToken, SyntaxKind.BangEqualsToken
-            );
-            break;
-
-        case '=':
-            SetKind(
-                ref kind, ref position, 
-                '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken
-            );
-            break;
-
-        case '^':
-            SetKind(
-                ref kind, ref position, 
-                '=', SyntaxKind.CircumflexToken, SyntaxKind.CircumflexEqualsToken
-            );
-            break;
-
-        case '<':
-            SetKind(
-                ref kind, ref position, 
-                '<', '=', 
-                SyntaxKind.RightArrowToken, SyntaxKind.DoubleRightArrowToken, SyntaxKind.RightArrowEqualsToken
-            );
-            break;
-
-        case '>':
-            SetKind(
-                ref kind, ref position, 
-                '>', '=', 
-                SyntaxKind.LeftArrowToken, SyntaxKind.DoubleLeftArrowToken, SyntaxKind.LeftArrowEqualsToken
-            );
-            break;
-
-        case '&':
-            SetKind(
-                ref kind, ref position, 
-                '&', '=', 
-                SyntaxKind.AmpersandToken, SyntaxKind.DoubleAmpersandToken, SyntaxKind.AmpersandEqualsToken
-            );
-            break;
-        
-        case '|':
-            SetKind(
-                ref kind, ref position, 
-                '|', '=', 
-                SyntaxKind.PipeToken, SyntaxKind.DoublePipeToken, SyntaxKind.PipeEqualsToken
-            );
-            break;
-
-        case '.':
-            SetKind(
-                ref kind, ref position,
-                '.', 
-                SyntaxKind.DotToken, SyntaxKind.DoubleDotToken
-            );
-            break;
-
-        case '"':
-            ReadString();
-            break;
-
-        default:
-            if (char.IsDigit(Current))
-                ReadNumberToken();
+            case '\0': kind = SyntaxKind.EndOfFileToken; break;
             
-            else if (char.IsLetter(Current))
-                ReadIdentifierOrKeywordToken();
-            
-            else if (char.IsWhiteSpace(Current))
-                ReadWhitespaceToken();
-            
-            else {
-                diagnostics.ReportBadCharacter(position, Current);
-                position++;
-            }
+            case '(': kind = SyntaxKind.OpenParenthesisToken;   position++; break; 
+            case ')': kind = SyntaxKind.ClosedParenthesisToken; position++; break;
+            case '{': kind = SyntaxKind.OpenBraceToken;         position++; break; 
+            case '}': kind = SyntaxKind.ClosedBraceToken;       position++; break;
+            case '~': kind = SyntaxKind.TildeToken;             position++; break;
 
-            break;
+            case '+':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', '+', 
+                    SyntaxKind.PlusToken, SyntaxKind.PlusEqualsToken, SyntaxKind.DoublePlusToken
+                );
+                break;
+
+            case '-':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', '-', 
+                    SyntaxKind.MinusToken, SyntaxKind.MinusEqualsToken, SyntaxKind.DoubleMinusToken
+                );
+                break;
+
+            case '*':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', '*', 
+                    SyntaxKind.StarToken, SyntaxKind.StarEqualsToken, SyntaxKind.DoubleStarToken
+                );
+                break;
+
+            case '/':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', '/', 
+                    SyntaxKind.SlashToken, SyntaxKind.SlashEqualsToken, SyntaxKind.DoubleSlashToken
+                );
+                break;
+
+            case '%':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', 
+                    SyntaxKind.PercentToken, SyntaxKind.PercentEqualsToken
+                );
+                break;
+
+            case '!':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', SyntaxKind.BangToken, SyntaxKind.BangEqualsToken
+                );
+                break;
+
+            case '=':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken
+                );
+                break;
+
+            case '^':
+                SetKind(
+                    ref kind, ref position, 
+                    '=', SyntaxKind.CircumflexToken, SyntaxKind.CircumflexEqualsToken
+                );
+                break;
+
+            case '<':
+                SetKind(
+                    ref kind, ref position, 
+                    '<', '=', 
+                    SyntaxKind.RightArrowToken, SyntaxKind.DoubleRightArrowToken, SyntaxKind.RightArrowEqualsToken
+                );
+                break;
+
+            case '>':
+                SetKind(
+                    ref kind, ref position, 
+                    '>', '=', 
+                    SyntaxKind.LeftArrowToken, SyntaxKind.DoubleLeftArrowToken, SyntaxKind.LeftArrowEqualsToken
+                );
+                break;
+
+            case '&':
+                SetKind(
+                    ref kind, ref position, 
+                    '&', '=', 
+                    SyntaxKind.AmpersandToken, SyntaxKind.DoubleAmpersandToken, SyntaxKind.AmpersandEqualsToken
+                );
+                break;
+            
+            case '|':
+                SetKind(
+                    ref kind, ref position, 
+                    '|', '=', 
+                    SyntaxKind.PipeToken, SyntaxKind.DoublePipeToken, SyntaxKind.PipeEqualsToken
+                );
+                break;
+
+            case '.':
+                SetKind(
+                    ref kind, ref position,
+                    '.', 
+                    SyntaxKind.DotToken, SyntaxKind.DoubleDotToken
+                );
+                break;
+
+            case '"':
+                ReadString();
+                break;
+
+            default:
+                if (char.IsDigit(Current))
+                    ReadNumberToken();
+                
+                else if (char.IsLetter(Current))
+                    ReadIdentifierOrKeywordToken();
+                
+                else if (char.IsWhiteSpace(Current))
+                    ReadWhitespaceToken();
+                
+                else {
+                    diagnostics.ReportBadCharacter(position, Current);
+                    position++;
+                }
+
+                break;
         }
         
         var length = position - start;

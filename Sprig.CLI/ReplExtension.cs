@@ -32,8 +32,10 @@ internal sealed class ReplExtensions {
 
             Console.Write($"\t{prefix}");
             ColorPrint(error, ConsoleColor.Red);
-            Console.Write($"{suffix}\n\n");
+            Console.Write($"{suffix}\n");
         }
+        
+        Console.WriteLine();
     }
 
     internal static bool IsCompleteSource(string source) {
