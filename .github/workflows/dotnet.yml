@@ -18,7 +18,7 @@ jobs:
         run: dotnet restore
       
       - name: Build Solution
-        run: dotnet build --no-restore
+        run: dotnet build --configuration Release --no-restore
 
   test:
     name: Run xUnit Tests
