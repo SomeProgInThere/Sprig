@@ -82,7 +82,6 @@ public enum SyntaxKind {
     BlockStatment,
     ExpressionStatement,
     VariableDeclaration,
-    AssignOperationStatement,
     IfStatement,
     WhileStatement,
     DoWhileStatement,

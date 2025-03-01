@@ -15,7 +15,6 @@ internal abstract class BoundTreeRewriter {
         BoundNodeKind.DoWhileStatement              => RewriteDoWhileStatement((BoundDoWhileStatement)node),
         BoundNodeKind.ForStatement                  => RewriteForStatement((BoundForStatement)node),
         BoundNodeKind.VariableDeclarationStatement  => RewriteVariableDeclarationStatement((BoundVariableDeclarationStatement)node),
-        BoundNodeKind.AssignOperationStatement      => RewriteAssignOperationStatement((BoundAssignOperationStatement)node),
 
         _ => throw new Exception($"Unexpected node: {node.Kind}"),
     };
@@ -112,15 +111,6 @@ internal abstract class BoundTreeRewriter {
             return node;
 
         return new BoundVariableDeclarationStatement(node.Variable, initializer);
-    }
-
-    protected virtual BoundStatement RewriteAssignOperationStatement(BoundAssignOperationStatement node) {
-        var expression = RewriteExpression(node.Expression);
-
-        if (expression == node.Expression)
-            return node;
-
-        return new BoundAssignOperationStatement(node.Variable, node.AssignOperatorToken, expression);
     }
 
     public virtual BoundExpression RewriteExpression(BoundExpression node) => node.Kind switch {

@@ -25,11 +25,6 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
                     index++;
                     break;
 
-                case BoundNodeKind.AssignOperationStatement:
-                    EvaluateAssignOperationStatement((BoundAssignOperationStatement)statement);
-                    index++;
-                    break;
-
                 case BoundNodeKind.ExpressionStatement:
                     EvaluateExpressionStatement((BoundExpressionStatement)statement);
                     index++;
@@ -60,29 +55,6 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
         } 
 
         return lastValue;
-    }
-
-    private void EvaluateAssignOperationStatement(BoundAssignOperationStatement node) {
-        var value = (int)EvaluateExpression(node.Expression);
-
-        if (node.Variable == null) 
-            return;
-        
-        var kind = node.AssignOperatorToken.Kind;
-        variables[node.Variable] = kind switch {
-            SyntaxKind.PlusEqualsToken          => (int)variables[node.Variable] + value,
-            SyntaxKind.MinusEqualsToken         => (int)variables[node.Variable] - value,
-            SyntaxKind.StarEqualsToken          => (int)variables[node.Variable] * value,
-            SyntaxKind.SlashEqualsToken         => (int)variables[node.Variable] / value,
-            SyntaxKind.PercentEqualsToken       => (int)variables[node.Variable] % value,
-            SyntaxKind.AmpersandEqualsToken     => (int)variables[node.Variable] & value,
-            SyntaxKind.PipeEqualsToken          => (int)variables[node.Variable] | value,
-            SyntaxKind.CircumflexEqualsToken    => (int)variables[node.Variable] ^ value,
-                
-            _ => throw new Exception($"Undefined assignment operator: {kind}"),
-        };
-
-        lastValue = variables[node.Variable];
     }
 
     private void EvaluateVariableDeclaration(BoundVariableDeclarationStatement node) {

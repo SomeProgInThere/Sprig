@@ -33,16 +33,6 @@ public sealed class VariableDeclarationStatement(SyntaxToken keyword, SyntaxToke
     public override SyntaxKind Kind => SyntaxKind.VariableDeclaration;
 }
 
-public sealed class AssignOperationStatement(SyntaxToken identifier, SyntaxToken assignOperatorToken, Expression expression)
-    : Statement {
-
-    public SyntaxToken Identifier { get; } = identifier;
-    public SyntaxToken AssignOperatorToken { get; } = assignOperatorToken;
-    public Expression Expression { get; } = expression;
-
-    public override SyntaxKind Kind => SyntaxKind.AssignOperationStatement;
-}
-
 public sealed class IfStatement(SyntaxToken ifKeyword, Expression condition, Statement body, ElseClause? elseClause) 
     : Statement {
 

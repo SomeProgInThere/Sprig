@@ -24,7 +24,6 @@ internal sealed class Binder(BoundScope? parent) {
         return syntax.Kind switch {
             SyntaxKind.BlockStatment            => BindBlockStatement((BlockStatement)syntax),
             SyntaxKind.VariableDeclaration      => BindVariableDeclaration((VariableDeclarationStatement)syntax),
-            SyntaxKind.AssignOperationStatement => BindAssignOperationStatement((AssignOperationStatement)syntax),
             SyntaxKind.ExpressionStatement      => BindExpressionStatement((ExpressionStatement)syntax),
             SyntaxKind.IfStatement              => BindIfStatement((IfStatement)syntax),
             SyntaxKind.WhileStatement           => BindWhileStatement((WhileStatement)syntax),
@@ -54,22 +53,6 @@ internal sealed class Binder(BoundScope? parent) {
         var variable = BindVariable(syntax.Identifier, mutable, initializer.Type);
 
         return new BoundVariableDeclarationStatement(variable, initializer);
-    }
-
-    private BoundStatement BindAssignOperationStatement(AssignOperationStatement syntax) {
-        var name = syntax.Identifier.LiteralOrEmpty;
-        var expression = BindExpression(syntax.Expression);
-
-        if (!Scope.TryLookupVariable(name, out var variable) && name != string.Empty)
-            diagnostics.ReportUndefinedName(syntax.Identifier.Span, name);
-        
-        if (variable?.Mutable ?? false)
-            diagnostics.ReportCannotAssign(syntax.AssignOperatorToken.Span, name);
-
-        if (expression.Type != variable?.Type)
-            diagnostics.ReportCannotConvert(syntax.AssignOperatorToken.Span, expression.Type, variable?.Type);
-
-        return new BoundAssignOperationStatement(variable, syntax.AssignOperatorToken, expression);
     }
 
     private BoundStatement BindIfStatement(IfStatement syntax) {
@@ -129,7 +112,11 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {
         var result = BindExpression(syntax);
         
-        if (result.Type != targetType) {
+        if (
+            targetType != TypeSymbol.Error && 
+            result.Type != TypeSymbol.Error && 
+            result.Type != targetType
+        ) {
             diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
             return new BoundErrorExpression();
         }

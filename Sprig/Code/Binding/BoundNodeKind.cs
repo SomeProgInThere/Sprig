@@ -23,5 +23,4 @@ internal enum BoundNodeKind {
     DoWhileStatement,
     ForStatement,
     VariableDeclarationStatement,
-    AssignOperationStatement,
 }

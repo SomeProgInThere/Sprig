@@ -38,7 +38,6 @@ internal sealed class Parser {
         SyntaxKind.WhileKeyword     => ParseWhileStatement(),
         SyntaxKind.DoKeyword        => ParseDoWhileStatement(),
         SyntaxKind.ForKeyword       => ParseForStatement(),
-        SyntaxKind.IdentifierToken  => ParseAssignOperationStatement(),
         
         _ => ParseExpressionStatement(),
     };
@@ -71,30 +70,6 @@ internal sealed class Parser {
         
         var initializer = ParseAssignmentExpression();
         return new VariableDeclarationStatement(keyword, identifier, equalsToken, initializer);
-    }
-
-    private Statement ParseAssignOperationStatement() {
-        var isAssignOperator = Next.Kind switch {
-            SyntaxKind.PlusEqualsToken          or
-            SyntaxKind.MinusEqualsToken         or
-            SyntaxKind.StarEqualsToken          or
-            SyntaxKind.SlashEqualsToken         or
-            SyntaxKind.PercentEqualsToken       or
-            SyntaxKind.AmpersandEqualsToken     or
-            SyntaxKind.PipeEqualsToken          or
-            SyntaxKind.CircumflexEqualsToken    => true,
-            _ => false,
-        };
-        
-        if (isAssignOperator) {
-            var identifier = MatchToken(SyntaxKind.IdentifierToken);
-            var assignOperatorToken = NextToken();
-            var expression = ParseAssignmentExpression();
-            
-            return new AssignOperationStatement(identifier, assignOperatorToken, expression);
-        }
-
-        return ParseExpressionStatement();
     }
 
     private Statement ParseIfStatement() {

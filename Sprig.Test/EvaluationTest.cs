@@ -77,7 +77,7 @@ public class EvaluationTest {
             {
                 var x = 0
                 for i in [false]..10
-                    x += i
+                    x = x + i
             }
         ";
 
