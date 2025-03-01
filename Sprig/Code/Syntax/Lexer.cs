@@ -21,6 +21,7 @@ internal sealed class Lexer(SourceText source) {
             case '}': kind = SyntaxKind.ClosedBraceToken;       position++; break;
             case '~': kind = SyntaxKind.TildeToken;             position++; break;
             case ',': kind = SyntaxKind.CommaToken;             position++; break;
+            case ':': kind = SyntaxKind.ColonToken;             position++; break;
 
             case '+':
                 SetKind(

@@ -2,7 +2,7 @@ namespace Sprig.Code.Symbols;
 
 public sealed class TypeSymbol : Symbol {
     
-    public static readonly TypeSymbol Boolean = new("boolean");
+    public static readonly TypeSymbol Bool = new("bool");
     public static readonly TypeSymbol Int = new("int");
     public static readonly TypeSymbol String = new("string");
 

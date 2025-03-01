@@ -21,17 +21,17 @@ public class Casting {
 
     public bool IsExplicit => Exists && !IsImplicit;
 
-    public static Casting Classify(TypeSymbol from, TypeSymbol to) {
+    public static Casting TypeOf(TypeSymbol from, TypeSymbol to) {
         if (from == to)
             return Identity;
         
-        if (from == TypeSymbol.Boolean || from == TypeSymbol.Int) {
+        if (from == TypeSymbol.Bool || from == TypeSymbol.Int) {
             if (to == TypeSymbol.String)
                 return Explicit;
         }
 
         if (from == TypeSymbol.String) {
-            if (to == TypeSymbol.Boolean || to == TypeSymbol.Int)
+            if (to == TypeSymbol.Bool || to == TypeSymbol.Int)
                 return Explicit;
         }
         

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Sprig.Code.Source;
 using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
@@ -49,14 +50,26 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundStatement BindVariableDeclaration(VariableDeclarationStatement syntax) {
         var mutable = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
-        var initializer = BindExpression(syntax.Initializer);
-        var variable = BindVariable(syntax.Identifier, mutable, initializer.Type);
+        
+        var typeIdentifier = syntax.TypeClause?.Identifier;
+        TypeSymbol? explicitType = null;
 
-        return new BoundVariableDeclarationStatement(variable, initializer);
+        if (syntax.TypeClause != null)
+            explicitType = LookupType(typeIdentifier.Literal);
+        else
+            diagnostics.ReportUndefinedType(typeIdentifier.Span, typeIdentifier.Literal);
+
+        var initializer = BindExpression(syntax.Initializer);
+
+        var variableType = explicitType ?? initializer.Type;
+        var castInitializer = BindCast(syntax.Initializer.Span, initializer, variableType);
+        var variable = BindVariable(syntax.Identifier, mutable, variableType);
+
+        return new BoundVariableDeclarationStatement(variable, castInitializer);
     }
 
     private BoundStatement BindIfStatement(IfStatement syntax) {
-        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
         var body = BindStatement(syntax.Body);
         
         var elseBody = syntax.ElseClause switch {
@@ -68,14 +81,14 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundStatement BindWhileStatement(WhileStatement syntax) {
-        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
         var body = BindStatement(syntax.Body);
         return new BoundWhileStatement(condition, body);
     }
 
     private BoundStatement BindDoWhileStatement(DoWhileStatement syntax) {
         var body = BindStatement(syntax.Body);
-        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
         return new BoundDoWhileStatement(body, condition);
     }
 
@@ -110,18 +123,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {
-        var result = BindExpression(syntax);
-        
-        if (
-            targetType != TypeSymbol.Error && 
-            result.Type != TypeSymbol.Error && 
-            result.Type != targetType
-        ) {
-            diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
-            return new BoundErrorExpression();
-        }
-        
-        return result;
+        return BindCast(syntax, targetType);
     }
 
     private BoundExpression BindExpressionInternal(Expression syntax) {
@@ -141,8 +143,8 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundExpression BindCallExpression(CallExpression syntax) {
 
-        if (syntax.Arguments.Count == 1 && LookupType(syntax.Identifier.LiteralOrEmpty) is TypeSymbol type)
-            return BindCast(type, syntax.Arguments[0]);
+        if (syntax.Arguments.Count == 1 && LookupType(syntax.Identifier.Literal) is TypeSymbol type)
+            return BindCast(syntax.Arguments[0], type, true);
 
         var boundArguments = ImmutableArray.CreateBuilder<BoundExpression>();
 
@@ -151,8 +153,8 @@ internal sealed class Binder(BoundScope? parent) {
             boundArguments.Add(boundArgument);
         }
 
-        if (!Scope.TryLookupFunction(syntax.Identifier.LiteralOrEmpty, out var function)) {
-            diagnostics.ReportUndefinedFunctionCall(syntax.Identifier.Span, syntax.Identifier.LiteralOrEmpty);
+        if (!Scope.TryLookupFunction(syntax.Identifier.Literal, out var function)) {
+            diagnostics.ReportUndefinedFunctionCall(syntax.Identifier.Span, syntax.Identifier.Literal);
             return new BoundErrorExpression();
         }
 
@@ -191,8 +193,8 @@ internal sealed class Binder(BoundScope? parent) {
         if (token.IsMissing)
             return new BoundErrorExpression();
 
-        if (!Scope.TryLookupVariable(token.LiteralOrEmpty, out var variable) && !token.IsMissing) {
-            diagnostics.ReportUndefinedName(token.Span, token.LiteralOrEmpty);
+        if (!Scope.TryLookupVariable(token.Literal, out var variable) && !token.IsMissing) {
+            diagnostics.ReportUndefinedName(token.Span, token.Literal);
             return new BoundErrorExpression();
         }
 
@@ -200,7 +202,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private BoundExpression BindAssignmentExpression(AssignmentExpression syntax) {
-        var name = syntax.IdentifierToken.LiteralOrEmpty;
+        var name = syntax.IdentifierToken.Literal;
         var expression = BindExpression(syntax.Expression);
         
         if (syntax.IdentifierToken.IsMissing)
@@ -214,12 +216,9 @@ internal sealed class Binder(BoundScope? parent) {
         if (variable?.Mutable ?? false)
             diagnostics.ReportCannotAssign(syntax.EqualsToken.Span, name);
 
-        if (expression.Type != variable?.Type) {
-            diagnostics.ReportCannotConvert(syntax.Expression.Span, expression.Type, variable?.Type);
-            return expression;
-        }
+        var castExpression = BindCast(syntax.Expression.Span, expression, variable.Type);
 
-        return new BoundAssignmentExpression(variable, expression);
+        return new BoundAssignmentExpression(variable, castExpression);
     }
 
     private BoundExpression BindUnaryExpression(UnaryExpression syntax) {
@@ -231,7 +230,7 @@ internal sealed class Binder(BoundScope? parent) {
 
         var op = UnaryOperator.Bind(token.Kind, operand.Type);
         if (op == null) {
-            diagnostics.ReportUndefinedUnaryOperator(token.Span, token.LiteralOrEmpty, operand.Type);
+            diagnostics.ReportUndefinedUnaryOperator(token.Span, token.Literal, operand.Type);
             return new BoundErrorExpression();
         }
 
@@ -249,7 +248,7 @@ internal sealed class Binder(BoundScope? parent) {
         var op = BinaryOperator.Bind(token.Kind, left.Type, right.Type);
         
         if (op == null) {
-            diagnostics.ReportUndefinedBinaryOperator(token.Span, token.LiteralOrEmpty, left.Type, right.Type);
+            diagnostics.ReportUndefinedBinaryOperator(token.Span, token.Literal, left.Type, right.Type);
             return new BoundErrorExpression();
         }
 
@@ -304,20 +303,32 @@ internal sealed class Binder(BoundScope? parent) {
         return result;
     }
 
-    private BoundExpression BindCast(TypeSymbol type, Expression syntax) {
+    private BoundExpression BindCast(Expression syntax, TypeSymbol type, bool allowExplicit = false) {
         var expression = BindExpression(syntax);
-        var cast = Casting.Classify(expression.Type, type);
+        return BindCast(syntax.Span, expression, type, allowExplicit);
+    }
 
+    private BoundExpression BindCast(TextSpan syntaxSpan, BoundExpression expression, TypeSymbol type, bool allowExplicit = false) {
+        var cast = Casting.TypeOf(expression.Type, type);
+        
         if (!cast.Exists) {
-            diagnostics.ReportCannotConvert(syntax.Span, expression.Type, type);
+            if (expression.Type != TypeSymbol.Error && type != TypeSymbol.Error)
+                diagnostics.ReportCannotConvert(syntaxSpan, expression.Type, type);
+
             return new BoundErrorExpression();
         }
+
+        if (!allowExplicit && cast.IsExplicit)
+            diagnostics.ReportCannotConvert(syntaxSpan, expression.Type, type, true);
+
+        if (cast.IsIdentity)
+            return expression;
 
         return new BoundCastExpression(type, expression);
     }
 
     private VariableSymbol BindVariable(SyntaxToken identifier, bool mutable, TypeSymbol type) {
-        var name = identifier.LiteralOrEmpty;
+        var name = identifier.Literal;
         var declare = !identifier.IsMissing;
 
         var variable = new VariableSymbol(name, mutable, type);
@@ -328,7 +339,7 @@ internal sealed class Binder(BoundScope? parent) {
     }
 
     private static TypeSymbol? LookupType(string name) => name switch {
-        "bool" => TypeSymbol.Boolean,
+        "bool" => TypeSymbol.Bool,
         "int" => TypeSymbol.Int,
         "string" => TypeSymbol.String,
         _ => null,

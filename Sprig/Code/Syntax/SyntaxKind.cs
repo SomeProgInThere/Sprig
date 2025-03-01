@@ -24,6 +24,7 @@ public enum SyntaxKind {
     RightArrowToken,
     DotToken,
     CommaToken,
+    ColonToken,
 
     DoubleAmpersandToken,
     DoublePipeToken,
@@ -74,8 +75,11 @@ public enum SyntaxKind {
     RangeExpression,
     CallExpression,
     
-    // Nodes
+    // Other
     CompilationUnit,
+    
+    // Clause
+    TypeClause,
     ElseClause,
 
     // Statements

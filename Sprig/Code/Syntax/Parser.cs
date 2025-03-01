@@ -33,7 +33,7 @@ internal sealed class Parser {
     private Statement ParseStatement() => Current.Kind switch {
         SyntaxKind.OpenBraceToken   => ParseBlockStatement(),
         SyntaxKind.LetKeyword or 
-        SyntaxKind.VarKeyword       => ParseVariableDeclaration(),
+        SyntaxKind.VarKeyword       => ParseVariableDeclarationStatement(),
         SyntaxKind.IfKeyword        => ParseIfStatement(),
         SyntaxKind.WhileKeyword     => ParseWhileStatement(),
         SyntaxKind.DoKeyword        => ParseDoWhileStatement(),
@@ -61,15 +61,24 @@ internal sealed class Parser {
         return new BlockStatement(openBraceToken, statements.ToImmutable(), closedBraceToken);
     }
 
-    private Statement ParseVariableDeclaration() {
+    private Statement ParseVariableDeclarationStatement() {
         var expected = Current.Kind == SyntaxKind.LetKeyword ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword;
         
         var keyword = MatchToken(expected);
         var identifier = MatchToken(SyntaxKind.IdentifierToken);
+        
+        TypeClause? typeClause = null;
+
+        if (Current.Kind == SyntaxKind.ColonToken) {
+            var colonToken = MatchToken(SyntaxKind.ColonToken);
+            var typeIdentifier = MatchToken(SyntaxKind.IdentifierToken);
+            typeClause = new TypeClause(colonToken, typeIdentifier);
+        }
+
         var equalsToken = MatchToken(SyntaxKind.EqualsToken);
         
         var initializer = ParseAssignmentExpression();
-        return new VariableDeclarationStatement(keyword, identifier, equalsToken, initializer);
+        return new VariableDeclarationStatement(keyword, identifier, typeClause, equalsToken, initializer);
     }
 
     private Statement ParseIfStatement() {

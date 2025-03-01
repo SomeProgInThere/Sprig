@@ -85,7 +85,7 @@ public class DiagnosticsTest {
         ";
 
         var diagnostics = @"
-            Cannot convert type 'boolean' to 'int'
+            Cannot convert type 'bool' to 'int'
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);
@@ -98,7 +98,7 @@ public class DiagnosticsTest {
         ";
 
         var diagnostics = @"
-            Unary operator '+' is not defined for type 'boolean'
+            Unary operator '+' is not defined for type 'bool'
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);    
@@ -111,7 +111,7 @@ public class DiagnosticsTest {
         ";
 
         var diagnostics = @"
-            Binary operator '*' is not defined for types 'int' and 'boolean'
+            Binary operator '*' is not defined for types 'int' and 'bool'
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);    

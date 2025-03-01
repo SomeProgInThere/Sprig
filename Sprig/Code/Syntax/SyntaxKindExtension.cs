@@ -80,6 +80,7 @@ internal static class SyntaxKindExtension {
             SyntaxKind.OpenBraceToken           => "{",
             SyntaxKind.ClosedBraceToken         => "}",
             SyntaxKind.CommaToken               => ",",
+            SyntaxKind.ColonToken               => ":",
 
             SyntaxKind.DoublePlusToken          => "++",
             SyntaxKind.DoubleMinusToken         => "--",

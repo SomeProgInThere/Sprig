@@ -42,6 +42,6 @@ internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kin
         new UnaryOperator(SyntaxKind.DoublePlusToken,  UnaryOperatorKind.PreIncrement,  TypeSymbol.Int),
         new UnaryOperator(SyntaxKind.DoubleMinusToken, UnaryOperatorKind.PreDecrement,  TypeSymbol.Int),
         
-        new UnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, TypeSymbol.Boolean),
+        new UnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, TypeSymbol.Bool),
     ];
 }

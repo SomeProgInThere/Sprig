@@ -15,7 +15,7 @@ internal sealed class BoundLiteralExpression(object value)
 
     public override BoundNodeKind Kind => BoundNodeKind.LiteralExpression;
     public override TypeSymbol Type { get; } = value switch {
-        bool => TypeSymbol.Boolean,
+        bool => TypeSymbol.Bool,
         int => TypeSymbol.Int,
         string => TypeSymbol.String,
         _ => throw new Exception($"Unexpected literal '{value}' of type '{value.GetType()}'"),

@@ -48,13 +48,21 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
+    public void ReportUndefinedType(TextSpan span, string literal) {
+        var message = $"Type '{literal}' is not defined";
+        Report(span, message);
+    }
+
     public void ReportVariableRedeclaration(TextSpan span, string name) {
         var message = $"Variable '{name}' is already declared";
         Report(span, message);
     }
 
-    public void ReportCannotConvert(TextSpan span, TypeSymbol actual, TypeSymbol? expected) {
+    public void ReportCannotConvert(TextSpan span, TypeSymbol actual, TypeSymbol? expected, bool reportCastExisits = false) {
         var message = $"Cannot convert type '{actual}' to '{expected}'";
+        if (reportCastExisits)
+            message += ". An explicit cast exists (are you missing a cast?)";
+
         Report(span, message);
     }
 

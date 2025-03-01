@@ -254,7 +254,7 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
     private object EvaluateCastExpression(BoundCastExpression node) {
         var value = EvaluateExpression(node.Expression);
         
-        if (node.Type == TypeSymbol.Boolean)
+        if (node.Type == TypeSymbol.Bool)
             return Convert.ToBoolean(value);
         
         else if (node.Type == TypeSymbol.Int)
