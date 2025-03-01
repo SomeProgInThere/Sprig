@@ -43,10 +43,10 @@ public sealed class AssignOperationStatement(SyntaxToken identifier, SyntaxToken
     public override SyntaxKind Kind => SyntaxKind.AssignOperationStatement;
 }
 
-public sealed class IfStatement(SyntaxToken ifToken, Expression condition, Statement body, ElseClause? elseClause) 
+public sealed class IfStatement(SyntaxToken ifKeyword, Expression condition, Statement body, ElseClause? elseClause) 
     : Statement {
 
-    public SyntaxToken IfToken { get; } = ifToken;
+    public SyntaxToken IfKeyword { get; } = ifKeyword;
     public Expression Condition { get; } = condition;
     public Statement Body { get; } = body;
     public ElseClause? ElseClause { get; } = elseClause;
@@ -54,14 +54,25 @@ public sealed class IfStatement(SyntaxToken ifToken, Expression condition, State
     public override SyntaxKind Kind => SyntaxKind.IfStatement;
 }
 
-public sealed class WhileStatement(SyntaxToken whileToken, Expression condition, Statement body) 
+public sealed class WhileStatement(SyntaxToken whileKeyword, Expression condition, Statement body) 
     : Statement {
 
-    public SyntaxToken WhileToken { get; } = whileToken;
+    public SyntaxToken WhileKeyword { get; } = whileKeyword;
     public Expression Condition { get; } = condition;
     public Statement Body { get; } = body;
 
     public override SyntaxKind Kind => SyntaxKind.WhileStatement;
+}
+
+public sealed class DoWhileStatement(SyntaxToken doKeyword, Statement body, SyntaxToken whileKeyword, Expression condition) 
+    : Statement {
+
+    public SyntaxToken DoKeyword { get; } = doKeyword;
+    public Statement Body { get; } = body;
+    public SyntaxToken WhileKeyword { get; } = whileKeyword;
+    public Expression Condition { get; } = condition;
+
+    public override SyntaxKind Kind => SyntaxKind.DoWhileStatement;
 }
 
 public sealed class ForStatement(SyntaxToken forKeyword, SyntaxToken identifier, SyntaxToken inKeyword, Expression range, Statement body) 

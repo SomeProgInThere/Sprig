@@ -36,6 +36,7 @@ internal sealed class Parser {
         SyntaxKind.VarKeyword       => ParseVariableDeclaration(),
         SyntaxKind.IfKeyword        => ParseIfStatement(),
         SyntaxKind.WhileKeyword     => ParseWhileStatement(),
+        SyntaxKind.DoKeyword        => ParseDoWhileStatement(),
         SyntaxKind.ForKeyword       => ParseForStatement(),
         SyntaxKind.IdentifierToken  => ParseAssignOperationStatement(),
         
@@ -126,6 +127,16 @@ internal sealed class Parser {
         var body = ParseStatement();
 
         return new WhileStatement(whileKeyword, condition, body);
+    }
+
+    
+    private Statement ParseDoWhileStatement() {
+        var doKeyword = MatchToken(SyntaxKind.DoKeyword);
+        var body = ParseStatement();
+        var whileKeyword = MatchToken(SyntaxKind.WhileKeyword);
+        var condition = ParseAssignmentExpression();
+
+        return new DoWhileStatement(doKeyword, body, whileKeyword, condition);
     }
 
     private Statement ParseForStatement() {

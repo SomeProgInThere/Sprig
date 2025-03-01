@@ -28,6 +28,7 @@ internal sealed class Binder(BoundScope? parent) {
             SyntaxKind.ExpressionStatement      => BindExpressionStatement((ExpressionStatement)syntax),
             SyntaxKind.IfStatement              => BindIfStatement((IfStatement)syntax),
             SyntaxKind.WhileStatement           => BindWhileStatement((WhileStatement)syntax),
+            SyntaxKind.DoWhileStatement         => BindDoWhileStatement((DoWhileStatement)syntax),
             SyntaxKind.ForStatement             => BindForStatement((ForStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
@@ -89,6 +90,12 @@ internal sealed class Binder(BoundScope? parent) {
         return new BoundWhileStatement(condition, body);
     }
 
+    private BoundStatement BindDoWhileStatement(DoWhileStatement syntax) {
+        var body = BindStatement(syntax.Body);
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
+        return new BoundDoWhileStatement(body, condition);
+    }
+
     private BoundStatement BindForStatement(ForStatement syntax) {
         var range = BindExpression(syntax.Range);
 
@@ -116,6 +123,17 @@ internal sealed class Binder(BoundScope? parent) {
             return new BoundErrorExpression();
         }
 
+        return result;
+    }
+
+    private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {
+        var result = BindExpression(syntax);
+        
+        if (result.Type != targetType) {
+            diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
+            return new BoundErrorExpression();
+        }
+        
         return result;
     }
 
@@ -173,17 +191,6 @@ internal sealed class Binder(BoundScope? parent) {
         }
 
         return new BoundCallExpression(function, boundArguments.ToImmutableArray());
-    }
-
-    private BoundExpression BindExpression(Expression syntax, TypeSymbol targetType) {
-        var result = BindExpression(syntax);
-        
-        if (result.Type != targetType) {
-            diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
-            return new BoundErrorExpression();
-        }
-        
-        return result;
     }
 
     private static BoundExpression BindLiteralExpression(LiteralExpression syntax) {

@@ -8,6 +8,7 @@ public class InlineTest {
     [InlineData("{ var i = 10 var x = 0 while i > 0 { x += i i -= 1 } x }", 55)]
     [InlineData("{ var x = 0 for i in 0..10 { x += i } x }", 55)]
     [InlineData("{ var x = 10 for i in 1..(x = x - 1) {} x }", 9)]
+    [InlineData("{ var x = 0 do x += 1 while x < 10 x }", 10)]
     [InlineData("\"test_case\"", "test_case")]
     [InlineData("\"test_\"\"case\"", "test_\"case")]
     public void Evaluate_ComputeCorrectValues(string expression, object value) {

@@ -39,7 +39,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 	}
 
     /*
-		If statement						|	If-Else statement
+		Iif statement						|	if-else statement
 											|
         HL-IR:                          	|   HL-IR:
             if <condition>              	|       if <condition>        
@@ -82,7 +82,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
     }
 	
 	/*
-		While-statement
+		while-statement
 
 		HL-IR:
 			while <condition>
@@ -94,29 +94,52 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 				<body>
 			check:
 				goto <condition> continue
-			end:
 	*/
     protected override BoundStatement RewriteWhileStatement(BoundWhileStatement node) {
 		var continueLabel = GenerateLabel();
 		var checkLabel = GenerateLabel();
-		var endLabel = GenerateLabel();
 
 		var gotoCheck = new BoundGotoStatement(checkLabel);
 		
 		var continueStatement = new BoundLableStatement(continueLabel);
 		var checkStatement = new BoundLableStatement(checkLabel);
 		var gotoCondition = new BoundConditionalGotoStatement(continueLabel, node.Condition);
-		var endStatement = new BoundLableStatement(endLabel);
 
 		var result = new BoundBlockStatement(
-			[gotoCheck, continueStatement, node.Body, checkStatement, gotoCondition, endStatement]
+			[gotoCheck, continueStatement, node.Body, checkStatement, gotoCondition]
+		);
+
+		return RewriteStatement(result);
+    }
+
+	/*
+		do-while-statement
+
+		HL-IR:
+			do
+				<body>
+			while <condition>
+		
+		LL-IR:
+			continue:
+				<body>
+			goto <condition> continue
+	*/
+    protected override BoundStatement RewriteDoWhileStatement(BoundDoWhileStatement node) {
+		var continueLabel = GenerateLabel();
+
+		var continueStatement = new BoundLableStatement(continueLabel);
+		var gotoCondition = new BoundConditionalGotoStatement(continueLabel, node.Condition);
+		
+		var result = new BoundBlockStatement(
+			[continueStatement, node.Body, gotoCondition]
 		);
 
 		return RewriteStatement(result);
     }
 
     /*  
-		For-statement
+		for-statement
 
         HL-IR:
             for <var> in <lower>..<upper>

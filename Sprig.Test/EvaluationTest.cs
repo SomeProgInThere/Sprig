@@ -53,6 +53,25 @@ public class EvaluationTest {
     }
 
     [Fact]
+    public void Evaluate_DoWhileStatement_ReportCannotConvert() {
+        var source = @" 
+            {
+                var x = 0
+                do {
+                    x = 10
+                }
+                while [10]
+            }
+        ";
+
+        var diagnostics = @"
+            Cannot convert type 'int' to 'boolean'
+        ";
+
+        TestAssert.AssertDiagnostics(source, diagnostics);
+    }
+
+    [Fact]
     public void Evaluate_ForStatement_ReportCannotConvert() {
         var source = @" 
             {

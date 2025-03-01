@@ -60,6 +60,7 @@ public enum SyntaxKind {
     IfKeyword,
     ElseKeyword,
     WhileKeyword,
+    DoKeyword,
     ForKeyword,
     InKeyword,
 
@@ -84,5 +85,6 @@ public enum SyntaxKind {
     AssignOperationStatement,
     IfStatement,
     WhileStatement,
+    DoWhileStatement,
     ForStatement,
 }
