@@ -50,14 +50,15 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundStatement BindVariableDeclaration(VariableDeclarationStatement syntax) {
         var mutable = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
-        
-        var typeIdentifier = syntax.TypeClause?.Identifier;
         TypeSymbol? explicitType = null;
+        
+        if (syntax.TypeClause != null) {
+            var typeIdentifier = syntax.TypeClause?.Identifier;
+            explicitType = LookupType(typeIdentifier?.Literal ?? "");
 
-        if (syntax.TypeClause != null)
-            explicitType = LookupType(typeIdentifier.Literal);
-        else
-            diagnostics.ReportUndefinedType(typeIdentifier.Span, typeIdentifier.Literal);
+            if (explicitType is null)
+                diagnostics.ReportUndefinedType(typeIdentifier.Span, typeIdentifier.Literal);
+        }
 
         var initializer = BindExpression(syntax.Initializer);
 
