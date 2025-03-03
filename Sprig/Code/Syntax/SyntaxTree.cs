@@ -41,12 +41,3 @@ public sealed class SyntaxTree {
     public CompilationUnit Root { get; }
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; }
 }
-
-public class CompilationUnit(Statement statement, SyntaxToken endOfFileToken) 
-    : SyntaxNode {
-
-    public Statement Statement { get; } = statement;
-    public SyntaxToken EndOfFile { get; } = endOfFileToken;
-
-    public override SyntaxKind Kind => SyntaxKind.CompilationUnit;
-}

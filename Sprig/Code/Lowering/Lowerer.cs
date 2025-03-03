@@ -157,7 +157,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
         var variableDeclaration = new BoundVariableDeclarationStatement(node.Variable, range.Lower);
         var variable = new BoundVariableExpression(node.Variable);
 
-		var upperBoundSymbol = new VariableSymbol("upperBound", true, TypeSymbol.Int);
+		var upperBoundSymbol = new VariableSymbol("upperBound", true, TypeSymbol.Int, VariableScope.Local);
 		var upperBoundDeclaration = new BoundVariableDeclarationStatement(upperBoundSymbol, range.Upper);
 
         var condition = new BoundBinaryExpression(

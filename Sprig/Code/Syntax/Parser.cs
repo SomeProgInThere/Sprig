@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-
 using Sprig.Code.Source;
 
 namespace Sprig.Code.Syntax;
@@ -23,12 +22,56 @@ internal sealed class Parser {
     }
 
     public CompilationUnit ParseCompilationUnit() {
-        var statement = ParseStatement();
+        var members = ParseMembers();
         var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-        return new CompilationUnit(statement, endOfFileToken);
+        return new CompilationUnit(members, endOfFileToken);
     }
 
     public Diagnostics Diagnostics { get; }
+
+    private ImmutableArray<Member> ParseMembers() {
+        var members = ImmutableArray.CreateBuilder<Member>();
+
+        while (Current.Kind != SyntaxKind.EndOfFileToken) {
+            var startToken = Current;
+            Member? member;
+            
+            if (Current.Kind == SyntaxKind.FnKeyword)
+                member = ParseFunctionHeader();
+            else {
+                var statement = ParseStatement();
+                member = new GlobalStatment(statement);
+            }
+
+            members.Add(member);
+            if (Current == startToken)
+                NextToken();
+        }
+
+        return members.ToImmutable();
+    }
+
+    private Member ParseFunctionHeader() {
+        var fnKeyword = MatchToken(SyntaxKind.FnKeyword);
+        var identifier = MatchToken(SyntaxKind.IdentifierToken);
+
+        var openParenthesisToken = MatchToken(SyntaxKind.OpenParenthesisToken);
+        var parameters = ParseParameters();
+        var closedParenthesisToken = MatchToken(SyntaxKind.ClosedParenthesisToken);
+
+        var returnType = ParseTypeClause();
+        var body = (BlockStatement)ParseBlockStatement();
+
+        return new FunctionHeader(
+            fnKeyword, 
+            identifier, 
+            openParenthesisToken, 
+            parameters, 
+            closedParenthesisToken, 
+            returnType, 
+            body
+        );
+    }
 
     private Statement ParseStatement() => Current.Kind switch {
         SyntaxKind.OpenBraceToken   => ParseBlockStatement(),
@@ -63,46 +106,52 @@ internal sealed class Parser {
 
     private Statement ParseVariableDeclarationStatement() {
         var expected = Current.Kind == SyntaxKind.LetKeyword ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword;
-        
+
         var keyword = MatchToken(expected);
         var identifier = MatchToken(SyntaxKind.IdentifierToken);
-        
-        TypeClause? typeClause = null;
-
-        if (Current.Kind == SyntaxKind.ColonToken) {
-            var colonToken = MatchToken(SyntaxKind.ColonToken);
-            var typeIdentifier = MatchToken(SyntaxKind.IdentifierToken);
-            typeClause = new TypeClause(colonToken, typeIdentifier);
-        }
-
+        var typeClause = ParseTypeClause();
         var equalsToken = MatchToken(SyntaxKind.EqualsToken);
-        
+
         var initializer = ParseAssignmentExpression();
         return new VariableDeclarationStatement(keyword, identifier, typeClause, equalsToken, initializer);
     }
 
-    private Statement ParseIfStatement() {
+    private TypeClause? ParseTypeClause() {
+        if (Current.Kind != SyntaxKind.ColonToken)
+            return null;
+    
+        var colonToken = MatchToken(SyntaxKind.ColonToken);
+        var typeIdentifier = MatchToken(SyntaxKind.IdentifierToken);
+        return new TypeClause(colonToken, typeIdentifier);
+    }
+
+    private Statement ParseIfStatement()
+    {
         var ifKeyword = MatchToken(SyntaxKind.IfKeyword);
         var condition = ParseAssignmentExpression();
         var body = ParseStatement();
+        ElseClause? elseClause = ParseElseClause();
 
-        ElseClause? elseClause = null;
+        return new IfStatement(ifKeyword, condition, body, elseClause);
+    }
 
+    private ElseClause? ParseElseClause() {        
+        ElseClause? clause = null;
         if (Current.Kind == SyntaxKind.ElseKeyword) {
             var elseKeyword = NextToken();
             var elseBody = ParseStatement();
 
-            elseClause = new ElseClause(elseKeyword, elseBody);
-            orderedClauses.Push(elseClause);
-        } 
+            clause = new ElseClause(elseKeyword, elseBody);
+            orderedClauses.Push(clause);
+        }
         else {
-            orderedClauses.Push(elseClause);
+            orderedClauses.Push(clause);
             if (orderedClauses.Count > 0 && orderedClauses.Peek() != null) {
-                return new IfStatement(ifKeyword, condition, body, orderedClauses.Pop());
+                return orderedClauses.Pop();
             }
         }
-        
-        return new IfStatement(ifKeyword, condition, body, elseClause);
+
+        return clause;
     }
 
     private Statement ParseWhileStatement() {
@@ -180,7 +229,7 @@ internal sealed class Parser {
 
             var operatorToken = NextToken();
             var right = ParseBinaryExpression(binaryPrecedence);
-            left = new BinaryExpression(left, right, operatorToken);
+            left = new BinaryExpression(left, operatorToken, right);
         }
 
         return left;
@@ -197,11 +246,11 @@ internal sealed class Parser {
     }
 
     private Expression ParseParenthesizedExpression() {
-        var left = MatchToken(SyntaxKind.OpenParenthesisToken);
+        var openParenthesisToken = MatchToken(SyntaxKind.OpenParenthesisToken);
         var expression = ParseAssignmentExpression();
-        var right = MatchToken(SyntaxKind.ClosedParenthesisToken);
+        var closedParenthesisToken = MatchToken(SyntaxKind.ClosedParenthesisToken);
 
-        return new ParenthesizedExpression(left, right, expression);
+        return new ParenthesizedExpression(openParenthesisToken, expression, closedParenthesisToken);
     }
 
     private Expression ParseBooleanLiteral() {
@@ -238,6 +287,27 @@ internal sealed class Parser {
         }
         
         return new SeparatedSyntaxList<Expression>(nodesWithSeperators.ToImmutable());
+    }
+
+    private SeparatedSyntaxList<FunctionParameter> ParseParameters() {
+        var parameters = ImmutableArray.CreateBuilder<SyntaxNode>();
+
+        FunctionParameter parameter;
+        while (Current.Kind != SyntaxKind.EndOfFileToken && Current.Kind != SyntaxKind.ClosedParenthesisToken) {
+            
+            var identifier = MatchToken(SyntaxKind.IdentifierToken);
+            var type = ParseTypeClause();
+            parameter = new FunctionParameter(identifier, type);
+
+            parameters.Add(parameter);
+
+            if (Current.Kind != SyntaxKind.ClosedParenthesisToken) {
+                var comma = MatchToken(SyntaxKind.CommaToken);
+                parameters.Add(comma);
+            }
+        }
+        
+        return new SeparatedSyntaxList<FunctionParameter>(parameters.ToImmutable());    
     }
 
     private Expression ParseNumberLiteral() {

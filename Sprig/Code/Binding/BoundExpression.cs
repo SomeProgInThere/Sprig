@@ -80,7 +80,7 @@ internal sealed class BoundCallExpression(FunctionSymbol function, ImmutableArra
     public ImmutableArray<BoundExpression> Arguments { get; } = arguments;
 
     public override BoundNodeKind Kind => BoundNodeKind.CallExpression;
-    public override TypeSymbol Type => Function.Type;
+    public override TypeSymbol Type => Function.ReturnType;
 }
 
 internal class BoundCastExpression(TypeSymbol type, BoundExpression expression)

@@ -54,7 +54,7 @@ internal sealed class ReplExtensions {
             return true;
 
         var syntaxTree = SyntaxTree.Parse(source);
-        if (syntaxTree.Root.Statement.LastToken().IsMissing)
+        if (syntaxTree.Root.Members.Last().LastToken().IsMissing)
             return false;
 
         return true;

@@ -1,14 +1,16 @@
+global using VariableTable = System.Collections.Generic.Dictionary<Sprig.Code.Symbols.VariableSymbol, object>;
+global using FunctionBodyTable = System.Collections.Immutable.ImmutableDictionary<Sprig.Code.Symbols.FunctionSymbol, Sprig.Code.Binding.BoundBlockStatement>;
+
 using System.Collections.Immutable;
 
 using Sprig.Code.Binding;
 using Sprig.Code.Lowering;
-using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
 namespace Sprig.Code;
 
 public sealed class Compilation {
-
+    
     public Compilation(SyntaxTree syntaxTree) 
         : this(null, syntaxTree) {}
 
@@ -17,13 +19,17 @@ public sealed class Compilation {
         SyntaxTree = syntaxTree;
     }
 
-    public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables) {
+    public EvaluationResult Evaluate(VariableTable variables) {
         var diagnostics = SyntaxTree.Diagnostics.Concat(GlobalScope?.Diagnostics ?? []).ToImmutableArray();        
         if (diagnostics.Any())
             return new EvaluationResult(diagnostics);
+
+        var program = Binder.BindProgram(GlobalScope);
+        if (program.Diagnostics.Any())
+            return new EvaluationResult([..program.Diagnostics]);
         
         var statement = GetStatement();
-        var evaluator = new Evaluator(statement, variables);
+        var evaluator = new Evaluator(program.FunctionBodies, statement, variables);
         var result = evaluator.Evaluate();
 
         return new EvaluationResult([], result);

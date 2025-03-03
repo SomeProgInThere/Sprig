@@ -44,22 +44,23 @@ internal sealed class UnaryExpression(Expression operand, SyntaxToken operatorTo
     public override SyntaxKind Kind => SyntaxKind.UnaryExpression;
 }
 
-internal sealed class BinaryExpression(Expression left, Expression right, SyntaxToken operatorToken)
+internal sealed class BinaryExpression(Expression left, SyntaxToken operatorToken, Expression right)
     : Expression {
 
     public Expression Left { get; } = left;
-    public Expression Right { get; } = right;
     public SyntaxToken OperatorToken { get; } = operatorToken;
+    public Expression Right { get; } = right;
 
     public override SyntaxKind Kind => SyntaxKind.BinaryExpression;
 }
 
-internal sealed class ParenthesizedExpression(SyntaxToken open, SyntaxToken closed, Expression expression)
-    : Expression {
+internal sealed class ParenthesizedExpression(
+    SyntaxToken openParenthesisToken, Expression expression, SyntaxToken closedParenthesisToken
+) : Expression {
 
-    public SyntaxToken Open { get; } = open;
-    public SyntaxToken Closed { get; } = closed;
+    public SyntaxToken OpenParenthesisToken { get; } = openParenthesisToken;
     public Expression Expression { get; } = expression;
+    public SyntaxToken ClosedParenthesisToken { get; } = closedParenthesisToken;
 
     public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
 }

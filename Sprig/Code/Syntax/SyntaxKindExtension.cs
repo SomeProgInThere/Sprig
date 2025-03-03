@@ -55,6 +55,7 @@ internal static class SyntaxKindExtension {
             "do"    => SyntaxKind.DoKeyword,
             "for"   => SyntaxKind.ForKeyword,
             "in"    => SyntaxKind.InKeyword,
+            "fn"    => SyntaxKind.FnKeyword,
             "let"   => SyntaxKind.LetKeyword,
             "var"   => SyntaxKind.VarKeyword,
 
@@ -109,6 +110,7 @@ internal static class SyntaxKindExtension {
             SyntaxKind.DoKeyword    => "do",
             SyntaxKind.ForKeyword   => "for",
             SyntaxKind.InKeyword    => "in",
+            SyntaxKind.FnKeyword    => "fn",
             SyntaxKind.ElseKeyword  => "else",
             SyntaxKind.LetKeyword   => "let",
             SyntaxKind.VarKeyword   => "var",

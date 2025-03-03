@@ -1,25 +1,148 @@
 using System.Collections.Immutable;
+using Sprig.Code.Lowering;
 using Sprig.Code.Source;
 using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
 namespace Sprig.Code.Binding;
 
-internal sealed class Binder(BoundScope? parent) {
+internal sealed class Binder {
 
-    public static BoundGlobalScope BindGlobalScope(BoundGlobalScope? previous, CompilationUnit compilation) {
+    public Binder(BoundScope? parent, FunctionSymbol? function) {
+        this.parent = parent;
+        this.function = function;
+        scope = new BoundScope(parent);
+
+        if (function != null) {
+            foreach (var parameter in function.Parameters)
+                scope.TryDeclareVariable(parameter);
+        }
+    }
+
+    public static BoundGlobalScope BindGlobalScope(BoundGlobalScope? previous, CompilationUnit syntax) {
         var parentScope = CreateParentScope(previous);
-        var binder = new Binder(parentScope);
+        var binder = new Binder(parentScope, null);
         
-        var statement = binder.BindStatement(compilation.Statement);
-        var variables = binder.Scope.Variables;
+        foreach (var function in syntax.Members.OfType<FunctionHeader>())
+            binder.BindFunctionHeader(function);
+
+        var statmentBuilder = ImmutableArray.CreateBuilder<BoundStatement>();
+
+        foreach (var globalStatement in syntax.Members.OfType<GlobalStatment>()) {
+            var boundStatement = binder.BindStatement(globalStatement.Statement);
+            statmentBuilder.Add(boundStatement);
+        }
+
+        var statement = new BoundBlockStatement(statmentBuilder.ToImmutable());
+        var functions = binder.scope.Functions;
+        var variables = binder.scope.Variables;
         var diagnostics = binder.Diagnostics.ToImmutableArray();
 
-        return new BoundGlobalScope(previous, diagnostics, variables, statement);
+        if (previous != null)
+            diagnostics = diagnostics.InsertRange(0, previous.Diagnostics);
+
+        return new BoundGlobalScope(previous, diagnostics, functions, variables, statement);
+    }
+
+    public static BoundProgram BindProgram(BoundGlobalScope globalScope) {
+        var parentScope = CreateParentScope(globalScope);
+        var functionBodies = ImmutableDictionary.CreateBuilder<FunctionSymbol, BoundBlockStatement>();
+        var diagnostics = ImmutableArray<DiagnosticMessage>.Empty;
+
+        var scope = globalScope;
+        while (scope != null) {
+            foreach (var function in scope.Functions) {
+                var binder = new Binder(parentScope, function);
+                var body = binder.BindStatement(function.Header.Body);
+                
+                var loweredBody = Lowerer.Lower(body);
+                functionBodies.Add(function, loweredBody);
+
+                diagnostics = diagnostics.AddRange(binder.Diagnostics);
+            }
+
+            scope = scope.Previous;
+        }
+
+        return new BoundProgram(globalScope, diagnostics, functionBodies.ToImmutable());
     }
 
     public Diagnostics Diagnostics => diagnostics;
-    public BoundScope Scope = new(parent);
+    public BoundScope scope;
+
+    private static BoundScope? CreateParentScope(BoundGlobalScope? previous) {
+        var stack = new Stack<BoundGlobalScope>();
+
+        while (previous != null) {
+            stack.Push(previous);
+            previous = previous.Previous;
+        }
+
+        var parent = CreateRootScope();
+        
+        while (stack.Count > 0) {
+            previous = stack.Pop();
+            var scope = new BoundScope(parent);
+
+            foreach (var function in previous.Functions)
+                scope.TryDeclareFunction(function);
+
+            foreach (var variable in previous.Variables)
+                scope.TryDeclareVariable(variable);
+
+            parent = scope;
+        }
+
+        return parent;
+    }
+
+    private static BoundScope? CreateRootScope() {
+        var result = new BoundScope(null);
+    
+        foreach (var function in BuiltinFunctions.All())
+            result.TryDeclareFunction(function);
+
+        return result;
+    }
+
+    private void BindFunctionHeader(FunctionHeader syntax) {
+        var parameters = ImmutableArray.CreateBuilder<ParameterSymbol>();
+        var existantParameters = new HashSet<string>();
+
+        foreach(var parameter in syntax.Parameters) {
+            var parameterName = parameter.Identifier.Literal;
+            var parameterType = BindTypeClause(parameter.Type) ?? TypeSymbol.Error;
+            
+            if (!existantParameters.Add(parameterName))
+                diagnostics.ReportParameterAlreadyExists(parameter.Span, parameterName);
+
+            else {
+                var parameterSymbol = new ParameterSymbol(parameterName, parameterType);
+                parameters.Add(parameterSymbol);
+            }
+        }
+
+        var type = BindTypeClause(syntax.ReturnType) ?? TypeSymbol.Void;
+        if (type != TypeSymbol.Void)
+            throw new Exception("Functions with returns are not supported");
+
+        var function = new FunctionSymbol(syntax.Identifier.Literal, parameters.ToImmutable(), type, syntax);
+        if (!scope.TryDeclareFunction(function))
+            diagnostics.ReportSymbolAlreadyExists(syntax.Identifier.Span, function.Name);
+    }
+
+    private TypeSymbol? BindTypeClause(TypeClause clause) {
+        TypeSymbol? type = null;
+        if (clause != null) {
+            var typeIdentifier = clause.Identifier;
+            type = LookupType(typeIdentifier.Literal);
+
+            if (type is null)
+                diagnostics.ReportUndefinedType(typeIdentifier.Span, typeIdentifier.Literal);
+        }
+
+        return type;
+    }
 
     private BoundStatement BindStatement(Statement syntax) {
         return syntax.Kind switch {
@@ -37,14 +160,14 @@ internal sealed class Binder(BoundScope? parent) {
 
     private BoundStatement BindBlockStatement(BlockStatement syntax) {
         var statements = ImmutableArray.CreateBuilder<BoundStatement>();
-        Scope = new BoundScope(Scope);
+        scope = new BoundScope(scope);
 
         foreach (var statement in syntax.Statements) {
             var boundStatement = BindStatement(statement);
             statements.Add(boundStatement);
         }
 
-        Scope = Scope.Parent ?? new BoundScope(parent);
+        scope = scope.Parent ?? new BoundScope(parent);
         return new BoundBlockStatement(statements.ToImmutable());
     }
 
@@ -54,7 +177,7 @@ internal sealed class Binder(BoundScope? parent) {
         
         if (syntax.TypeClause != null) {
             var typeIdentifier = syntax.TypeClause?.Identifier;
-            explicitType = LookupType(typeIdentifier?.Literal ?? "");
+            explicitType = LookupType(typeIdentifier.Literal);
 
             if (explicitType is null)
                 diagnostics.ReportUndefinedType(typeIdentifier.Span, typeIdentifier.Literal);
@@ -96,13 +219,13 @@ internal sealed class Binder(BoundScope? parent) {
     private BoundStatement BindForStatement(ForStatement syntax) {
         var range = BindExpression(syntax.Range);
 
-        Scope = new BoundScope(Scope);
+        scope = new BoundScope(scope);
 
         var variable = BindVariable(syntax.Identifier, true, TypeSymbol.Int);
         var body = BindStatement(syntax.Body);
 
-        if (Scope.Parent != null)
-            Scope = Scope.Parent;
+        if (scope.Parent != null)
+            scope = scope.Parent;
 
         return new BoundForStatement(variable, range, body);
     }
@@ -154,7 +277,7 @@ internal sealed class Binder(BoundScope? parent) {
             boundArguments.Add(boundArgument);
         }
 
-        if (!Scope.TryLookupFunction(syntax.Identifier.Literal, out var function)) {
+        if (!scope.TryLookupFunction(syntax.Identifier.Literal, out var function)) {
             diagnostics.ReportUndefinedFunctionCall(syntax.Identifier.Span, syntax.Identifier.Literal);
             return new BoundErrorExpression();
         }
@@ -175,7 +298,7 @@ internal sealed class Binder(BoundScope? parent) {
             var argument = boundArguments[i];
             
             if (argument.Type != parameter.Type) {
-                diagnostics.ReportIncorrectArgumentType(syntax.Span, parameter.Name, parameter.Type, argument.Type);
+                diagnostics.ReportIncorrectArgumentType(syntax.Arguments[i].Span, parameter.Name, parameter.Type, argument.Type);
                 return new BoundErrorExpression();
             }
         }
@@ -194,7 +317,7 @@ internal sealed class Binder(BoundScope? parent) {
         if (token.IsMissing)
             return new BoundErrorExpression();
 
-        if (!Scope.TryLookupVariable(token.Literal, out var variable) && !token.IsMissing) {
+        if (!scope.TryLookupVariable(token.Literal, out var variable) && !token.IsMissing) {
             diagnostics.ReportUndefinedName(token.Span, token.Literal);
             return new BoundErrorExpression();
         }
@@ -209,7 +332,7 @@ internal sealed class Binder(BoundScope? parent) {
         if (syntax.IdentifierToken.IsMissing)
             return expression;
 
-        if (!Scope.TryLookupVariable(name, out var variable) && name != string.Empty) {
+        if (!scope.TryLookupVariable(name, out var variable) && name != string.Empty) {
             diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
             return expression;
         }
@@ -272,38 +395,6 @@ internal sealed class Binder(BoundScope? parent) {
         return new BoundRangeExpression(lower, rangeToken, upper);
     }
 
-    private static BoundScope? CreateParentScope(BoundGlobalScope? previous) {
-        
-        var stack = new Stack<BoundGlobalScope>();
-        while (previous != null) {
-            stack.Push(previous);
-            previous = previous.Previous;
-        }
-
-        var parent = CreateRootScope();
-
-        while (stack.Count > 0) {
-            previous = stack.Pop();
-            var scope = new BoundScope(parent);
-            
-            foreach (var variable in previous.Variables)
-                scope.TryDeclareVariable(variable);
-
-            parent = scope;
-        }
-
-        return parent;
-    }
-
-    private static BoundScope? CreateRootScope() {
-        var result = new BoundScope(null);
-        
-        foreach (var function in BuiltinFunctions.All())
-            result.TryDeclareFunction(function);
-
-        return result;
-    }
-
     private BoundExpression BindCast(Expression syntax, TypeSymbol type, bool allowExplicit = false) {
         var expression = BindExpression(syntax);
         return BindCast(syntax.Span, expression, type, allowExplicit);
@@ -330,10 +421,11 @@ internal sealed class Binder(BoundScope? parent) {
 
     private VariableSymbol BindVariable(SyntaxToken identifier, bool mutable, TypeSymbol type) {
         var name = identifier.Literal;
-        var declare = !identifier.IsMissing;
+        var exists = !identifier.IsMissing;
 
-        var variable = new VariableSymbol(name, mutable, type);
-        if (declare && !Scope.TryDeclareVariable(variable))
+        var scope = function is null ? VariableScope.Global : VariableScope.Local; 
+        var variable = new VariableSymbol(name, mutable, type, scope);
+        if (exists && !this.scope.TryDeclareVariable(variable))
             diagnostics.ReportVariableRedeclaration(identifier.Span, name);
         
         return variable;
@@ -347,4 +439,6 @@ internal sealed class Binder(BoundScope? parent) {
     };
 
     private readonly Diagnostics diagnostics = [];
+    private readonly BoundScope? parent;
+    private readonly FunctionSymbol? function;
 }

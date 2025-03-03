@@ -2,24 +2,29 @@ using System.Collections.Immutable;
 
 using Sprig.Code.Binding;
 using Sprig.Code.Symbols;
-using Sprig.Code.Syntax;
 
 namespace Sprig.Code;
 
-internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSymbol, object> variables) {
+internal sealed class Evaluator(FunctionBodyTable functionBodies, BoundBlockStatement root, VariableTable globals) {
     
     public object? Evaluate() {
-        var labelMap = new Dictionary<LabelSymbol, int>();
+        locals.Push([]);
+        return EvaluateStatement(root);
+    }
 
-        for (var i = 0; i < root.Statements.Length; i++) {
-            if (root.Statements[i] is BoundLableStatement statement)
-                labelMap.Add(statement.Label, i + 1);
+    private object? EvaluateStatement(BoundBlockStatement body) {
+        var labelTable = new Dictionary<LabelSymbol, int>();
+
+        for (var i = 0; i < body.Statements.Length; i++) {
+            if (body.Statements[i] is BoundLableStatement statement)
+                labelTable.Add(statement.Label, i + 1);
         }
 
         var index = 0;
-        while (index < root.Statements.Length) {
-            var statement = root.Statements[index];
+        while (index < body.Statements.Length) {
+            var statement = body.Statements[index];
             switch (statement.Kind) {
+
                 case BoundNodeKind.VariableDeclarationStatement:
                     EvaluateVariableDeclaration((BoundVariableDeclarationStatement)statement);
                     index++;
@@ -32,19 +37,19 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
 
                 case BoundNodeKind.GotoStatement:
                     var gotoStatement = (BoundGotoStatement)statement;
-                    index = labelMap[gotoStatement.Label];
+                    index = labelTable[gotoStatement.Label];
                     break;
 
                 case BoundNodeKind.ConditionalGotoStatement:
                     var conditionalGotoStatement = (BoundConditionalGotoStatement)statement;
                     var condition = (bool)EvaluateExpression(conditionalGotoStatement.Condition);
-                    
+
                     if (condition && conditionalGotoStatement.Jump || !condition && !conditionalGotoStatement.Jump)
-                        index = labelMap[conditionalGotoStatement.Label];
-                    else 
+                        index = labelTable[conditionalGotoStatement.Label];
+                    else
                         index++;
                     break;
-                
+
                 case BoundNodeKind.LabelStatement:
                     index++;
                     break;
@@ -52,15 +57,15 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
                 default:
                     throw new Exception($"Undefined statement: {statement.Kind}");
             }
-        } 
+        }
 
         return lastValue;
     }
 
     private void EvaluateVariableDeclaration(BoundVariableDeclarationStatement node) {
         var value = EvaluateExpression(node.Initializer);
-        variables[node.Variable] = value;
         lastValue = value;
+        AssignValue(node.Variable, value);
     }
     
     private void EvaluateExpressionStatement(BoundExpressionStatement node) => lastValue = EvaluateExpression(node.Expression);
@@ -83,15 +88,21 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
     private static object EvaluateLiteralExpression(BoundLiteralExpression literal) => literal.Value;
     
     private object EvaluateVariableExpression(BoundVariableExpression node) {
-        if (node.Variable is null)
-            throw new Exception($"Variable: {nameof(node.Variable)} is not initialized");
+        var variable = node.Variable 
+            ?? throw new Exception($"Node variable not initialized");
         
-        return variables[node.Variable];
+        if (variable.Scope == VariableScope.Global)
+            return globals[variable];
+                
+        else {
+            var localVariables = locals.Peek();
+            return localVariables[variable];
+        }
     }
 
     private object EvaluateAssignmentExpression(BoundAssignmentExpression node) {
         var value = EvaluateExpression(node.Expression);
-        variables[node.Variable] = value;
+        AssignValue(node.Variable, value);
         return value;
     }
 
@@ -247,7 +258,20 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
         }
 
         else {
-            throw new Exception($"Unexpected function: {node.Function}");
+            var stackframe = new VariableTable();
+            
+            for (var i = 0; i < node.Arguments.Length; i++) {
+                var parameter = node.Function.Parameters[i];
+                var value = EvaluateExpression(node.Arguments[i]);
+                stackframe.Add(parameter, value);
+            }
+
+            locals.Push(stackframe);
+            var statement = functionBodies[node.Function];
+            var result = EvaluateStatement(statement);
+            locals.Pop();
+
+            return result;
         }
     }
 
@@ -266,8 +290,19 @@ internal sealed class Evaluator(BoundBlockStatement root, Dictionary<VariableSym
             throw new Exception($"Undefined type: {node.Type}");
     }
 
+    private void AssignValue(VariableSymbol variable, object value) {
+        if (variable.Scope == VariableScope.Global)
+            globals[variable] = value;
+
+        else {
+            var localVariables = locals.Peek();
+            localVariables[variable] = value;
+        }
+    }
+
     private Random? random;
     private object? lastValue;
+    private readonly Stack<VariableTable> locals = [];
 }
 
 public sealed class EvaluationResult(ImmutableArray<DiagnosticMessage> diagnostics, object? result = null) {

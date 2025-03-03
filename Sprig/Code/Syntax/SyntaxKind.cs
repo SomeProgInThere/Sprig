@@ -64,6 +64,7 @@ public enum SyntaxKind {
     DoKeyword,
     ForKeyword,
     InKeyword,
+    FnKeyword,
 
     // Expressions
     LiteralExpression,
@@ -74,9 +75,12 @@ public enum SyntaxKind {
     ParenthesizedExpression,
     RangeExpression,
     CallExpression,
-    
-    // Other
+
+    // Members
     CompilationUnit,
+    GlobalStatement,
+    FunctionHeader,
+    FunctionParameter,
     
     // Clause
     TypeClause,

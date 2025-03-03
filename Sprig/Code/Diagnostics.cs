@@ -44,17 +44,17 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUndefinedName(TextSpan span, string literal) {
-        var message = $"Symbol '{literal}' is not defined";
+        var message = $"Symbol '{literal}' is not defined in scope";
         Report(span, message);
     }
 
     public void ReportUndefinedType(TextSpan span, string literal) {
-        var message = $"Type '{literal}' is not defined";
+        var message = $"Type '{literal}' is not defined in scope";
         Report(span, message);
     }
 
     public void ReportVariableRedeclaration(TextSpan span, string name) {
-        var message = $"Variable '{name}' is already declared";
+        var message = $"Variable '{name}' is already declared in scope";
         Report(span, message);
     }
 
@@ -77,7 +77,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUndefinedFunctionCall(TextSpan span, string name) {
-        var message = $"Function '{name}' is not defined";
+        var message = $"Function '{name}' is not defined in scope";
         Report(span, message);
     }
 
@@ -96,6 +96,16 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
+    public void ReportSymbolAlreadyExists(TextSpan span, string name) {
+        var message = $"Symbol '{name}' already exists in scope";
+        Report(span, message);
+    }
+
+    public void ReportParameterAlreadyExists(TextSpan span, string name) {
+        var message = $"Parameter '{name}' already exists in scope";
+        Report(span, message);
+    }
+    
     private void Report(TextSpan span, string message) {
         var diagnostic = new DiagnosticMessage(span, message);
         diagnostics.Add(diagnostic);

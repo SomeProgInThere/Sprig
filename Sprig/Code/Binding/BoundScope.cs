@@ -51,11 +51,23 @@ internal sealed class BoundScope(BoundScope? parent = null) {
 internal sealed class BoundGlobalScope(
     BoundGlobalScope? previous,
     ImmutableArray<DiagnosticMessage> diagnostics,
+    ImmutableArray<FunctionSymbol> functions,
     ImmutableArray<VariableSymbol> variables,
     BoundStatement statement
 ) {
     public BoundGlobalScope? Previous { get; } = previous;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
+    public ImmutableArray<FunctionSymbol> Functions { get; } = functions;
     public ImmutableArray<VariableSymbol> Variables { get; } = variables;
     public BoundStatement Statement { get; } = statement;
+}
+
+internal sealed class BoundProgram(
+    BoundGlobalScope globalScope,
+    ImmutableArray<DiagnosticMessage> diagnostics,
+    FunctionBodyTable functionBodies
+) {
+    public BoundGlobalScope GlobalScope { get; } = globalScope;
+    public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
+    public FunctionBodyTable FunctionBodies { get; } = functionBodies;
 }

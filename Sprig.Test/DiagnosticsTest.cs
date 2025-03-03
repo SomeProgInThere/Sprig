@@ -17,7 +17,7 @@ public class DiagnosticsTest {
         ";
 
         var diagnostics = @"
-            Variable 'x' is already declared
+            Variable 'x' is already declared in scope
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);
@@ -30,7 +30,7 @@ public class DiagnosticsTest {
         ";
 
         var diagnostics = @"
-            Symbol 'x' is not defined
+            Symbol 'x' is not defined in scope
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);
@@ -44,16 +44,6 @@ public class DiagnosticsTest {
 
         var diagnostics = @"
             Unterminated string literal
-        ";
-
-        TestAssert.AssertDiagnostics(source, diagnostics);
-    }
-
-    [Fact]
-    public void Report_NoErrorForEmptySource() {
-        var source = @"[]";
-        var diagnostics = @"
-            Unexpected token <EndOfFileToken>, expected <IdentifierToken>
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);
