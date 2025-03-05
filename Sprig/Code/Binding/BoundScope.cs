@@ -65,9 +65,9 @@ internal sealed class BoundGlobalScope(
 internal sealed class BoundProgram(
     BoundGlobalScope globalScope,
     ImmutableArray<DiagnosticMessage> diagnostics,
-    FunctionBodyTable functionBodies
+    ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functionBodies
 ) {
     public BoundGlobalScope GlobalScope { get; } = globalScope;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
-    public FunctionBodyTable FunctionBodies { get; } = functionBodies;
+    public ImmutableDictionary<FunctionSymbol, BoundBlockStatement> FunctionBodies { get; } = functionBodies;
 }

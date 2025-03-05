@@ -5,8 +5,12 @@ using Sprig.Code.Symbols;
 
 namespace Sprig.Code;
 
-internal sealed class Evaluator(FunctionBodyTable functionBodies, BoundBlockStatement root, VariableTable globals) {
-    
+internal sealed class Evaluator(
+    ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functionBodies, 
+    BoundBlockStatement root, 
+    Dictionary<VariableSymbol, object> globals
+) {
+        
     public object? Evaluate() {
         locals.Push([]);
         return EvaluateStatement(root);
@@ -258,7 +262,7 @@ internal sealed class Evaluator(FunctionBodyTable functionBodies, BoundBlockStat
         }
 
         else {
-            var stackframe = new VariableTable();
+            var stackframe = new Dictionary<VariableSymbol, object>();
             
             for (var i = 0; i < node.Arguments.Length; i++) {
                 var parameter = node.Function.Parameters[i];
@@ -302,7 +306,7 @@ internal sealed class Evaluator(FunctionBodyTable functionBodies, BoundBlockStat
 
     private Random? random;
     private object? lastValue;
-    private readonly Stack<VariableTable> locals = [];
+    private readonly Stack<Dictionary<VariableSymbol, object>> locals = [];
 }
 
 public sealed class EvaluationResult(ImmutableArray<DiagnosticMessage> diagnostics, object? result = null) {
