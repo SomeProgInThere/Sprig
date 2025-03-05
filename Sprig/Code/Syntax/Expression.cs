@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Immutable;
-
 namespace Sprig.Code.Syntax;
 
 public abstract class Expression : SyntaxNode {}

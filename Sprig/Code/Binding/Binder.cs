@@ -307,7 +307,7 @@ internal sealed class Binder {
     }
 
     private static BoundExpression BindLiteralExpression(LiteralExpression syntax) {
-        var value = syntax.Value ?? 0;
+        var value = syntax.Value ?? int.MinValue;
         return new BoundLiteralExpression(value);
     }
 

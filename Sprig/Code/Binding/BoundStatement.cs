@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Sprig.Code.Symbols;
-using Sprig.Code.Syntax;
 
 namespace Sprig.Code.Binding;
 

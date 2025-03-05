@@ -26,8 +26,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUnexpectedToken(TextSpan span, SyntaxKind actual, SyntaxKind expected) {
-        var actualString = actual.Literal() is null ? $"<{actual}>" : $"'{actual.Literal()}'";
-        var expectedString = expected.Literal() is null ? $"<{expected}>" : $"'{expected.Literal()}'";
+        var actualString = SyntaxKindExtension.Literal(actual) is null ? $"<{actual}>" : $"'{SyntaxKindExtension.Literal(actual)}'";
+        var expectedString = SyntaxKindExtension.Literal(expected) is null ? $"<{expected}>" : $"'{SyntaxKindExtension.Literal(expected)}'";
         var message = $"Unexpected token {actualString}, expected {expectedString}";
         
         Report(span, message);
