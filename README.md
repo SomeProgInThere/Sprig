@@ -1,32 +1,27 @@
 # Sprig [![dotnet-build](https://github.com/SomeProgInThere/Rubics/actions/workflows/dotnet.yml/badge.svg)](https://github.com/SomeProgInThere/Rubics/actions/workflows/dotnet.yml)
 
 ### A Compiler for my own language Sprig made with .NET framework
-## Status
-Currently a work in progress interpreter:
   
-  ### Implemented Features:
-  * Variable declatations (mutable and unmutable)
-  * Basic Casting
-  * Basic Types like int, bool and string
-  * Expressions and statements (if-else, while, for, etc.) with scopes
-  * Builtin functions (print, input, rand)
-  * Proper Diagnostics and Errors with line and column numbers
+### Implemented Features:
+* Variable declatations (mutable and unmutable)
+* Primivite type-casting
+* Basic Types like int, float, bool and string
+* Expressions and statements (if-else, while, for, etc.) with scopes
+* User defined and builtin functions like print, input and random
+* Proper Diagnostics and Errors with positions
   
-  ### REPL Features:
+### REPL Features:
 
-  * Pretty printing with rendered colors in REPL
-  * Fully editable document-like REPL environment
-  * Viewable History in REPL
-  * Viewable Parse and binding trees of each statement
+* Pretty printing with rendered colors in REPL
+* Fully editable document-like REPL environment
+* Viewable History in REPL
+* Viewable Parse and binding trees of each statement
 
 ## Structure
 The Solution has three projects in it:
-  * Sprig (Main)
-  * Sprig.CLI (Command-line Interface)
-  * Sprig.Test (Tests for compiler)
-
-## Goals
-Learning the fundamentals of making a interpreter (and a *actual* compiler later on)
+* Sprig (Main)
+* Sprig.CLI (Command-line Interface)
+* Sprig.Test (Tests for compiler)
 
 ## Build
 
