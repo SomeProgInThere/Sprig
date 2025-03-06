@@ -25,16 +25,21 @@ public class Casting {
         if (from == to)
             return Identity;
         
-        if (from == TypeSymbol.Bool || from == TypeSymbol.Int) {
+        if (from == TypeSymbol.Bool || from == TypeSymbol.Int || from == TypeSymbol.Float) {
             if (to == TypeSymbol.String)
                 return Explicit;
-        }
 
-        if (from == TypeSymbol.String) {
-            if (to == TypeSymbol.Bool || to == TypeSymbol.Int)
+            if (to == TypeSymbol.Int) {
                 return Explicit;
+            }
         }
         
+        if (from == TypeSymbol.Int) {
+            if (to == TypeSymbol.Float) {
+                return Implicit;
+            }
+        }
+
         return None;
     }
 }

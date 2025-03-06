@@ -21,7 +21,7 @@ internal sealed class ReplExtensions {
 
             Console.WriteLine();
             ColorPrint($"Error (Ln {lineNumber}, Col {column}): ", ConsoleColor.Red);
-            ColorPrint($"{diagnostic}\n", ConsoleColor.Gray);
+            ColorPrint($"{diagnostic}\n", ConsoleColor.DarkGray);
 
             var prefixSpan = TextSpan.CreateFromBounds(line.Start, diagnostic.Span.Start);
             var suffixSpan = TextSpan.CreateFromBounds(diagnostic.Span.End, line.End);
@@ -30,9 +30,9 @@ internal sealed class ReplExtensions {
             var error = sourceText.ToString(diagnostic.Span);
             var suffix = sourceText.ToString(suffixSpan);
 
-            Console.Write($"\t{prefix}");
-            ColorPrint(error, ConsoleColor.Red);
-            Console.Write($"{suffix}\n");
+            ColorPrint($"\t--> {lineNumber, 1} | {prefix}", ConsoleColor.Gray);
+            ColorPrint(error, ConsoleColor.DarkRed);
+            ColorPrint($"{suffix}\n", ConsoleColor.Gray);
         }
         
         Console.WriteLine();

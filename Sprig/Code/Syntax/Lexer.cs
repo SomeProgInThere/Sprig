@@ -207,16 +207,34 @@ internal sealed class Lexer(SourceText source) {
     }
 
     private void ReadNumberToken() {
-        while (char.IsDigit(Current))
+        var isFloat = false;
+        while (char.IsDigit(Current) || Current == '.') {
+            if (Current == '.') {
+                if (Next == '.') {
+                    break;
+                }
+
+                if (isFloat)
+                    break;
+                isFloat = true;
+            }
             position++;
+        }
             
         var length = position - start;
         var literal = source.ToString(start, length);
-            
-        if (!int.TryParse(literal, out var result))
-            diagnostics.ReportInvalidNumber(new TextSpan(start, length), literal, TypeSymbol.Int);
-                
-        value = result;
+
+        if (!isFloat) {
+            if (!int.TryParse(literal, out var intResult))
+                diagnostics.ReportInvalidNumber(new TextSpan(start, length), literal, TypeSymbol.Int);
+            value = intResult;
+        }
+        else {
+            if (!float.TryParse(literal, out var floatResult))
+                diagnostics.ReportInvalidNumber(new TextSpan(start, length), literal, TypeSymbol.Float);
+            value = floatResult;
+        }
+
         kind = SyntaxKind.NumberToken;
     }
 

@@ -75,7 +75,7 @@ public class DiagnosticsTest {
         ";
 
         var diagnostics = @"
-            Cannot convert type 'bool' to 'int'
+            Cannot convert type 'bool' to 'int'. An explicit cast exists (are you missing a cast?)
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);

@@ -432,9 +432,10 @@ internal sealed class Binder {
     }
 
     private static TypeSymbol? LookupType(string name) => name switch {
-        "bool" => TypeSymbol.Bool,
-        "int" => TypeSymbol.Int,
-        "string" => TypeSymbol.String,
+        "bool"      => TypeSymbol.Bool,
+        "int"       => TypeSymbol.Int,
+        "string"    => TypeSymbol.String,
+        "float"     => TypeSymbol.Float,
         _ => null,
     };
 

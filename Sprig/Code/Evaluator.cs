@@ -113,6 +113,14 @@ internal sealed class Evaluator(
     private object EvaluateUnaryExpression(BoundUnaryExpression node) {
         var operand = EvaluateExpression(node.Operand);
 
+        if (node.Type == TypeSymbol.Float) {
+            return node.Operator.Kind switch {
+                UnaryOperatorKind.Identity => (float)operand,
+                UnaryOperatorKind.Negetion => -(float)operand,
+                _ => throw new Exception($"Unexpected Unary operator: {node.Operator}"),
+            };
+        }
+        
         switch (node.Operator.Kind) {
             case UnaryOperatorKind.Identity:
                 return (int)operand;
@@ -164,12 +172,18 @@ internal sealed class Evaluator(
                 if (node.Type == TypeSymbol.String)
                     return (string)left + (string)right;
 
+                if (node.Type == TypeSymbol.Float)
+                    return (float)left + (float)right;
+
                 return (int)left + (int)right;
             
-            case BinaryOperatorKind.Substact: 
+            case BinaryOperatorKind.Substact:            
+                if (node.Type == TypeSymbol.Float)
+                    return (float)left - (float)right;
+
                 return (int)left - (int)right;
             
-            case BinaryOperatorKind.Multiply: 
+            case BinaryOperatorKind.Multiply:
                 if (node.Type == TypeSymbol.String) {
                     var str = (string)left;
                     for (var i = 1; i < (int)right; i++)
@@ -178,18 +192,30 @@ internal sealed class Evaluator(
                     return str;
                 }
 
+                if (node.Type == TypeSymbol.Float)
+                    return (float)left + (float)right;
+
                 return (int)left * (int)right;
 
-            case BinaryOperatorKind.Divide: 
+            case BinaryOperatorKind.Divide:                 
+                if (node.Type == TypeSymbol.Float)
+                    return (float)left / (float)right;
+
                 return (int)left / (int)right;
             
-            case BinaryOperatorKind.Modulus: 
+            case BinaryOperatorKind.Modulus:            
+                if (node.Type == TypeSymbol.Float)
+                    return (float)left % (float)right;
+ 
                 return (int)left % (int)right;
             
             case BinaryOperatorKind.Remainder: 
                 return Math.DivRem((int)left, (int)right).Remainder;
             
-            case BinaryOperatorKind.RaisePower: 
+            case BinaryOperatorKind.RaisePower:             
+                if (node.Type == TypeSymbol.Float)
+                    return (float)Math.Pow((float)left, (float)right);
+
                 return (int)Math.Pow((int)left, (int)right);
              
             case BinaryOperatorKind.LogicalAnd: 
@@ -213,16 +239,28 @@ internal sealed class Evaluator(
             case BinaryOperatorKind.BitshiftRight: 
                 return (int)left << (int)right;
 
-            case BinaryOperatorKind.GreaterThan: 
+            case BinaryOperatorKind.GreaterThan:
+             if (node.Type == TypeSymbol.Float)
+                    return (float)left > (float)right;
+
                 return (int)left > (int)right;
             
-            case BinaryOperatorKind.GreaterThanEqualsTo: 
+            case BinaryOperatorKind.GreaterThanEqualsTo:
+             if (node.Type == TypeSymbol.Float)
+                    return (float)left >= (float)right;
+
                 return (int)left >= (int)right;
             
             case BinaryOperatorKind.LesserThan:
+             if (node.Type == TypeSymbol.Float)
+                    return (float)left < (float)right;
+
                 return (int)left < (int)right;
             
-            case BinaryOperatorKind.LesserThanEqualsTo: 
+            case BinaryOperatorKind.LesserThanEqualsTo:
+             if (node.Type == TypeSymbol.Float)
+                    return (float)left <= (float)right;
+
                 return (int)left <= (int)right;
 
             case BinaryOperatorKind.Equals: 
@@ -290,6 +328,9 @@ internal sealed class Evaluator(
         
         else if (node.Type == TypeSymbol.String)
             return Convert.ToString(value) ?? "";
+
+        else if (node.Type == TypeSymbol.Float)
+            return (float)Convert.ToDouble(value);
         else
             throw new Exception($"Undefined type: {node.Type}");
     }
