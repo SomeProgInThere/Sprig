@@ -32,6 +32,8 @@ public class BasixExpressionTest {
             // String Operations
             TestExpression.CreateExpression("\"test\" + \" case\"", "test case"),
             TestExpression.CreateExpression("\"test \" * 3", "test test test "),
+            TestExpression.CreateExpression("\"test case\" == \"test case\"", true),
+            TestExpression.CreateExpression("\"test case\" != \"test_case\"", true),
 
             // Parentheses
             TestExpression.CreateExpression("2 * (3 + (4 * 2))", 22),
