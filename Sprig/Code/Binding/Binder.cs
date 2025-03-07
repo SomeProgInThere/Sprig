@@ -318,7 +318,7 @@ internal sealed class Binder {
             return new BoundErrorExpression();
 
         if (!scope.TryLookupVariable(token.Literal, out var variable) && !token.IsMissing) {
-            diagnostics.ReportUndefinedName(token.Span, token.Literal);
+            diagnostics.ReportUndefinedIdentifier(token.Span, token.Literal);
             return new BoundErrorExpression();
         }
 
@@ -333,7 +333,7 @@ internal sealed class Binder {
             return expression;
 
         if (!scope.TryLookupVariable(name, out var variable) && name != string.Empty) {
-            diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
+            diagnostics.ReportUndefinedIdentifier(syntax.IdentifierToken.Span, name);
             return expression;
         }
 

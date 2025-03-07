@@ -24,13 +24,13 @@ public class DiagnosticsTest {
     }
 
     [Fact]
-    public void Report_UndefinedName() {
+    public void Report_UndefinedIdentifier() {
         var source = @"
             [x] * 10
         ";
 
         var diagnostics = @"
-            Symbol 'x' is not defined in scope
+            Identifier 'x' is not defined in scope
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);

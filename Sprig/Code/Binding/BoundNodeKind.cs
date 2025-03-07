@@ -22,5 +22,5 @@ internal enum BoundNodeKind {
     WhileStatement,
     DoWhileStatement,
     ForStatement,
-    VariableDeclarationStatement,
+    VariableDeclaration,
 }

@@ -14,7 +14,7 @@ internal abstract class BoundTreeRewriter {
         BoundNodeKind.WhileStatement                => RewriteWhileStatement((BoundWhileStatement)node),
         BoundNodeKind.DoWhileStatement              => RewriteDoWhileStatement((BoundDoWhileStatement)node),
         BoundNodeKind.ForStatement                  => RewriteForStatement((BoundForStatement)node),
-        BoundNodeKind.VariableDeclarationStatement  => RewriteVariableDeclarationStatement((BoundVariableDeclarationStatement)node),
+        BoundNodeKind.VariableDeclaration  => RewriteVariableDeclarationStatement((BoundVariableDeclarationStatement)node),
 
         _ => throw new Exception($"Unexpected node: {node.Kind}"),
     };

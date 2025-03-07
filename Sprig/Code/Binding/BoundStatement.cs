@@ -18,7 +18,7 @@ internal sealed class BoundVariableDeclarationStatement(VariableSymbol variable,
     public VariableSymbol Variable { get; } = variable;
     public BoundExpression Initializer { get; } = initializer;
 
-    public override BoundNodeKind Kind => BoundNodeKind.VariableDeclarationStatement;
+    public override BoundNodeKind Kind => BoundNodeKind.VariableDeclaration;
 }
 
 internal sealed class BoundExpressionStatement(BoundExpression expression)

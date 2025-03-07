@@ -43,8 +43,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
-    public void ReportUndefinedName(TextSpan span, string literal) {
-        var message = $"Symbol '{literal}' is not defined in scope";
+    public void ReportUndefinedIdentifier(TextSpan span, string literal) {
+        var message = $"Identifier '{literal}' is not defined in scope";
         Report(span, message);
     }
 

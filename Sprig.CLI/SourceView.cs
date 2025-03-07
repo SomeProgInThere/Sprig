@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 using Sprig.Code.Syntax;
 
-namespace Sprig.CLI;
+namespace Sprig.Interpreter;
 
 public class SourceView {
 

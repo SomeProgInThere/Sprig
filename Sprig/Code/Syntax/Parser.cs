@@ -275,14 +275,22 @@ internal sealed class Parser {
 
     private SeparatedSyntaxList<Expression> ParseArguments() {
         var nodesWithSeperators = ImmutableArray.CreateBuilder<SyntaxNode>();
+        var parseNextArgument = true;
 
-        while (Current.Kind != SyntaxKind.EndOfFileToken && Current.Kind != SyntaxKind.ClosedParenthesisToken) {
+        while (
+            parseNextArgument 
+            && Current.Kind != SyntaxKind.ClosedParenthesisToken 
+            && Current.Kind != SyntaxKind.EndOfFileToken 
+        ) {
             var expression = ParseAssignmentExpression();
             nodesWithSeperators.Add(expression);
 
-            if (Current.Kind != SyntaxKind.ClosedParenthesisToken) {
-                var comma = MatchToken(SyntaxKind.CommaToken);
-                nodesWithSeperators.Add(comma);
+            if (Current.Kind == SyntaxKind.CommaToken) {
+                var commaToken = MatchToken(SyntaxKind.CommaToken);
+                nodesWithSeperators.Add(commaToken);
+            }
+            else {
+                parseNextArgument = false;
             }
         }
         
@@ -291,19 +299,25 @@ internal sealed class Parser {
 
     private SeparatedSyntaxList<FunctionParameter> ParseParameters() {
         var parameters = ImmutableArray.CreateBuilder<SyntaxNode>();
+        var parseNextParameter = true;
 
-        FunctionParameter parameter;
-        while (Current.Kind != SyntaxKind.EndOfFileToken && Current.Kind != SyntaxKind.ClosedParenthesisToken) {
-            
+        while (
+            parseNextParameter
+            && Current.Kind != SyntaxKind.ClosedParenthesisToken
+            && Current.Kind != SyntaxKind.EndOfFileToken
+        ) { 
             var identifier = MatchToken(SyntaxKind.IdentifierToken);
             var type = ParseTypeClause();
-            parameter = new FunctionParameter(identifier, type);
+            var parameter = new FunctionParameter(identifier, type);
 
             parameters.Add(parameter);
 
-            if (Current.Kind != SyntaxKind.ClosedParenthesisToken) {
+            if (Current.Kind == SyntaxKind.CommaToken) {
                 var comma = MatchToken(SyntaxKind.CommaToken);
                 parameters.Add(comma);
+            }
+            else {
+                parseNextParameter = false;
             }
         }
         

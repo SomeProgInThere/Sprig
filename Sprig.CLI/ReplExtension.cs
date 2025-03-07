@@ -5,13 +5,15 @@ using Sprig.Code;
 using Sprig.Code.Source;
 using Sprig.Code.Syntax;
 
-namespace Sprig.CLI;
+namespace Sprig.Interpreter;
 
 internal sealed class ReplExtensions {
 
     internal static void DisplayDiagnostics(SyntaxTree syntaxTree, EvaluationResult result) {
         var sourceText = syntaxTree.SourceText;
-        foreach (var diagnostic in result.Diagnostics) {
+        var orderedDiagnostics = result.Diagnostics.OrderBy(diag => diag.Span, new TextSpanComparer());
+
+        foreach (var diagnostic in orderedDiagnostics) {
 
             var lineIndex = sourceText.GetLineIndex(diagnostic.Span.Start);
             var line = sourceText.Lines[lineIndex];
@@ -153,4 +155,14 @@ internal sealed class ReplExtensions {
     Sprig [{RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture}]
     Type "!help" for list of commands
     """;
+}
+
+internal class TextSpanComparer : IComparer<TextSpan> {
+    public int Compare(TextSpan x, TextSpan y) {
+        int cmp = x.Start - y.Start;
+        if (cmp == 0)
+            cmp = x.Length - y.Length;
+        
+        return cmp;
+    }
 }

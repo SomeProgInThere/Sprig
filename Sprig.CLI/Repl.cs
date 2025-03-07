@@ -3,7 +3,7 @@ using Sprig.Code;
 using Sprig.Code.Symbols;
 using Sprig.Code.Syntax;
 
-namespace Sprig.CLI;
+namespace Sprig.Interpreter;
 
 internal sealed class Repl {
 

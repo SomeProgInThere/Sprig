@@ -29,7 +29,7 @@ internal sealed class Evaluator(
             var statement = body.Statements[index];
             switch (statement.Kind) {
 
-                case BoundNodeKind.VariableDeclarationStatement:
+                case BoundNodeKind.VariableDeclaration:
                     EvaluateVariableDeclaration((BoundVariableDeclarationStatement)statement);
                     index++;
                     break;
