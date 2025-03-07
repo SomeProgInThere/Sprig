@@ -20,7 +20,7 @@
 ## Structure
 The Solution has three projects in it:
 * Sprig (Main)
-* Sprig.CLI (Command-line Interface)
+* Sprig.Interpreter (Interactive REPL)
 * Sprig.Test (Tests for compiler)
 
 ## Build

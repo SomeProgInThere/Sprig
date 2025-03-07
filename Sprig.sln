@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprig", "Sprig\Sprig.csproj", "{43937580-C0C0-4B54-B943-CF75A9EB2C75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprig.Interpreter", "Sprig.CLI\Sprig.Interpreter.csproj", "{01D2F8F9-B2D1-4FD8-86E0-42E505453487}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprig.Interpreter", "Sprig.Interpreter\Sprig.Interpreter.csproj", "{01D2F8F9-B2D1-4FD8-86E0-42E505453487}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprig.Tests", "Sprig.Test\Sprig.Tests.csproj", "{0142823C-FD49-48AE-8BCD-D8E6AAC514DD}"
 EndProject
