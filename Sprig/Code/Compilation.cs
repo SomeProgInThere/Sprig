@@ -27,7 +27,7 @@ public sealed class Compilation {
             return new EvaluationResult([..program.Diagnostics]);
         
         var statement = GetStatement();
-        var evaluator = new Evaluator(program.FunctionBodies, statement, variables);
+        var evaluator = new Evaluator(program.Functions, statement, variables);
         var result = evaluator.Evaluate();
 
         return new EvaluationResult([], result);
@@ -35,9 +35,22 @@ public sealed class Compilation {
 
     public Compilation ContinueWith(SyntaxTree syntaxTree) => new(this, syntaxTree);
 
-    public void EmitTree(TextWriter writer) { 
+    public void EmitTree(TextWriter writer) {
         var statement = GetStatement();
-        statement.WriteTo(writer);
+        
+        if (statement.Statements.Any())
+            statement.WriteTo(writer);
+
+        else {
+            var program = Binder.BindProgram(GlobalScope);
+            foreach (var functionBody in program.Functions) {
+                if (!GlobalScope.Functions.Contains(functionBody.Key))
+                    continue;
+                
+                functionBody.Key.WriteTo(writer);
+                functionBody.Value.WriteTo(writer);
+            }
+        }
     }
 
     private BoundBlockStatement GetStatement() {
