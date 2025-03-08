@@ -235,7 +235,7 @@ internal static class BoundNodePrinter {
     }
 
     private static void WriteVariableDeclaration(BoundVariableDeclaration node, IndentedTextWriter writer) {
-        writer.WriteKeyword(node.Variable.Mutable ? "var " : "let ");
+        writer.WriteKeyword(node.Variable.Mutable ? "let " : "var ");
         writer.WriteIdentifier(node.Variable.Name);
         writer.WritePunctuation(" = ");
 
