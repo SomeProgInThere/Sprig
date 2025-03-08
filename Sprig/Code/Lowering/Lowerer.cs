@@ -34,7 +34,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 	}
 
 	private LabelSymbol GenerateLabel() {
-		var name = $"l{++labelCount}";
+		var name = $"label{++labelCount}";
 		return new LabelSymbol(name);
 	}
 
@@ -94,19 +94,19 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 				<body>
 			check:
 				goto <condition> continue
+			break:
 	*/
     protected override BoundStatement RewriteWhileStatement(BoundWhileStatement node) {
-		var continueLabel = GenerateLabel();
-		var checkLabel = GenerateLabel();
-
+        var checkLabel = GenerateLabel();
 		var gotoCheck = new BoundGotoStatement(checkLabel);
 		
-		var continueStatement = new BoundLabelStatement(continueLabel);
+		var continueStatement = new BoundLabelStatement(node.JumpLabel.ContinueLabel);
 		var checkStatement = new BoundLabelStatement(checkLabel);
-		var gotoCondition = new BoundConditionalGoto(continueLabel, node.Condition);
+		var gotoCondition = new BoundConditionalGoto(node.JumpLabel.ContinueLabel, node.Condition);
+		var breakStatement = new BoundLabelStatement(node.JumpLabel.BrakeLabel);
 
 		var result = new BoundBlockStatement(
-			[gotoCheck, continueStatement, node.Body, checkStatement, gotoCondition]
+			[gotoCheck, continueStatement, node.Body, checkStatement, gotoCondition, breakStatement]
 		);
 
 		return RewriteStatement(result);
@@ -124,15 +124,15 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 			continue:
 				<body>
 			goto <condition> continue
+			break:
 	*/
     protected override BoundStatement RewriteDoWhileStatement(BoundDoWhileStatement node) {
-		var continueLabel = GenerateLabel();
+        var continueStatement = new BoundLabelStatement(node.JumpLabel.ContinueLabel);
+		var gotoCondition = new BoundConditionalGoto(node.JumpLabel.ContinueLabel, node.Condition);
+		var breakStatement = new BoundLabelStatement(node.JumpLabel.BrakeLabel);
 
-		var continueStatement = new BoundLabelStatement(continueLabel);
-		var gotoCondition = new BoundConditionalGoto(continueLabel, node.Condition);
-		
 		var result = new BoundBlockStatement(
-			[continueStatement, node.Body, gotoCondition]
+			[continueStatement, node.Body, gotoCondition, breakStatement]
 		);
 
 		return RewriteStatement(result);
@@ -150,6 +150,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 			var <upperBound> = <upper>
             while (<var> <= <upperBound>)
                 <body>
+				continue:
                 <var> = <var> + 1
     */
     protected override BoundStatement RewriteForStatement(BoundForStatement node) {
@@ -167,7 +168,9 @@ internal sealed class Lowerer() : BoundTreeRewriter {
                 ?? throw new Exception("Invaild binary operation")
         );
 
-        var step = new BoundExpressionStatement(
+		var continueLabelStatement = new BoundLabelStatement(node.JumpLabel.ContinueLabel);
+
+        var increment = new BoundExpressionStatement(
             new BoundAssignmentExpression(node.Variable, new BoundBinaryExpression(
                     variable,
                     new BoundLiteralExpression(1),
@@ -177,10 +180,11 @@ internal sealed class Lowerer() : BoundTreeRewriter {
             )
         );
 
-        var whileBody = new BoundBlockStatement([node.Body, step]);
-        var whileStatement = new BoundWhileStatement(condition, whileBody);
-        var result = new BoundBlockStatement([variableDeclaration, upperDeclaration, whileStatement]);
+        var whileBody = new BoundBlockStatement([node.Body, continueLabelStatement, increment]);
+		var jumpLabel = new JumpLabel(node.JumpLabel.BrakeLabel, GenerateLabel());
+        var whileStatement = new BoundWhileStatement(condition, whileBody, jumpLabel);
 
+        var result = new BoundBlockStatement([variableDeclaration, upperDeclaration, whileStatement]);
         return RewriteStatement(result);
     }
 

@@ -61,31 +61,3 @@ internal sealed class BoundIfStatement(BoundExpression condition, BoundStatement
 
     public override BoundNodeKind Kind => BoundNodeKind.IfStatement;
 }
-
-internal class BoundWhileStatement(BoundExpression condition, BoundStatement body) 
-    : BoundStatement {
-
-    public BoundExpression Condition { get; } = condition;
-    public BoundStatement Body { get; } = body;
-
-    public override BoundNodeKind Kind => BoundNodeKind.WhileStatement;
-}
-
-internal class BoundDoWhileStatement(BoundStatement body, BoundExpression condition) 
-    : BoundStatement {
-
-    public BoundStatement Body { get; } = body;
-    public BoundExpression Condition { get; } = condition;
-
-    public override BoundNodeKind Kind => BoundNodeKind.DoWhileStatement;
-}
-
-internal class BoundForStatement(VariableSymbol variable, BoundExpression range, BoundStatement body)
-    : BoundStatement {
-
-    public VariableSymbol Variable { get; } = variable;
-    public BoundExpression Range { get; } = range;
-    public BoundStatement Body { get; } = body;
-
-    public override BoundNodeKind Kind => BoundNodeKind.ForStatement;
-}

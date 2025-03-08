@@ -65,6 +65,8 @@ public enum SyntaxKind {
     ForKeyword,
     InKeyword,
     FnKeyword,
+    BreakKeyword,
+    ContinueKeyword,
 
     // Expressions
     LiteralExpression,
@@ -94,4 +96,6 @@ public enum SyntaxKind {
     WhileStatement,
     DoWhileStatement,
     ForStatement,
+    BreakStatement,
+    ContinueStatement,
 }

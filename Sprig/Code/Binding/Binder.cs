@@ -153,6 +153,8 @@ internal sealed class Binder {
             SyntaxKind.WhileStatement           => BindWhileStatement((WhileStatement)syntax),
             SyntaxKind.DoWhileStatement         => BindDoWhileStatement((DoWhileStatement)syntax),
             SyntaxKind.ForStatement             => BindForStatement((ForStatement)syntax),
+            SyntaxKind.BreakStatement           => BindBreakStatement((BreakStatement)syntax),
+            SyntaxKind.ContinueStatement        => BindContinueStatement((ContinueStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
         };
@@ -206,14 +208,14 @@ internal sealed class Binder {
 
     private BoundStatement BindWhileStatement(WhileStatement syntax) {
         var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
-        var body = BindStatement(syntax.Body);
-        return new BoundWhileStatement(condition, body);
+        var body = BindLoopBody(syntax.Body, out var jumpLabel);
+        return new BoundWhileStatement(condition, body, jumpLabel);
     }
 
     private BoundStatement BindDoWhileStatement(DoWhileStatement syntax) {
-        var body = BindStatement(syntax.Body);
+        var body = BindLoopBody(syntax.Body, out var jumpLabel);
         var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
-        return new BoundDoWhileStatement(body, condition);
+        return new BoundDoWhileStatement(body, condition, jumpLabel);
     }
 
     private BoundStatement BindForStatement(ForStatement syntax) {
@@ -222,18 +224,56 @@ internal sealed class Binder {
         scope = new BoundScope(scope);
 
         var variable = BindVariable(syntax.Identifier, true, TypeSymbol.Int);
-        var body = BindStatement(syntax.Body);
+        var body = BindLoopBody(syntax.Body, out var jumpLabel);
 
         if (scope.Parent != null)
             scope = scope.Parent;
 
-        return new BoundForStatement(variable, range, body);
+        return new BoundForStatement(variable, range, body, jumpLabel);
+    }
+
+    private BoundStatement BindBreakStatement(BreakStatement syntax) {
+        if (loopJumps.Count < 0) {
+            diagnostics.ReportInvalidJump(syntax.BreakKeyword.Span, syntax.BreakKeyword.Literal);
+            return BindErrorStatement();
+        }
+
+        var breakLabel = loopJumps.Peek().BrakeLabel;
+        return new BoundGotoStatement(breakLabel);
+    }
+
+    private BoundStatement BindContinueStatement(ContinueStatement syntax) {
+        if (loopJumps.Count < 0) {
+            diagnostics.ReportInvalidJump(syntax.ContinueKeyword.Span, syntax.ContinueKeyword.Literal);
+            return BindErrorStatement();
+        }
+
+        var continueLabel = loopJumps.Peek().ContinueLabel;
+        return new BoundGotoStatement(continueLabel);
     }
 
     private BoundStatement BindExpressionStatement(ExpressionStatement syntax) {
         var expression = BindExpression(syntax.Expression, true);
         return new BoundExpressionStatement(expression);
     }
+
+    private BoundStatement BindLoopBody(Statement body, out JumpLabel jumpLabel) {
+        labelCounter++;
+
+        var breakLabel = new LabelSymbol($"break{labelCounter}");
+        var continueLabel = new LabelSymbol($"continue{labelCounter}");
+
+        jumpLabel = new JumpLabel(breakLabel, continueLabel);
+        
+        loopJumps.Push(jumpLabel);
+        var boundBody = BindStatement(body);
+        loopJumps.Pop();
+
+        return boundBody;
+    }
+
+    private static BoundStatement BindErrorStatement() 
+        => new BoundExpressionStatement(new BoundErrorExpression());
 
     private BoundExpression BindExpression(Expression syntax, bool isVoid = false) {
         var result = BindExpressionInternal(syntax);
@@ -439,6 +479,9 @@ internal sealed class Binder {
     };
 
     private readonly Diagnostics diagnostics = [];
+    private readonly Stack<JumpLabel> loopJumps = [];
+
     private readonly BoundScope? parent;
     private readonly FunctionSymbol? function;
+    private int labelCounter;
 }

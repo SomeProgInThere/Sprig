@@ -79,3 +79,17 @@ public sealed class ForStatement(SyntaxToken forKeyword, SyntaxToken identifier,
 
     public override SyntaxKind Kind => SyntaxKind.ForStatement;
 }
+
+public sealed class BreakStatement(SyntaxToken breakKeyword)
+    : Statement {
+
+    public SyntaxToken BreakKeyword { get; } = breakKeyword;
+    public override SyntaxKind Kind => SyntaxKind.BreakStatement;
+}
+
+public sealed class ContinueStatement(SyntaxToken continueKeyword)
+    : Statement {
+
+    public SyntaxToken ContinueKeyword { get; } = continueKeyword;
+    public override SyntaxKind Kind => SyntaxKind.ContinueStatement;
+}

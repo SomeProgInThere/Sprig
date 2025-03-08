@@ -268,7 +268,6 @@ internal static class BoundNodePrinter {
         if (unindent)
             writer.Indent--;
         
-        writer.WriteLine();
         writer.WritePunctuation(node.Label.Name);
         writer.WritePunctuation(":");
 

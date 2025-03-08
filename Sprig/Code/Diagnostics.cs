@@ -106,6 +106,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
     
+    public void ReportInvalidJump(TextSpan span, string literal) {
+        var message = $"No enclosing loop to {literal} out of";
+        Report(span, message);
+    }
+
     private void Report(TextSpan span, string message) {
         var diagnostic = new DiagnosticMessage(span, message);
         diagnostics.Add(diagnostic);
