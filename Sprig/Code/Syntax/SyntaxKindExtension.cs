@@ -80,6 +80,8 @@ internal static class SyntaxKindExtension {
             SyntaxKind.ClosedParenthesisToken   => ")",
             SyntaxKind.OpenBraceToken           => "{",
             SyntaxKind.ClosedBraceToken         => "}",
+            SyntaxKind.LeftArrowToken           => ">",
+            SyntaxKind.RightArrowToken          => "<",
             SyntaxKind.CommaToken               => ",",
             SyntaxKind.ColonToken               => ":",
 
@@ -94,6 +96,8 @@ internal static class SyntaxKindExtension {
             SyntaxKind.PercentEqualsToken       => "%=",
             SyntaxKind.BangEqualsToken          => "!=",
             SyntaxKind.DoubleEqualsToken        => "==",
+            SyntaxKind.LeftArrowEqualsToken     => ">=",
+            SyntaxKind.RightArrowEqualsToken    => "<=",
             SyntaxKind.DoubleAmpersandToken     => "&&",
             SyntaxKind.AmpersandEqualsToken     => "&=",
             SyntaxKind.DoublePipeToken          => "||",

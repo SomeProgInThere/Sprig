@@ -14,6 +14,7 @@ internal enum BoundNodeKind {
 
     // Statements
     BlockStatement,
+    VariableDeclaration,
     ExpressionStatement,
     GotoStatement,
     ConditionalGotoStatement,
@@ -22,5 +23,4 @@ internal enum BoundNodeKind {
     WhileStatement,
     DoWhileStatement,
     ForStatement,
-    VariableDeclaration,
 }

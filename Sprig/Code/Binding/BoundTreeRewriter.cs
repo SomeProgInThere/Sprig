@@ -8,13 +8,13 @@ internal abstract class BoundTreeRewriter {
         BoundNodeKind.BlockStatement                => RewriteBlockStatement((BoundBlockStatement)node),
         BoundNodeKind.ExpressionStatement           => RewriteExpressionStatement((BoundExpressionStatement)node),
         BoundNodeKind.GotoStatement                 => RewriteGotoStatement((BoundGotoStatement)node),
-        BoundNodeKind.ConditionalGotoStatement      => RewriteConditionalGotoStatement((BoundConditionalGotoStatement)node),
-        BoundNodeKind.LabelStatement                => RewriteLabelStatement((BoundLableStatement)node),
+        BoundNodeKind.ConditionalGotoStatement      => RewriteConditionalGotoStatement((BoundConditionalGoto)node),
+        BoundNodeKind.LabelStatement                => RewriteLabelStatement((BoundLabelStatement)node),
         BoundNodeKind.IfStatement                   => RewriteIfStatement((BoundIfStatement)node),
         BoundNodeKind.WhileStatement                => RewriteWhileStatement((BoundWhileStatement)node),
         BoundNodeKind.DoWhileStatement              => RewriteDoWhileStatement((BoundDoWhileStatement)node),
         BoundNodeKind.ForStatement                  => RewriteForStatement((BoundForStatement)node),
-        BoundNodeKind.VariableDeclaration  => RewriteVariableDeclarationStatement((BoundVariableDeclarationStatement)node),
+        BoundNodeKind.VariableDeclaration  => RewriteVariableDeclarationStatement((BoundVariableDeclaration)node),
 
         _ => throw new Exception($"Unexpected node: {node.Kind}"),
     };
@@ -23,15 +23,15 @@ internal abstract class BoundTreeRewriter {
         return node;
     }
 
-    private BoundStatement RewriteConditionalGotoStatement(BoundConditionalGotoStatement node){
+    private BoundStatement RewriteConditionalGotoStatement(BoundConditionalGoto node){
         var condition = RewriteExpression(node.Condition);
         if (condition == node.Condition)
             return node;
         
-        return new BoundConditionalGotoStatement(node.Label, condition, node.Jump);
+        return new BoundConditionalGoto(node.Label, condition, node.Jump);
     }
     
-    private static BoundStatement RewriteLabelStatement(BoundLableStatement node) {
+    private static BoundStatement RewriteLabelStatement(BoundLabelStatement node) {
         return node;
     }
 
@@ -104,13 +104,13 @@ internal abstract class BoundTreeRewriter {
         return new BoundForStatement(node.Variable, range, body);
     }
 
-    protected virtual BoundStatement RewriteVariableDeclarationStatement(BoundVariableDeclarationStatement node) {
+    protected virtual BoundStatement RewriteVariableDeclarationStatement(BoundVariableDeclaration node) {
         var initializer = RewriteExpression(node.Initializer);
 
         if (initializer == node.Initializer)
             return node;
 
-        return new BoundVariableDeclarationStatement(node.Variable, initializer);
+        return new BoundVariableDeclaration(node.Variable, initializer);
     }
 
     public virtual BoundExpression RewriteExpression(BoundExpression node) => node.Kind switch {
@@ -166,7 +166,7 @@ internal abstract class BoundTreeRewriter {
         if (lower == node.Lower && upper == node.Upper)
             return node;
 
-        return new BoundRangeExpression(lower, node.RangeToken, upper);
+        return new BoundRangeExpression(lower, upper);
     }
 
     protected virtual BoundExpression RewriteCallExpression(BoundCallExpression node) {

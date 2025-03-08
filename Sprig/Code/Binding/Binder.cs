@@ -189,7 +189,7 @@ internal sealed class Binder {
         var castInitializer = BindCast(syntax.Initializer.Span, initializer, variableType);
         var variable = BindVariable(syntax.Identifier, mutable, variableType);
 
-        return new BoundVariableDeclarationStatement(variable, castInitializer);
+        return new BoundVariableDeclaration(variable, castInitializer);
     }
 
     private BoundStatement BindIfStatement(IfStatement syntax) {
@@ -381,7 +381,6 @@ internal sealed class Binder {
 
     private BoundExpression BindRangeExpression(RangeExpression syntax) {
         var lower = BindExpression(syntax.LowerBound);
-        var rangeToken = syntax.RangeToken;
         var upper = BindExpression(syntax.UpperBound);
 
         if (lower.Type.IsError || upper.Type.IsError)
@@ -392,7 +391,7 @@ internal sealed class Binder {
             return new BoundErrorExpression();
         }
 
-        return new BoundRangeExpression(lower, rangeToken, upper);
+        return new BoundRangeExpression(lower, upper);
     }
 
     private BoundExpression BindCast(Expression syntax, TypeSymbol type, bool allowExplicit = false) {

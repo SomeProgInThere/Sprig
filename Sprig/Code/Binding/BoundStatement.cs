@@ -12,7 +12,7 @@ internal sealed class BoundBlockStatement(ImmutableArray<BoundStatement> stateme
     public override BoundNodeKind Kind => BoundNodeKind.BlockStatement;
 }
 
-internal sealed class BoundVariableDeclarationStatement(VariableSymbol variable, BoundExpression initializer)
+internal sealed class BoundVariableDeclaration(VariableSymbol variable, BoundExpression initializer)
     : BoundStatement {
         
     public VariableSymbol Variable { get; } = variable;
@@ -35,7 +35,7 @@ internal sealed class BoundGotoStatement(LabelSymbol label)
     public override BoundNodeKind Kind => BoundNodeKind.GotoStatement;
 }
 
-internal sealed class BoundConditionalGotoStatement(LabelSymbol label, BoundExpression condition, bool jump = true)
+internal sealed class BoundConditionalGoto(LabelSymbol label, BoundExpression condition, bool jump = true)
     : BoundStatement {
 
     public LabelSymbol Label { get; } = label;
@@ -45,7 +45,7 @@ internal sealed class BoundConditionalGotoStatement(LabelSymbol label, BoundExpr
     public override BoundNodeKind Kind => BoundNodeKind.ConditionalGotoStatement;
 }
 
-internal sealed class BoundLableStatement(LabelSymbol label)
+internal sealed class BoundLabelStatement(LabelSymbol label)
     : BoundStatement {
 
     public LabelSymbol Label { get; } = label;

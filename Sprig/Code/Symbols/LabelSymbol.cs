@@ -1,4 +1,4 @@
-namespace Sprig.Code.Binding;
+namespace Sprig.Code.Symbols;
 
 internal sealed class LabelSymbol(string name) {
     public string Name { get; } = name;

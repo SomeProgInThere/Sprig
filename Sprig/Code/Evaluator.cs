@@ -20,7 +20,7 @@ internal sealed class Evaluator(
         var labelTable = new Dictionary<LabelSymbol, int>();
 
         for (var i = 0; i < body.Statements.Length; i++) {
-            if (body.Statements[i] is BoundLableStatement statement)
+            if (body.Statements[i] is BoundLabelStatement statement)
                 labelTable.Add(statement.Label, i + 1);
         }
 
@@ -30,7 +30,7 @@ internal sealed class Evaluator(
             switch (statement.Kind) {
 
                 case BoundNodeKind.VariableDeclaration:
-                    EvaluateVariableDeclaration((BoundVariableDeclarationStatement)statement);
+                    EvaluateVariableDeclaration((BoundVariableDeclaration)statement);
                     index++;
                     break;
 
@@ -45,7 +45,7 @@ internal sealed class Evaluator(
                     break;
 
                 case BoundNodeKind.ConditionalGotoStatement:
-                    var conditionalGotoStatement = (BoundConditionalGotoStatement)statement;
+                    var conditionalGotoStatement = (BoundConditionalGoto)statement;
                     var condition = (bool)EvaluateExpression(conditionalGotoStatement.Condition);
 
                     if (condition && conditionalGotoStatement.Jump || !condition && !conditionalGotoStatement.Jump)
@@ -66,7 +66,7 @@ internal sealed class Evaluator(
         return lastValue;
     }
 
-    private void EvaluateVariableDeclaration(BoundVariableDeclarationStatement node) {
+    private void EvaluateVariableDeclaration(BoundVariableDeclaration node) {
         var value = EvaluateExpression(node.Initializer);
         lastValue = value;
         AssignValue(node.Variable, value);

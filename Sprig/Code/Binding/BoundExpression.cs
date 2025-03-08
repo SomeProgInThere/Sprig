@@ -34,10 +34,10 @@ internal sealed class BoundUnaryExpression(BoundExpression operand, UnaryOperato
     public override TypeSymbol Type => Operand.Type;
 }
 
-internal sealed class BoundVariableExpression(VariableSymbol? variable)
+internal sealed class BoundVariableExpression(VariableSymbol variable)
     : BoundExpression {
 
-    public VariableSymbol? Variable { get; } = variable;
+    public VariableSymbol Variable { get; } = variable;
     
     public override BoundNodeKind Kind => BoundNodeKind.VariableExpression;
     public override TypeSymbol Type => Variable?.Type ?? TypeSymbol.Int;
@@ -64,11 +64,10 @@ internal sealed class BoundBinaryExpression(BoundExpression left, BoundExpressio
     public override TypeSymbol Type => Operator.ResultType;
 }
 
-internal sealed class BoundRangeExpression(BoundExpression lower, SyntaxToken rangeToken, BoundExpression upper)
+internal sealed class BoundRangeExpression(BoundExpression lower, BoundExpression upper)
     : BoundExpression
 {
     public BoundExpression Lower { get; } = lower;
-    public SyntaxToken RangeToken { get; } = rangeToken;
     public BoundExpression Upper { get; } = upper;
 
     public override BoundNodeKind Kind => BoundNodeKind.RangeExpression;
