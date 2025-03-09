@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-using Sprig.Code.Syntax;
+using Sprig.Codegen.Syntax;
 
 namespace Sprig.Interpreter;
 

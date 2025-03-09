@@ -1,7 +1,7 @@
 
-using Sprig.Code;
-using Sprig.Code.Symbols;
-using Sprig.Code.Syntax;
+using Sprig.Codegen;
+using Sprig.Codegen.Symbols;
+using Sprig.Codegen.Syntax;
 
 namespace Sprig.Tests;
 
