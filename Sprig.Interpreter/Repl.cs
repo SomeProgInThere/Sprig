@@ -84,9 +84,7 @@ internal sealed class Repl {
                     break;
 
                 case ConsoleKey.Escape:
-                    document.Clear();
-                    document.Add(string.Empty);
-                    view.CurrentLine = 0;
+                    ReplExtensions.HandleEscape(document, view);
                     break;
 
                 case ConsoleKey.PageUp:

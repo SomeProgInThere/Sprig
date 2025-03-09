@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+
 using Sprig.Codegen.Lowering;
 using Sprig.Codegen.Source;
 using Sprig.Codegen.Symbols;
@@ -323,8 +324,22 @@ internal sealed class Binder {
         }
 
         if (syntax.Arguments.Count != function?.Parameters.Length) {
+            TextSpan span;
+
+            if (syntax.Arguments.Count > function.Parameters.Length) {
+                SyntaxNode? firstExcessNode = function.Parameters.Length > 0 
+                    ? syntax.Arguments.Seperator(function.Parameters.Length - 1)
+                    : syntax.Arguments[0];
+                
+                var lastExcessArgument = syntax.Arguments[^1];
+                span = TextSpan.CreateFromBounds(firstExcessNode.Span.Start, lastExcessArgument.Span.End);
+            }
+            else {
+                span = syntax.ClosedParenthesisToken.Span;
+            }
+            
             diagnostics.ReportIncorrectArgumentCount(
-                syntax.Span, 
+                span, 
                 function?.Name ?? "", 
                 function?.Parameters.Length ?? 0, 
                 syntax.Arguments.Count
@@ -333,15 +348,21 @@ internal sealed class Binder {
             return new BoundErrorExpression();
         }
 
+        bool hasErrors = false;
         for (var i = 0; i < boundArguments.Count; i++) {
             var parameter = function.Parameters[i];
             var argument = boundArguments[i];
             
             if (argument.Type != parameter.Type) {
-                diagnostics.ReportIncorrectArgumentType(syntax.Arguments[i].Span, parameter.Name, parameter.Type, argument.Type);
-                return new BoundErrorExpression();
+                if (argument.Type != TypeSymbol.Error)
+                    diagnostics.ReportIncorrectArgumentType(syntax.Arguments[i].Span, parameter.Name, parameter.Type, argument.Type);
+                
+                hasErrors = true;
             }
         }
+
+        if (hasErrors)
+            return new BoundErrorExpression();
 
         return new BoundCallExpression(function, boundArguments.ToImmutableArray());
     }

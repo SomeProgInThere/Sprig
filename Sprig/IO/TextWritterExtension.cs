@@ -1,5 +1,6 @@
 
 using System.CodeDom.Compiler;
+using Sprig.Codegen.Syntax;
 
 namespace Sprig.IO;
 
@@ -23,14 +24,22 @@ public static class TextWritterExtension {
             Console.ResetColor();
     }
 
-    public static void WriteKeyword(this TextWriter writer, string text) {
+    public static void WriteSpace(this TextWriter writer) => writer.Write(" ");
+
+    public static void WriteKeyword(this TextWriter writer, SyntaxKind token) {
         writer.SetForeground(ConsoleColor.Blue);
-        writer.Write(text);
+        writer.Write(token.Literal());
         writer.ResetColor();
     }
 
     public static void WriteIdentifier(this TextWriter writer, string text) {
         writer.SetForeground(ConsoleColor.DarkYellow);
+        writer.Write(text);
+        writer.ResetColor();
+    }
+
+    public static void WriteExtra(this TextWriter writer, string text) {
+        writer.SetForeground(ConsoleColor.Gray);
         writer.Write(text);
         writer.ResetColor();
     }
@@ -47,9 +56,9 @@ public static class TextWritterExtension {
         writer.ResetColor();
     }
 
-    public static void WritePunctuation(this TextWriter writer, string text) {
+    public static void WritePunctuation(this TextWriter writer, SyntaxKind token) {
         writer.SetForeground(ConsoleColor.Gray);
-        writer.Write(text);
+        writer.Write(token.Literal());
         writer.ResetColor();
     }
 }

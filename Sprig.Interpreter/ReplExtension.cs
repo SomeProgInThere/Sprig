@@ -97,6 +97,12 @@ internal sealed class ReplExtensions {
         view.CurrentChar--;        
     }
 
+    internal static void HandleEscape(ObservableCollection<string> document, SourceView view) {
+        document.Clear();
+        document.Add(string.Empty);
+        view.CurrentLine = 0;
+    }
+
     internal static void HandleDelete(ObservableCollection<string> document, SourceView view) {
         var lineIndex = view.CurrentLine;
         var line = document[lineIndex];
