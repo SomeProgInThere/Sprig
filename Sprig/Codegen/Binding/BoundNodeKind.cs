@@ -15,11 +15,11 @@ internal enum BoundNodeKind {
     // Statements
     BlockStatement,
     VariableDeclaration,
-    ExpressionStatement,
+    LabelStatement,
     GotoStatement,
     ConditionalGotoStatement,
     ReturnStatement,
-    LabelStatement,
+    ExpressionStatement,
     IfStatement,
     WhileStatement,
     DoWhileStatement,

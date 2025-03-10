@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-
+using Sprig.Codegen.Binding.ControlFlow;
 using Sprig.Codegen.Lowering;
 using Sprig.Codegen.Source;
 using Sprig.Codegen.Symbols;
@@ -57,8 +57,10 @@ internal sealed class Binder {
                 var body = binder.BindStatement(function.Header.Body);
                 
                 var loweredBody = Lowerer.Lower(body);
-                functionBodies.Add(function, loweredBody);
+                if (function.ReturnType != TypeSymbol.Void && !ControlFlowGraph.AllPathsReturn(loweredBody))
+                    binder.diagnostics.ReportNotAllPathsReturn(function.Header.Identifier.Span);
 
+                functionBodies.Add(function, loweredBody);
                 diagnostics = diagnostics.AddRange(binder.Diagnostics);
             }
 
@@ -434,7 +436,7 @@ internal sealed class Binder {
         if (operand.Type.IsError)
             return new BoundErrorExpression();
 
-        var op = UnaryOperator.Bind(token.Kind, operand.Type);
+        var op = BoundUnaryOperator.Bind(token.Kind, operand.Type);
         if (op == null) {
             diagnostics.ReportUndefinedUnaryOperator(token.Span, token.Literal, operand.Type);
             return new BoundErrorExpression();
@@ -451,7 +453,7 @@ internal sealed class Binder {
         if (left.Type.IsError || right.Type.IsError)
             return new BoundErrorExpression();
 
-        var op = BinaryOperator.Bind(token.Kind, left.Type, right.Type);
+        var op = BoundBinaryOperator.Bind(token.Kind, left.Type, right.Type);
         
         if (op == null) {
             diagnostics.ReportUndefinedBinaryOperator(token.Span, token.Literal, left.Type, right.Type);

@@ -69,13 +69,17 @@ internal static class BoundNodePrinter {
                 break;
                 
             case BoundNodeKind.ConditionalGotoStatement: 
-                WriteConditionalGoto((BoundConditionalGoto)node, writer);
+                WriteConditionalGoto((BoundConditionalGotoStatement)node, writer);
                 break;
                 
             case BoundNodeKind.LabelStatement: 
                 WriteLabelStatement((BoundLabelStatement)node, writer);
                 break;
                 
+            case BoundNodeKind.ReturnStatement:
+                WriteReturnStatement((BoundReturnStatment)node, writer);
+                break;
+
             case BoundNodeKind.IfStatement: 
                 WriteIfStatement((BoundIfStatement)node, writer);
                 break;
@@ -265,7 +269,7 @@ internal static class BoundNodePrinter {
         writer.WriteLine();
     }
 
-    private static void WriteConditionalGoto(BoundConditionalGoto node, IndentedTextWriter writer) {
+    private static void WriteConditionalGoto(BoundConditionalGotoStatement node, IndentedTextWriter writer) {
         writer.WriteExtra("goto");
         writer.WriteSpace();
         writer.WriteIdentifier(node.Label.Name);
@@ -288,6 +292,16 @@ internal static class BoundNodePrinter {
 
         if (unindent)
             writer.Indent++;
+
+        writer.WriteLine();
+    }
+
+    private static void WriteReturnStatement(BoundReturnStatment node, IndentedTextWriter writer) {
+        writer.WriteKeyword(SyntaxKind.ReturnKeyword);
+        if (node.Expression != null) {
+            writer.WriteSpace();
+            node.Expression.WriteTo(writer);
+        }
 
         writer.WriteLine();
     }

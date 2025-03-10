@@ -14,12 +14,12 @@ internal enum UnaryOperatorKind {
     PostDecrement,
 }
 
-internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kind, TypeSymbol operandType, TypeSymbol resultType) {
+internal sealed class BoundUnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kind, TypeSymbol operandType, TypeSymbol resultType) {
 
-    public UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind operatorKind, TypeSymbol operandType)
+    public BoundUnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind operatorKind, TypeSymbol operandType)
         : this(syntaxKind, operatorKind, operandType, operandType) {}
 
-    public static UnaryOperator? Bind(SyntaxKind kind, TypeSymbol operandType) {
+    public static BoundUnaryOperator? Bind(SyntaxKind kind, TypeSymbol operandType) {
         foreach (var op in operators)
             if (op.SyntaxKind == kind && op.OperandType == operandType)
                 return op;
@@ -32,16 +32,16 @@ internal sealed class UnaryOperator(SyntaxKind syntaxKind, UnaryOperatorKind kin
     public TypeSymbol OperandType { get; } = operandType;
     public TypeSymbol ResultType { get; } = resultType;
 
-    private static readonly UnaryOperator[] operators = [
-        new UnaryOperator(SyntaxKind.PlusToken,  UnaryOperatorKind.Identity,   TypeSymbol.Int),
-        new UnaryOperator(SyntaxKind.MinusToken, UnaryOperatorKind.Negetion,   TypeSymbol.Int),
-        new UnaryOperator(SyntaxKind.TildeToken, UnaryOperatorKind.BitwiseNot, TypeSymbol.Int),
+    private static readonly BoundUnaryOperator[] operators = [
+        new BoundUnaryOperator(SyntaxKind.PlusToken,  UnaryOperatorKind.Identity,   TypeSymbol.Int),
+        new BoundUnaryOperator(SyntaxKind.MinusToken, UnaryOperatorKind.Negetion,   TypeSymbol.Int),
+        new BoundUnaryOperator(SyntaxKind.TildeToken, UnaryOperatorKind.BitwiseNot, TypeSymbol.Int),
 
-        new UnaryOperator(SyntaxKind.DoublePlusToken,  UnaryOperatorKind.PostIncrement, TypeSymbol.Int),
-        new UnaryOperator(SyntaxKind.DoubleMinusToken, UnaryOperatorKind.PostDecrement, TypeSymbol.Int),
-        new UnaryOperator(SyntaxKind.DoublePlusToken,  UnaryOperatorKind.PreIncrement,  TypeSymbol.Int),
-        new UnaryOperator(SyntaxKind.DoubleMinusToken, UnaryOperatorKind.PreDecrement,  TypeSymbol.Int),
+        new BoundUnaryOperator(SyntaxKind.DoublePlusToken,  UnaryOperatorKind.PostIncrement, TypeSymbol.Int),
+        new BoundUnaryOperator(SyntaxKind.DoubleMinusToken, UnaryOperatorKind.PostDecrement, TypeSymbol.Int),
+        new BoundUnaryOperator(SyntaxKind.DoublePlusToken,  UnaryOperatorKind.PreIncrement,  TypeSymbol.Int),
+        new BoundUnaryOperator(SyntaxKind.DoubleMinusToken, UnaryOperatorKind.PreDecrement,  TypeSymbol.Int),
         
-        new UnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, TypeSymbol.Bool),
+        new BoundUnaryOperator(SyntaxKind.BangToken,  UnaryOperatorKind.LogicalNot, TypeSymbol.Bool),
     ];
 }

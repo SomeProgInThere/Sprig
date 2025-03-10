@@ -45,7 +45,7 @@ internal sealed class Evaluator(
                     break;
 
                 case BoundNodeKind.ConditionalGotoStatement:
-                    var conditionalGotoStatement = (BoundConditionalGoto)statement;
+                    var conditionalGotoStatement = (BoundConditionalGotoStatement)statement;
                     var condition = (bool)EvaluateExpression(conditionalGotoStatement.Condition);
 
                     if (condition && conditionalGotoStatement.Jump 

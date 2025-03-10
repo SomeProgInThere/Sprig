@@ -35,7 +35,7 @@ internal sealed class BoundGotoStatement(LabelSymbol label)
     public override BoundNodeKind Kind => BoundNodeKind.GotoStatement;
 }
 
-internal sealed class BoundConditionalGoto(LabelSymbol label, BoundExpression condition, bool jump = true)
+internal sealed class BoundConditionalGotoStatement(LabelSymbol label, BoundExpression condition, bool jump = true)
     : BoundStatement {
 
     public LabelSymbol Label { get; } = label;

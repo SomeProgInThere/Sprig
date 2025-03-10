@@ -42,7 +42,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 		if (node.ElseStatement is null) {
 			var endLabel = GenerateLabel();
 
-			var gotoCondition = new BoundConditionalGoto(endLabel, node.Condition, false);
+			var gotoCondition = new BoundConditionalGotoStatement(endLabel, node.Condition, false);
 			var endStatement = new BoundLabelStatement(endLabel);
 			var result = new BoundBlockStatement([
 				gotoCondition, 
@@ -56,7 +56,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 			var elseLabel = GenerateLabel();
 			var endLabel = GenerateLabel();
 
-			var gotoCondition = new BoundConditionalGoto(elseLabel, node.Condition, false);
+			var gotoCondition = new BoundConditionalGotoStatement(elseLabel, node.Condition, false);
 			var gotoStatement = new BoundGotoStatement(endLabel);
 			var elseStatement = new BoundLabelStatement(elseLabel);
 			var endStatement = new BoundLabelStatement(endLabel);
@@ -80,7 +80,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 		var bodyLabelStatement = new BoundLabelStatement(bodyLabel);
 
 		var continueLabelStatement = new BoundLabelStatement(node.JumpLabel.ContinueLabel);
-		var gotoCondition = new BoundConditionalGoto(bodyLabel, node.Condition);
+		var gotoCondition = new BoundConditionalGotoStatement(bodyLabel, node.Condition);
 		var breakStatement = new BoundLabelStatement(node.JumpLabel.BrakeLabel);
 
 		var result = new BoundBlockStatement([
@@ -100,7 +100,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
 		var bodyLabelStatement = new BoundLabelStatement(bodyLabel);
 
 		var continueLabelStatement = new BoundLabelStatement(node.JumpLabel.ContinueLabel);
-		var gotoCondition = new BoundConditionalGoto(bodyLabel, node.Condition);
+		var gotoCondition = new BoundConditionalGotoStatement(bodyLabel, node.Condition);
 		var breakStatement = new BoundLabelStatement(node.JumpLabel.BrakeLabel);
 
 		var result = new BoundBlockStatement([
@@ -125,7 +125,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
         var condition = new BoundBinaryExpression(
             variable,
             new BoundVariableExpression(upperSymbol),
-            BinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int, TypeSymbol.Int) 
+            BoundBinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int, TypeSymbol.Int) 
                 ?? throw new Exception("Invaild binary operation")
         );
 
@@ -135,7 +135,7 @@ internal sealed class Lowerer() : BoundTreeRewriter {
             new BoundAssignmentExpression(node.Variable, new BoundBinaryExpression(
                     variable,
                     new BoundLiteralExpression(1),
-                    BinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int, TypeSymbol.Int)
+                    BoundBinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int, TypeSymbol.Int)
                         ?? throw new Exception("Invalid binary operation")
                 )
             )

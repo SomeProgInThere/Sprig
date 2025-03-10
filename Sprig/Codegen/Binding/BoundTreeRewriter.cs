@@ -8,7 +8,7 @@ internal abstract class BoundTreeRewriter {
         BoundNodeKind.BlockStatement                => RewriteBlockStatement((BoundBlockStatement)node),
         BoundNodeKind.ExpressionStatement           => RewriteExpressionStatement((BoundExpressionStatement)node),
         BoundNodeKind.GotoStatement                 => RewriteGotoStatement((BoundGotoStatement)node),
-        BoundNodeKind.ConditionalGotoStatement      => RewriteConditionalGotoStatement((BoundConditionalGoto)node),
+        BoundNodeKind.ConditionalGotoStatement      => RewriteConditionalGotoStatement((BoundConditionalGotoStatement)node),
         BoundNodeKind.LabelStatement                => RewriteLabelStatement((BoundLabelStatement)node),
         BoundNodeKind.ReturnStatement               => RewriteReturnStatment((BoundReturnStatment)node),
         BoundNodeKind.IfStatement                   => RewriteIfStatement((BoundIfStatement)node),
@@ -22,12 +22,12 @@ internal abstract class BoundTreeRewriter {
 
     private static BoundStatement RewriteGotoStatement(BoundGotoStatement node) => node;
 
-    private BoundStatement RewriteConditionalGotoStatement(BoundConditionalGoto node){
+    private BoundStatement RewriteConditionalGotoStatement(BoundConditionalGotoStatement node){
         var condition = RewriteExpression(node.Condition);
         if (condition == node.Condition)
             return node;
         
-        return new BoundConditionalGoto(node.Label, condition, node.Jump);
+        return new BoundConditionalGotoStatement(node.Label, condition, node.Jump);
     }
 
     private static BoundStatement RewriteLabelStatement(BoundLabelStatement node) => node;

@@ -4,6 +4,7 @@ using Sprig.Codegen.Binding;
 using Sprig.Codegen.Lowering;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
+using Sprig.Codegen.Binding.ControlFlow;
 
 namespace Sprig.Codegen;
 
@@ -18,7 +19,10 @@ public sealed class Compilation {
     }
 
     public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables) {
-        var diagnostics = SyntaxTree.Diagnostics.Concat(GlobalScope?.Diagnostics ?? []).ToImmutableArray();        
+        var diagnostics = SyntaxTree.Diagnostics
+            .Concat(GlobalScope?.Diagnostics ?? [])
+            .ToImmutableArray();        
+        
         if (diagnostics.Any())
             return new EvaluationResult(diagnostics);
 
@@ -27,6 +31,21 @@ public sealed class Compilation {
             return new EvaluationResult([..program.Diagnostics]);
         
         var statement = GetStatement();
+
+        var appPath = Environment.GetCommandLineArgs()[0];
+        var appDirectory = Path.GetDirectoryName(appPath);
+        var graphPath = Path.Combine(appDirectory, "cfg.dot");
+
+        var controlFlowStatments = !statement.Statements.Any() 
+            && !program.Functions.IsEmpty
+                ? program.Functions.Last().Value
+                : statement;
+
+        var controlFlowGraph = ControlFlowGraph.Create(controlFlowStatments);
+
+        using (var writer = new StreamWriter(graphPath))
+            controlFlowGraph.WriteTo(writer);
+
         var evaluator = new Evaluator(program.Functions, statement, variables);
         var result = evaluator.Evaluate();
 
@@ -37,7 +56,7 @@ public sealed class Compilation {
 
     public void EmitTree(TextWriter writer) {
         var statement = GetStatement();
-        
+
         if (statement.Statements.Any())
             statement.WriteTo(writer);
 
