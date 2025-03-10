@@ -93,3 +93,12 @@ public sealed class ContinueStatement(SyntaxToken continueKeyword)
     public SyntaxToken ContinueKeyword { get; } = continueKeyword;
     public override SyntaxKind Kind => SyntaxKind.ContinueStatement;
 }
+
+public sealed class ReturnStatement(SyntaxToken returnKeyword, Expression? expression) 
+    : Statement {
+        
+    public SyntaxToken ReturnKeyword { get; } = returnKeyword;
+    public Expression? Expression { get; } = expression;
+
+    public override SyntaxKind Kind => SyntaxKind.ReturnStatement;
+}

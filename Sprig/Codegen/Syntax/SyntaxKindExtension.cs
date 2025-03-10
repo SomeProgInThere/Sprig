@@ -56,6 +56,7 @@ internal static class SyntaxKindExtension {
             "for"      => SyntaxKind.ForKeyword,
             "break"    => SyntaxKind.BreakKeyword,
             "continue" => SyntaxKind.ContinueKeyword,
+            "return"   => SyntaxKind.ReturnKeyword,
             "in"       => SyntaxKind.InKeyword,
             "fn"       => SyntaxKind.FnKeyword,
             "let"      => SyntaxKind.LetKeyword,
@@ -120,6 +121,7 @@ internal static class SyntaxKindExtension {
             SyntaxKind.ElseKeyword     => "else",
             SyntaxKind.BreakKeyword    => "break",
             SyntaxKind.ContinueKeyword => "continue",
+            SyntaxKind.ReturnKeyword   => "return",
             SyntaxKind.LetKeyword      => "let",
             SyntaxKind.VarKeyword      => "var",
 

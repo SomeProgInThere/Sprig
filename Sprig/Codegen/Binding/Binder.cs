@@ -124,10 +124,8 @@ internal sealed class Binder {
         }
 
         var type = BindTypeClause(syntax.ReturnType) ?? TypeSymbol.Void;
-        if (type != TypeSymbol.Void)
-            throw new Exception("Functions with returns are not supported");
-
         var function = new FunctionSymbol(syntax.Identifier.Literal, parameters.ToImmutable(), type, syntax);
+        
         if (!scope.TryDeclareFunction(function))
             diagnostics.ReportSymbolAlreadyExists(syntax.Identifier.Span, function.Name);
     }
@@ -156,6 +154,7 @@ internal sealed class Binder {
             SyntaxKind.ForStatement             => BindForStatement((ForStatement)syntax),
             SyntaxKind.BreakStatement           => BindBreakStatement((BreakStatement)syntax),
             SyntaxKind.ContinueStatement        => BindContinueStatement((ContinueStatement)syntax),
+            SyntaxKind.ReturnStatement          => BindReturnStatement((ReturnStatement)syntax),
 
             _ => throw new Exception($"Unexpected statement: {syntax.Kind}"),
         };
@@ -251,6 +250,28 @@ internal sealed class Binder {
 
         var continueLabel = loopJumps.Peek().ContinueLabel;
         return new BoundGotoStatement(continueLabel);
+    }
+
+    private BoundStatement BindReturnStatement(ReturnStatement syntax) {
+        var expression = syntax.Expression == null ? null : BindExpression(syntax.Expression);
+        
+        if (function is null)
+            diagnostics.ReportInvalidReturn(syntax.ReturnKeyword.Span);
+
+        else {
+            if (function.ReturnType == TypeSymbol.Void) {
+                if (expression != null)
+                    diagnostics.ReportInvalidReturnExpression(syntax.Expression.Span, function.Name);
+            }
+            else {
+                if (expression is null)
+                    diagnostics.ReportMissingReturnExpression(syntax.ReturnKeyword.Span, function.Name, function.ReturnType);
+                
+                expression = BindCast(syntax.Expression.Span, expression, function.ReturnType);
+            }
+        }
+
+        return new BoundReturnStatment(expression);
     }
 
     private BoundStatement BindExpressionStatement(ExpressionStatement syntax) {

@@ -48,7 +48,9 @@ internal sealed class Evaluator(
                     var conditionalGotoStatement = (BoundConditionalGoto)statement;
                     var condition = (bool)EvaluateExpression(conditionalGotoStatement.Condition);
 
-                    if (condition && conditionalGotoStatement.Jump || !condition && !conditionalGotoStatement.Jump)
+                    if (condition && conditionalGotoStatement.Jump 
+                        || !condition && !conditionalGotoStatement.Jump)
+                        
                         index = labelTable[conditionalGotoStatement.Label];
                     else
                         index++;
@@ -57,6 +59,14 @@ internal sealed class Evaluator(
                 case BoundNodeKind.LabelStatement:
                     index++;
                     break;
+
+                case BoundNodeKind.ReturnStatement:
+                    var returnStatment = (BoundReturnStatment)statement;
+                    lastValue = returnStatment.Expression is null
+                        ? null
+                        : EvaluateExpression(returnStatment.Expression);
+
+                    return lastValue;
 
                 default:
                     throw new Exception($"Undefined statement: {statement.Kind}");

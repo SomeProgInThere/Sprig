@@ -6,18 +6,19 @@ namespace Sprig.Codegen.Syntax;
 internal sealed class Parser {
 
     public Parser(SourceText sourceText) {
-        var tokens = new List<SyntaxToken>();
+        var sourceTokens = new List<SyntaxToken>();
         var lexer = new Lexer(sourceText);
         SyntaxToken token;
 
         do {
             token = lexer.Lex();
             if (token.Kind != SyntaxKind.WhitespaceToken && token.Kind != SyntaxKind.BadToken)
-                tokens.Add(token);    
+                sourceTokens.Add(token);    
         } 
         while (token.Kind != SyntaxKind.EndOfFileToken);
            
-        this.tokens = [..tokens];
+        tokens = [..sourceTokens];
+        source = sourceText;
         Diagnostics = lexer.Diagnostics;
     }
 
@@ -83,9 +84,22 @@ internal sealed class Parser {
         SyntaxKind.ForKeyword       => ParseForStatement(),
         SyntaxKind.BreakKeyword     => ParseBreakStatement(),
         SyntaxKind.ContinueKeyword  => ParseContinueStatement(),
+        SyntaxKind.ReturnKeyword    => ParseReturnStatement(),
         
         _ => ParseExpressionStatement(),
     };
+
+    private Statement ParseReturnStatement() {
+        var keyword = MatchToken(SyntaxKind.ReturnKeyword);
+        
+        var keywordLine = source.GetLineIndex(keyword.Span.Start);
+        var currentLine = source.GetLineIndex(Current.Span.Start);
+        var isEof = Current.Kind == SyntaxKind.EndOfFileToken;
+        var isSameLine = !isEof && keywordLine == currentLine;
+
+        var expression = isSameLine ? ParseAssignmentExpression() : null;
+        return new ReturnStatement(keyword, expression);
+    }
 
     private Statement ParseBlockStatement() {        
         var statements = ImmutableArray.CreateBuilder<Statement>();
@@ -378,6 +392,7 @@ internal sealed class Parser {
 
     private readonly Stack<ElseClause?> orderedClauses = new();
     private readonly ImmutableArray<SyntaxToken> tokens;
+    private readonly SourceText source;
 
     private int position;
 };

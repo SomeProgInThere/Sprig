@@ -10,6 +10,7 @@ internal abstract class BoundTreeRewriter {
         BoundNodeKind.GotoStatement                 => RewriteGotoStatement((BoundGotoStatement)node),
         BoundNodeKind.ConditionalGotoStatement      => RewriteConditionalGotoStatement((BoundConditionalGoto)node),
         BoundNodeKind.LabelStatement                => RewriteLabelStatement((BoundLabelStatement)node),
+        BoundNodeKind.ReturnStatement               => RewriteReturnStatment((BoundReturnStatment)node),
         BoundNodeKind.IfStatement                   => RewriteIfStatement((BoundIfStatement)node),
         BoundNodeKind.WhileStatement                => RewriteWhileStatement((BoundWhileStatement)node),
         BoundNodeKind.DoWhileStatement              => RewriteDoWhileStatement((BoundDoWhileStatement)node),
@@ -19,9 +20,7 @@ internal abstract class BoundTreeRewriter {
         _ => throw new Exception($"Unexpected node: {node.Kind}"),
     };
 
-    private static BoundStatement RewriteGotoStatement(BoundGotoStatement node) {
-        return node;
-    }
+    private static BoundStatement RewriteGotoStatement(BoundGotoStatement node) => node;
 
     private BoundStatement RewriteConditionalGotoStatement(BoundConditionalGoto node){
         var condition = RewriteExpression(node.Condition);
@@ -30,9 +29,18 @@ internal abstract class BoundTreeRewriter {
         
         return new BoundConditionalGoto(node.Label, condition, node.Jump);
     }
-    
-    private static BoundStatement RewriteLabelStatement(BoundLabelStatement node) {
-        return node;
+
+    private static BoundStatement RewriteLabelStatement(BoundLabelStatement node) => node;
+
+    protected virtual BoundStatement RewriteReturnStatment(BoundReturnStatment node) {
+        var expression = node.Expression is null 
+            ? null 
+            : RewriteExpression(node.Expression);
+        
+        if (expression == node.Expression)
+            return node;
+
+        return new BoundReturnStatment(expression);
     }
 
     protected virtual BoundStatement RewriteBlockStatement(BoundBlockStatement node) {

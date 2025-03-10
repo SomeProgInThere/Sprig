@@ -111,6 +111,21 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
+    public void ReportInvalidReturn(TextSpan span) {
+        var message = $"Keyword 'return' is not present inside of a function";
+        Report(span, message);
+    }
+
+    public void ReportInvalidReturnExpression(TextSpan span, string name) {
+        var message = $"Keyword 'return' cannot be used for a non-return function"; 
+        Report(span, message);
+    }
+    
+    public void ReportMissingReturnExpression(TextSpan span, string name, TypeSymbol type) {
+        var message = $"A expression of type '{type}' expected for function '{name}'";
+        Report(span, message);
+    }
+
     private void Report(TextSpan span, string message) {
         var diagnostic = new DiagnosticMessage(span, message);
         diagnostics.Add(diagnostic);

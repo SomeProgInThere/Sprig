@@ -67,6 +67,7 @@ public enum SyntaxKind {
     FnKeyword,
     BreakKeyword,
     ContinueKeyword,
+    ReturnKeyword,
 
     // Expressions
     LiteralExpression,
@@ -98,4 +99,5 @@ public enum SyntaxKind {
     ForStatement,
     BreakStatement,
     ContinueStatement,
+    ReturnStatement,
 }

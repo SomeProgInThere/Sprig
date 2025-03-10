@@ -18,6 +18,7 @@ internal enum BoundNodeKind {
     ExpressionStatement,
     GotoStatement,
     ConditionalGotoStatement,
+    ReturnStatement,
     LabelStatement,
     IfStatement,
     WhileStatement,

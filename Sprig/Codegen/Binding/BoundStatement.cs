@@ -61,3 +61,10 @@ internal sealed class BoundIfStatement(BoundExpression condition, BoundStatement
 
     public override BoundNodeKind Kind => BoundNodeKind.IfStatement;
 }
+
+internal sealed class BoundReturnStatment(BoundExpression expression) 
+    : BoundStatement {
+
+    public BoundExpression Expression { get; } = expression;
+    public override BoundNodeKind Kind => BoundNodeKind.ReturnStatement;
+}
