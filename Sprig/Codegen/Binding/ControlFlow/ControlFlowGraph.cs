@@ -15,8 +15,8 @@ internal class ControlFlowGraph {
         var graph = Create(body);
         
         foreach (var branch in graph.End.Incoming) {
-            var lastStatement = branch.From.Statements.Last();
-            if (lastStatement.Kind != BoundNodeKind.ReturnStatement)
+            var lastStatement = branch.From.Statements.LastOrDefault();
+            if (lastStatement == null || lastStatement.Kind != BoundNodeKind.ReturnStatement)
                 return false;
         }
 
@@ -25,7 +25,8 @@ internal class ControlFlowGraph {
 
     public void WriteTo(TextWriter writer) {
 
-        static string Quote(string text) => "\"" + text.Replace("\"", "\\\"") + "\"";
+        static string Quote(string text) 
+            => "\"" + text.TrimEnd().Replace("\"", "\\\"").Replace(Environment.NewLine, "\\l") + "\""; 
 
         writer.WriteLine("digraph G {");
         
@@ -37,8 +38,7 @@ internal class ControlFlowGraph {
 
         foreach (var block in Blocks) {
             var id = blockIds[block];
-            var label = Quote(block.ToString().Replace(Environment.NewLine, "\\l"));
-            
+            var label = Quote(block.ToString());
             writer.WriteLine($"\t{id} [label = {label}, shape = box]");
         }
 

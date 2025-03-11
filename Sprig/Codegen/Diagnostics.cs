@@ -76,8 +76,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(span, message);
     }
 
-    public void ReportUndefinedFunctionCall(TextSpan span, string name) {
-        var message = $"Function '{name}' is not defined in scope";
+    public void ReportUndefinedFunction(TextSpan span, string name) {
+        var message = $"Function '{name}' does not exist";
         Report(span, message);
     }
 
@@ -97,12 +97,12 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportSymbolAlreadyExists(TextSpan span, string name) {
-        var message = $"Symbol '{name}' already exists in scope";
+        var message = $"Symbol '{name}' already exists";
         Report(span, message);
     }
 
     public void ReportParameterAlreadyExists(TextSpan span, string name) {
-        var message = $"Parameter '{name}' already exists in scope";
+        var message = $"Parameter '{name}' already exists";
         Report(span, message);
     }
     
@@ -127,7 +127,22 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportNotAllPathsReturn(TextSpan span) {
-        var message = $"Not all paths return a value";
+        var message = $"Not all code paths return a value";
+        Report(span, message);
+    }
+
+    public void ReportUndefinedVariable(TextSpan span, string name) {
+        var message = $"Variable '{name}' does not exist";
+        Report(span, message);
+    }
+
+    public void ReportNotAVariable(TextSpan span, string name) {
+        var message = $"Symbol '{name}' is not a variable";
+        Report(span, message);
+    }
+    
+    public void ReportNotAFunction(TextSpan span, string name) {
+        var message = $"Symbol '{name}' is not a function";
         Report(span, message);
     }
 

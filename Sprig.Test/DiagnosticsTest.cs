@@ -30,7 +30,7 @@ public class DiagnosticsTest {
         ";
 
         var diagnostics = @"
-            Identifier 'x' is not defined in scope
+            Variable 'x' does not exist
         ";
 
         TestAssert.AssertDiagnostics(source, diagnostics);

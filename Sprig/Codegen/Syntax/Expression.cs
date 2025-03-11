@@ -2,30 +2,30 @@ namespace Sprig.Codegen.Syntax;
 
 public abstract class Expression : SyntaxNode {}
 
-internal sealed class LiteralExpression(SyntaxToken literalToken, object? value)
+internal sealed class LiteralExpression(SyntaxToken literal, object? value)
     : Expression {
 
-    public LiteralExpression(SyntaxToken literalToken) 
-        : this(literalToken, literalToken.Value) {}
+    public LiteralExpression(SyntaxToken literal) 
+        : this(literal, literal.Value) {}
 
-    public SyntaxToken LiteralToken { get; } = literalToken;
+    public SyntaxToken Literal { get; } = literal;
     public object? Value { get; } = value;
 
     public override SyntaxKind Kind => SyntaxKind.LiteralExpression;
 }
 
-public sealed class NameExpression(SyntaxToken identifierToken) 
+public sealed class NameExpression(SyntaxToken identifier) 
     : Expression {
     
-    public SyntaxToken IdentifierToken { get; } = identifierToken;
+    public SyntaxToken Identifier { get; } = identifier;
 
     public override SyntaxKind Kind => SyntaxKind.NameExpression;
 }
 
-public sealed class AssignmentExpression(SyntaxToken identifierToken, SyntaxToken equalsToken, Expression expression)
+public sealed class AssignmentExpression(SyntaxToken identifier, SyntaxToken equalsToken, Expression expression)
     : Expression {
     
-    public SyntaxToken IdentifierToken { get; } = identifierToken;
+    public SyntaxToken Identifier { get; } = identifier;
     public SyntaxToken EqualsToken { get; } = equalsToken;
     public Expression Expression { get; } = expression;
 

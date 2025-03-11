@@ -64,7 +64,7 @@ public enum SyntaxKind {
     DoKeyword,
     ForKeyword,
     InKeyword,
-    FnKeyword,
+    FuncKeyword,
     BreakKeyword,
     ContinueKeyword,
     ReturnKeyword,

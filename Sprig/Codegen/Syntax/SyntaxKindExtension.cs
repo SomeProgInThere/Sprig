@@ -58,7 +58,7 @@ internal static class SyntaxKindExtension {
             "continue" => SyntaxKind.ContinueKeyword,
             "return"   => SyntaxKind.ReturnKeyword,
             "in"       => SyntaxKind.InKeyword,
-            "fn"       => SyntaxKind.FnKeyword,
+            "func"     => SyntaxKind.FuncKeyword,
             "let"      => SyntaxKind.LetKeyword,
             "var"      => SyntaxKind.VarKeyword,
 
@@ -117,7 +117,7 @@ internal static class SyntaxKindExtension {
             SyntaxKind.DoKeyword       => "do",
             SyntaxKind.ForKeyword      => "for",
             SyntaxKind.InKeyword       => "in",
-            SyntaxKind.FnKeyword       => "fn",
+            SyntaxKind.FuncKeyword     => "func",
             SyntaxKind.ElseKeyword     => "else",
             SyntaxKind.BreakKeyword    => "break",
             SyntaxKind.ContinueKeyword => "continue",

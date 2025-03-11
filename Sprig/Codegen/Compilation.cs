@@ -18,7 +18,7 @@ public sealed class Compilation {
         SyntaxTree = syntaxTree;
     }
 
-    public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables) {
+    public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables, bool outputControlFlowGraph = false) {
         var diagnostics = SyntaxTree.Diagnostics
             .Concat(GlobalScope?.Diagnostics ?? [])
             .ToImmutableArray();        
@@ -32,19 +32,21 @@ public sealed class Compilation {
         
         var statement = GetStatement();
 
-        var appPath = Environment.GetCommandLineArgs()[0];
-        var appDirectory = Path.GetDirectoryName(appPath);
-        var graphPath = Path.Combine(appDirectory, "cfg.dot");
+        if (outputControlFlowGraph) {
+            var appPath = Environment.GetCommandLineArgs()[0];
+            var appDirectory = Path.GetDirectoryName(appPath);
+            var graphPath = Path.Combine(appDirectory, "cfg.dot");
 
-        var controlFlowStatments = !statement.Statements.Any() 
-            && !program.Functions.IsEmpty
-                ? program.Functions.Last().Value
-                : statement;
+            var controlFlowStatments = !statement.Statements.Any() 
+                && !program.Functions.IsEmpty
+                    ? program.Functions.Last().Value
+                    : statement;
 
-        var controlFlowGraph = ControlFlowGraph.Create(controlFlowStatments);
+            var controlFlowGraph = ControlFlowGraph.Create(controlFlowStatments);
 
-        using (var writer = new StreamWriter(graphPath))
+            using var writer = new StreamWriter(graphPath);
             controlFlowGraph.WriteTo(writer);
+        }
 
         var evaluator = new Evaluator(program.Functions, statement, variables);
         var result = evaluator.Evaluate();
@@ -63,7 +65,7 @@ public sealed class Compilation {
         else {
             var program = Binder.BindProgram(GlobalScope);
             foreach (var functionBody in program.Functions) {
-                if (!GlobalScope.Functions.Contains(functionBody.Key))
+                if (!GlobalScope.Symbols.Contains(functionBody.Key))
                     continue;
                 
                 functionBody.Key.WriteTo(writer);

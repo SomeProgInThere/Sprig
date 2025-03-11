@@ -52,7 +52,7 @@ internal static class SymbolPrinter {
     }
 
     private static void WriteFunctionSymbol(FunctionSymbol symbol, TextWriter writer) {
-        writer.WriteKeyword(SyntaxKind.FnKeyword);
+        writer.WriteKeyword(SyntaxKind.FuncKeyword);
         writer.WriteSpace();
 
         writer.WriteIdentifier(symbol.Name);

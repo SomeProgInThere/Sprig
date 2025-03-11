@@ -16,7 +16,7 @@ internal sealed class Binder {
 
         if (function != null) {
             foreach (var parameter in function.Parameters)
-                scope.TryDeclareVariable(parameter);
+                scope.TryDeclareSymbol(parameter);
         }
     }
 
@@ -35,14 +35,13 @@ internal sealed class Binder {
         }
 
         var statement = new BoundBlockStatement(statmentBuilder.ToImmutable());
-        var functions = binder.scope.Functions;
-        var variables = binder.scope.Variables;
+        var symbols = binder.scope.Symbols;
         var diagnostics = binder.Diagnostics.ToImmutableArray();
 
         if (previous != null)
             diagnostics = diagnostics.InsertRange(0, previous.Diagnostics);
 
-        return new BoundGlobalScope(previous, diagnostics, functions, variables, statement);
+        return new BoundGlobalScope(previous, diagnostics, symbols, statement);
     }
 
     public static BoundProgram BindProgram(BoundGlobalScope globalScope) {
@@ -52,7 +51,9 @@ internal sealed class Binder {
 
         var scope = globalScope;
         while (scope != null) {
-            foreach (var function in scope.Functions) {
+            foreach (var symbol in scope.Symbols.Where(s => s is FunctionSymbol)) {
+                var function = symbol as FunctionSymbol;
+                
                 var binder = new Binder(parentScope, function);
                 var body = binder.BindStatement(function.Header.Body);
                 
@@ -87,11 +88,8 @@ internal sealed class Binder {
             previous = stack.Pop();
             var scope = new BoundScope(parent);
 
-            foreach (var function in previous.Functions)
-                scope.TryDeclareFunction(function);
-
-            foreach (var variable in previous.Variables)
-                scope.TryDeclareVariable(variable);
+            foreach (var symbols in previous.Symbols)
+                scope.TryDeclareSymbol(symbols);
 
             parent = scope;
         }
@@ -103,7 +101,7 @@ internal sealed class Binder {
         var result = new BoundScope(null);
     
         foreach (var function in BuiltinFunctions.All())
-            result.TryDeclareFunction(function);
+            result.TryDeclareSymbol(function);
 
         return result;
     }
@@ -128,7 +126,7 @@ internal sealed class Binder {
         var type = BindTypeClause(syntax.ReturnType) ?? TypeSymbol.Void;
         var function = new FunctionSymbol(syntax.Identifier.Literal, parameters.ToImmutable(), type, syntax);
         
-        if (!scope.TryDeclareFunction(function))
+        if (!scope.TryDeclareSymbol(function))
             diagnostics.ReportSymbolAlreadyExists(syntax.Identifier.Span, function.Name);
     }
 
@@ -191,7 +189,7 @@ internal sealed class Binder {
 
         var variableType = explicitType ?? initializer.Type;
         var castInitializer = BindCast(syntax.Initializer.Span, initializer, variableType);
-        var variable = BindVariable(syntax.Identifier, mutable, variableType);
+        var variable = BindVariableDeclaration(syntax.Identifier, mutable, variableType);
 
         return new BoundVariableDeclaration(variable, castInitializer);
     }
@@ -225,7 +223,7 @@ internal sealed class Binder {
 
         scope = new BoundScope(scope);
 
-        var variable = BindVariable(syntax.Identifier, true, TypeSymbol.Int);
+        var variable = BindVariableDeclaration(syntax.Identifier, true, TypeSymbol.Int);
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
 
         if (scope.Parent != null)
@@ -330,7 +328,6 @@ internal sealed class Binder {
     }
 
     private BoundExpression BindCallExpression(CallExpression syntax) {
-
         if (syntax.Arguments.Count == 1 && LookupType(syntax.Identifier.Literal) is TypeSymbol type)
             return BindCast(syntax.Arguments[0], type, true);
 
@@ -341,8 +338,14 @@ internal sealed class Binder {
             boundArguments.Add(boundArgument);
         }
 
-        if (!scope.TryLookupFunction(syntax.Identifier.Literal, out var function)) {
-            diagnostics.ReportUndefinedFunctionCall(syntax.Identifier.Span, syntax.Identifier.Literal);
+        var symbol = scope.TryLookupSymbol(syntax.Identifier.Literal);
+        if (symbol is null) {
+            diagnostics.ReportUndefinedFunction(syntax.Identifier.Span, syntax.Identifier.Literal);
+            return new BoundErrorExpression();
+        }
+
+        if (symbol is not FunctionSymbol function) {
+            diagnostics.ReportNotAFunction(syntax.Identifier.Span, syntax.Identifier.Literal);
             return new BoundErrorExpression();
         }
 
@@ -396,30 +399,28 @@ internal sealed class Binder {
     }
 
     private BoundExpression BindNameExpression(NameExpression syntax) {
-        var token = syntax.IdentifierToken;
+        var identifier = syntax.Identifier;
 
-        if (token.IsMissing)
+        if (identifier.IsMissing)
             return new BoundErrorExpression();
-
-        if (!scope.TryLookupVariable(token.Literal, out var variable) && !token.IsMissing) {
-            diagnostics.ReportUndefinedIdentifier(token.Span, token.Literal);
+        
+        var variable = BindVariableReference(identifier.Literal, identifier.Span);
+        if (variable is null)
             return new BoundErrorExpression();
-        }
 
         return new BoundVariableExpression(variable);
     }
 
     private BoundExpression BindAssignmentExpression(AssignmentExpression syntax) {
-        var name = syntax.IdentifierToken.Literal;
+        var name = syntax.Identifier.Literal;
         var expression = BindExpression(syntax.Expression);
         
-        if (syntax.IdentifierToken.IsMissing)
+        if (syntax.Identifier.IsMissing)
             return expression;
 
-        if (!scope.TryLookupVariable(name, out var variable) && name != string.Empty) {
-            diagnostics.ReportUndefinedIdentifier(syntax.IdentifierToken.Span, name);
-            return expression;
-        }
+        var variable = BindVariableReference(name, syntax.Identifier.Span);
+        if (variable is null)
+            return new BoundErrorExpression();
 
         if (variable?.Mutable ?? false)
             diagnostics.ReportCannotAssign(syntax.EqualsToken.Span, name);
@@ -502,16 +503,31 @@ internal sealed class Binder {
         return new BoundCastExpression(type, expression);
     }
 
-    private VariableSymbol BindVariable(SyntaxToken identifier, bool mutable, TypeSymbol type) {
+    private VariableSymbol BindVariableDeclaration(SyntaxToken identifier, bool mutable, TypeSymbol type) {
         var name = identifier.Literal;
         var exists = !identifier.IsMissing;
 
         var scope = function is null ? VariableScope.Global : VariableScope.Local; 
         var variable = new VariableSymbol(name, mutable, type, scope);
-        if (exists && !this.scope.TryDeclareVariable(variable))
+        if (exists && !this.scope.TryDeclareSymbol(variable))
             diagnostics.ReportVariableRedeclaration(identifier.Span, name);
         
         return variable;
+    }
+
+    private VariableSymbol? BindVariableReference(string name, TextSpan span) {
+        switch (scope.TryLookupSymbol(name)) {
+            case VariableSymbol variable:
+                return variable;
+
+            case null:
+                diagnostics.ReportUndefinedVariable(span, name);
+                return null;
+
+            default:
+                diagnostics.ReportNotAVariable(span, name);
+                return null;
+        }
     }
 
     private static TypeSymbol? LookupType(string name) => name switch {

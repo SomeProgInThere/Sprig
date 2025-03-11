@@ -37,7 +37,7 @@ internal sealed class Parser {
             var startToken = Current;
             Member? member;
             
-            if (Current.Kind == SyntaxKind.FnKeyword)
+            if (Current.Kind == SyntaxKind.FuncKeyword)
                 member = ParseFunctionHeader();
             else {
                 var statement = ParseStatement();
@@ -53,7 +53,7 @@ internal sealed class Parser {
     }
 
     private Member ParseFunctionHeader() {
-        var fnKeyword = MatchToken(SyntaxKind.FnKeyword);
+        var funcKeyword = MatchToken(SyntaxKind.FuncKeyword);
         var identifier = MatchToken(SyntaxKind.IdentifierToken);
 
         var openParenthesisToken = MatchToken(SyntaxKind.OpenParenthesisToken);
@@ -64,7 +64,7 @@ internal sealed class Parser {
         var body = (BlockStatement)ParseBlockStatement();
 
         return new FunctionHeader(
-            fnKeyword, 
+            funcKeyword, 
             identifier, 
             openParenthesisToken, 
             parameters, 

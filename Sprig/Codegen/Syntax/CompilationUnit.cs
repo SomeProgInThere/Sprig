@@ -31,7 +31,7 @@ public sealed class FunctionParameter(SyntaxToken identifier, TypeClause type)
 }
 
 public sealed class FunctionHeader(
-    SyntaxToken fnKeyword, 
+    SyntaxToken funcKeyword, 
     SyntaxToken identifier, 
     SyntaxToken openParenthesisToken, 
     SeparatedSyntaxList<FunctionParameter> parameters,
@@ -40,7 +40,7 @@ public sealed class FunctionHeader(
     BlockStatement body
 ) : Member {
 
-    public SyntaxToken FnKeyword { get; } = fnKeyword;
+    public SyntaxToken FuncKeyword { get; } = funcKeyword;
     public SyntaxToken Identifier { get; } = identifier;
     public SyntaxToken OpenParenthesisToken { get; } = openParenthesisToken;
     public SeparatedSyntaxList<FunctionParameter> Parameters { get; } = parameters;

@@ -1,4 +1,6 @@
 
+using System.CodeDom.Compiler;
+
 namespace Sprig.Codegen.Binding.ControlFlow;
 
 internal sealed class Block {
@@ -17,8 +19,10 @@ internal sealed class Block {
             return "<End>";
 
         using var writer = new StringWriter();
+        using var indentedWriter = new IndentedTextWriter(writer);
+
         foreach (var statement in Statements)
-            statement.WriteTo(writer);
+            statement.WriteTo(indentedWriter);
 
         return writer.ToString();
     }
