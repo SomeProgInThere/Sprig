@@ -2,8 +2,14 @@ using Sprig.Codegen.Source;
 
 namespace Sprig.Codegen.Syntax;
 
-public sealed class SyntaxToken(SyntaxKind kind, int position, string literal, object? value = null) 
-    : SyntaxNode {
+public sealed class SyntaxToken(
+    SyntaxTree syntaxTree, 
+    SyntaxKind kind, 
+    int position, 
+    string literal, 
+    object? value = null
+) 
+    : SyntaxNode(syntaxTree) {
 
     public int Position { get; } = position;
     public string Literal { get; } = literal ?? "";

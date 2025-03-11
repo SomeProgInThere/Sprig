@@ -2,8 +2,8 @@ using System.Collections.Immutable;
 
 namespace Sprig.Codegen.Syntax;
 
-public class CompilationUnit(ImmutableArray<Member> members, SyntaxToken endOfFileToken) 
-    : SyntaxNode {
+public class CompilationUnit(SyntaxTree syntaxTree, ImmutableArray<Member> members, SyntaxToken endOfFileToken) 
+    : SyntaxNode(syntaxTree) {
 
     public ImmutableArray<Member> Members { get; } = members;
     public SyntaxToken EndOfFileToken { get; } = endOfFileToken;
@@ -11,18 +11,19 @@ public class CompilationUnit(ImmutableArray<Member> members, SyntaxToken endOfFi
     public override SyntaxKind Kind => SyntaxKind.CompilationUnit;
 }
 
-public abstract class Member : SyntaxNode {}
+public abstract class Member(SyntaxTree syntaxTree) 
+    : SyntaxNode(syntaxTree) {}
 
-public sealed class GlobalStatment(Statement statement)
-    : Member {
+public sealed class GlobalStatment(SyntaxTree syntaxTree, Statement statement)
+    : Member(syntaxTree) {
     
     public Statement Statement { get; } = statement;
 
     public override SyntaxKind Kind => SyntaxKind.GlobalStatement;
 }
 
-public sealed class FunctionParameter(SyntaxToken identifier, TypeClause type) 
-    : SyntaxNode {
+public sealed class FunctionParameter(SyntaxTree syntaxTree, SyntaxToken identifier, TypeClause type) 
+    : SyntaxNode(syntaxTree) {
 
     public SyntaxToken Identifier { get; } = identifier;
     public TypeClause Type { get; } = type;
@@ -31,6 +32,7 @@ public sealed class FunctionParameter(SyntaxToken identifier, TypeClause type)
 }
 
 public sealed class FunctionHeader(
+    SyntaxTree syntaxTree,
     SyntaxToken funcKeyword, 
     SyntaxToken identifier, 
     SyntaxToken openParenthesisToken, 
@@ -38,7 +40,8 @@ public sealed class FunctionHeader(
     SyntaxToken closedParenthesisToken,
     TypeClause returnType,
     BlockStatement body
-) : Member {
+) 
+    : Member(syntaxTree) {
 
     public SyntaxToken FuncKeyword { get; } = funcKeyword;
     public SyntaxToken Identifier { get; } = identifier;

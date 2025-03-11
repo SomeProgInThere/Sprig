@@ -263,19 +263,19 @@ internal static class BoundNodePrinter {
     }
 
     private static void WriteGotoStatement(BoundGotoStatement node, IndentedTextWriter writer) {
-        writer.WriteExtra("goto");
+        writer.WriteInfo("goto");
         writer.WriteSpace();
         writer.WriteIdentifier(node.Label.Name);
         writer.WriteLine();
     }
 
     private static void WriteConditionalGoto(BoundConditionalGotoStatement node, IndentedTextWriter writer) {
-        writer.WriteExtra("goto");
+        writer.WriteInfo("goto");
         writer.WriteSpace();
         writer.WriteIdentifier(node.Label.Name);
 
         writer.WriteSpace();
-        writer.WriteExtra(node.Jump ? "if" : "if not");
+        writer.WriteInfo(node.Jump ? "if" : "if not");
         writer.WriteSpace();
         
         node.Condition.WriteTo(writer);

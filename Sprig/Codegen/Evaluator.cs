@@ -323,7 +323,7 @@ internal sealed class Evaluator(
             var result = EvaluateStatement(statement);
             locals.Pop();
 
-            return result;
+            return result ?? 0;
         }
     }
 

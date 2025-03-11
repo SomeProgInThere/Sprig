@@ -4,8 +4,8 @@ namespace Sprig.Codegen.Source;
 
 public sealed class SourceText {
 
-    public static SourceText FromString(string source) {
-        return new(source);
+    public static SourceText FromString(string source, string fileName = "") {
+        return new(source, fileName);
     }
 
     public ImmutableArray<TextLine> Lines { get; }
@@ -39,8 +39,9 @@ public sealed class SourceText {
 
     public override string ToString() => Source;
 
-    private SourceText(string source) {
-        Source = source; 
+    private SourceText(string source, string fileName) {
+        Source = source;
+        FileName = fileName;
         Lines = ParseLines(this, source);
     }
 
@@ -88,4 +89,5 @@ public sealed class SourceText {
     }
     
     private string Source { get; }
+    public string FileName { get; }
 }

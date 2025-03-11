@@ -1,44 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 
-using Sprig.Codegen;
 using Sprig.Codegen.Source;
 using Sprig.Codegen.Syntax;
 
 namespace Sprig.Interpreter;
 
 internal sealed class ReplExtensions {
-
-    internal static void DisplayDiagnostics(SyntaxTree syntaxTree, EvaluationResult result) {
-        var sourceText = syntaxTree.SourceText;
-        var orderedDiagnostics = result.Diagnostics.OrderBy(diag => diag.Span, new TextSpanComparer());
-
-        foreach (var diagnostic in orderedDiagnostics) {
-
-            var lineIndex = sourceText.GetLineIndex(diagnostic.Span.Start);
-            var line = sourceText.Lines[lineIndex];
-
-            var column = diagnostic.Span.Start - line.Start + 1;
-            var lineNumber = lineIndex + 1;
-
-            Console.WriteLine();
-            ColorPrint($"Error (Ln {lineNumber}, Col {column}): ", ConsoleColor.Red);
-            ColorPrint($"{diagnostic}\n", ConsoleColor.DarkGray);
-
-            var prefixSpan = TextSpan.CreateFromBounds(line.Start, diagnostic.Span.Start);
-            var suffixSpan = TextSpan.CreateFromBounds(diagnostic.Span.End, line.End);
-
-            var prefix = sourceText.ToString(prefixSpan).Trim('\t');
-            var error = sourceText.ToString(diagnostic.Span);
-            var suffix = sourceText.ToString(suffixSpan);
-
-            ColorPrint($"\t--> {lineNumber, 1} | {prefix}", ConsoleColor.Gray);
-            ColorPrint(error, ConsoleColor.DarkRed);
-            ColorPrint($"{suffix}\n", ConsoleColor.Gray);
-        }
-        
-        Console.WriteLine();
-    }
 
     internal static bool IsCompleteSource(string source) {
         if (string.IsNullOrEmpty(source))
@@ -161,14 +129,4 @@ internal sealed class ReplExtensions {
     Sprig [{RuntimeInformation.FrameworkDescription} {RuntimeInformation.ProcessArchitecture}]
     Type "!help" for list of commands
     """;
-}
-
-internal class TextSpanComparer : IComparer<TextSpan> {
-    public int Compare(TextSpan x, TextSpan y) {
-        int cmp = x.Start - y.Start;
-        if (cmp == 0)
-            cmp = x.Length - y.Length;
-        
-        return cmp;
-    }
 }

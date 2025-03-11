@@ -26,3 +26,14 @@ public sealed class TextLine(SourceText source, int start, int length, int lengt
 
     public override string ToString() => Source.ToString(Span);
 }
+
+public readonly struct TextLocation(SourceText source, TextSpan span) {
+    public SourceText Source { get; } = source;
+    public TextSpan Span { get; } = span;
+
+    public readonly int StartLine => Source.GetLineIndex(Span.Start);
+    public readonly int StartChar => Span.Start - Source.Lines[StartLine].Start;
+    
+    public readonly int EndLine => Source.GetLineIndex(Span.End);
+    public readonly int EndChar => Span.End - Source.Lines[EndLine].End;
+}

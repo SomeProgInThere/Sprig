@@ -4,7 +4,7 @@ using Sprig.Codegen.Source;
 
 namespace Sprig.Codegen.Syntax;
 
-public abstract class SyntaxNode {
+public abstract class SyntaxNode(SyntaxTree syntaxTree) {
     public abstract SyntaxKind Kind { get; }
     
     public virtual TextSpan Span {
@@ -54,6 +54,10 @@ public abstract class SyntaxNode {
         SyntaxNodeExtension.PrettyPrint(writer, this);
         writer.WriteLine();
     }
+
+    public TextLocation Location => new(SyntaxTree.SourceText, Span);
+    
+    public SyntaxTree SyntaxTree { get; } = syntaxTree;
 
     public override string ToString() {
         using var writer = new StringWriter();

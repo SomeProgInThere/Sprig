@@ -4,7 +4,7 @@ using Sprig.Codegen.Symbols;
 
 namespace Sprig.Codegen.Syntax;
 
-internal sealed class Lexer(SourceText source) {
+internal sealed class Lexer(SyntaxTree syntaxTree) {
 
     public SyntaxToken Lex() {
 
@@ -139,7 +139,9 @@ internal sealed class Lexer(SourceText source) {
                     ReadWhitespaceToken();
                 
                 else {
-                    diagnostics.ReportBadCharacter(new TextSpan(position, 1), Current);
+                    var span = new TextSpan(position, 1);
+                    var location = new TextLocation(syntaxTree.SourceText, span);
+                    diagnostics.ReportBadCharacter(location, Current);
                     position++;
                 }
 
@@ -147,8 +149,8 @@ internal sealed class Lexer(SourceText source) {
         }
         
         var length = position - start;
-        var literal = kind.Literal() ?? source.ToString(start, length);
-        return new SyntaxToken(kind, start, literal, value);
+        var literal = kind.Literal() ?? syntaxTree.SourceText.ToString(start, length);
+        return new SyntaxToken(syntaxTree, kind, start, literal, value);
     }
 
     private void SetKind(ref SyntaxKind kind, ref int position, char l1, SyntaxKind k1, SyntaxKind k2) {
@@ -173,7 +175,8 @@ internal sealed class Lexer(SourceText source) {
                 case '\r':
                 case '\n':
                     var span = new TextSpan(start, 1);
-                    diagnostics.ReportUnterminatedString(span);
+                    var location = new TextLocation(syntaxTree.SourceText, span);
+                    diagnostics.ReportUnterminatedString(location);
                     done = true;
                     break;
 
@@ -222,16 +225,22 @@ internal sealed class Lexer(SourceText source) {
         }
             
         var length = position - start;
-        var literal = source.ToString(start, length);
+        var literal = syntaxTree.SourceText.ToString(start, length);
 
         if (!isFloat) {
-            if (!int.TryParse(literal, out var intResult))
-                diagnostics.ReportInvalidNumber(new TextSpan(start, length), literal, TypeSymbol.Int);
+            if (!int.TryParse(literal, out var intResult)) {
+                var span = new TextSpan(start, length);
+                var location = new TextLocation(syntaxTree.SourceText, span);
+                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Int);
+            }
             value = intResult;
         }
         else {
-            if (!float.TryParse(literal, out var floatResult))
-                diagnostics.ReportInvalidNumber(new TextSpan(start, length), literal, TypeSymbol.Float);
+            if (!float.TryParse(literal, out var floatResult)) {
+                var span = new TextSpan(start, length);
+                var location = new TextLocation(syntaxTree.SourceText, span);
+                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Float);
+            }
             value = floatResult;
         }
 
@@ -243,7 +252,7 @@ internal sealed class Lexer(SourceText source) {
             position++;
             
         var length = position - start;
-        var literal = source.ToString(start, length);
+        var literal = syntaxTree.SourceText.ToString(start, length);
         kind = literal.KeywordKind();
     }
     
@@ -254,9 +263,9 @@ internal sealed class Lexer(SourceText source) {
 
     private char Peek(int offset) {
         var index = position + offset;
-        if (index >= source.Length) 
+        if (index >= syntaxTree.SourceText.Length) 
             return '\0';
-        return source[index];
+        return syntaxTree.SourceText[index];
     }
 
     private int position;

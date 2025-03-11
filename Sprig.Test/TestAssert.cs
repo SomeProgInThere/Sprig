@@ -38,7 +38,7 @@ public class TestAssert {
             Assert.Equal(expectedMessage, actualMessage);
         
             var expectedSpan = annotatedSource.Spans[i];
-            var actualSpan = result.Diagnostics[i].Span;
+            var actualSpan = result.Diagnostics[i].Location.Span;
             Assert.Equal(expectedSpan, actualSpan);
         }
     }

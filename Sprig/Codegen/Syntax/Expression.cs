@@ -1,12 +1,13 @@
 namespace Sprig.Codegen.Syntax;
 
-public abstract class Expression : SyntaxNode {}
+public abstract class Expression(SyntaxTree syntaxTree) 
+    : SyntaxNode(syntaxTree) {}
 
-internal sealed class LiteralExpression(SyntaxToken literal, object? value)
-    : Expression {
+internal sealed class LiteralExpression(SyntaxTree syntaxTree, SyntaxToken literal, object? value)
+    : Expression(syntaxTree) {
 
-    public LiteralExpression(SyntaxToken literal) 
-        : this(literal, literal.Value) {}
+    public LiteralExpression(SyntaxTree syntaxTree, SyntaxToken literal) 
+        : this(syntaxTree, literal, literal.Value) {}
 
     public SyntaxToken Literal { get; } = literal;
     public object? Value { get; } = value;
@@ -14,16 +15,21 @@ internal sealed class LiteralExpression(SyntaxToken literal, object? value)
     public override SyntaxKind Kind => SyntaxKind.LiteralExpression;
 }
 
-public sealed class NameExpression(SyntaxToken identifier) 
-    : Expression {
+public sealed class NameExpression(SyntaxTree syntaxTree, SyntaxToken identifier) 
+    : Expression(syntaxTree) {
     
     public SyntaxToken Identifier { get; } = identifier;
 
     public override SyntaxKind Kind => SyntaxKind.NameExpression;
 }
 
-public sealed class AssignmentExpression(SyntaxToken identifier, SyntaxToken equalsToken, Expression expression)
-    : Expression {
+public sealed class AssignmentExpression(
+    SyntaxTree syntaxTree, 
+    SyntaxToken identifier, 
+    SyntaxToken equalsToken, 
+    Expression expression
+)
+    : Expression(syntaxTree) {
     
     public SyntaxToken Identifier { get; } = identifier;
     public SyntaxToken EqualsToken { get; } = equalsToken;
@@ -32,8 +38,9 @@ public sealed class AssignmentExpression(SyntaxToken identifier, SyntaxToken equ
     public override SyntaxKind Kind => SyntaxKind.AssignmentExpression;
 }
 
-internal sealed class UnaryExpression(Expression operand, SyntaxToken operatorToken)
-    : Expression {
+internal sealed class UnaryExpression(
+    SyntaxTree syntaxTree, Expression operand, SyntaxToken operatorToken
+) : Expression(syntaxTree) {
 
     public Expression Operand { get; } = operand;
     public SyntaxToken OperatorToken { get; } = operatorToken;
@@ -41,8 +48,9 @@ internal sealed class UnaryExpression(Expression operand, SyntaxToken operatorTo
     public override SyntaxKind Kind => SyntaxKind.UnaryExpression;
 }
 
-internal sealed class BinaryExpression(Expression left, SyntaxToken operatorToken, Expression right)
-    : Expression {
+internal sealed class BinaryExpression(
+    SyntaxTree syntaxTree, Expression left, SyntaxToken operatorToken, Expression right
+) : Expression(syntaxTree) {
 
     public Expression Left { get; } = left;
     public SyntaxToken OperatorToken { get; } = operatorToken;
@@ -52,8 +60,12 @@ internal sealed class BinaryExpression(Expression left, SyntaxToken operatorToke
 }
 
 internal sealed class ParenthesizedExpression(
-    SyntaxToken openParenthesisToken, Expression expression, SyntaxToken closedParenthesisToken
-) : Expression {
+    SyntaxTree syntaxTree, 
+    SyntaxToken openParenthesisToken, 
+    Expression expression, 
+    SyntaxToken closedParenthesisToken
+) 
+    : Expression(syntaxTree) {
 
     public SyntaxToken OpenParenthesisToken { get; } = openParenthesisToken;
     public Expression Expression { get; } = expression;
@@ -62,8 +74,9 @@ internal sealed class ParenthesizedExpression(
     public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
 }
 
-internal sealed class RangeExpression(Expression lowerBound, SyntaxToken rangeToken, Expression upperBound)
-    : Expression
+internal sealed class RangeExpression(
+    SyntaxTree syntaxTree, Expression lowerBound, SyntaxToken rangeToken, Expression upperBound
+) : Expression(syntaxTree)
 {
     public Expression LowerBound { get; } = lowerBound;
     public SyntaxToken RangeToken { get; } = rangeToken;
@@ -73,12 +86,13 @@ internal sealed class RangeExpression(Expression lowerBound, SyntaxToken rangeTo
 }
 
 internal sealed class CallExpression(
+    SyntaxTree syntaxTree, 
     SyntaxToken identifier, 
     SyntaxToken openParenthesisToken,
     SeparatedSyntaxList<Expression> arguments,
     SyntaxToken closedParenthesisToken
 )
-    : Expression {
+    : Expression(syntaxTree) {
 
     public SyntaxToken Identifier { get; } = identifier;
     public SyntaxToken OpenParenthesisToken { get; } = openParenthesisToken;

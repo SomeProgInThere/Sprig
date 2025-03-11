@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Sprig.Codegen;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
+using Sprig.IO;
 
 namespace Sprig.Interpreter;
 
@@ -217,7 +218,7 @@ internal sealed class Repl {
             previous = compilation;
         }
         else {
-            ReplExtensions.DisplayDiagnostics(syntaxTree, result);
+            Console.Out.WriteDiagnostics(result.Diagnostics, syntaxTree);
         }
     }
 

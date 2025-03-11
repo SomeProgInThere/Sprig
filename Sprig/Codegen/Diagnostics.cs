@@ -10,144 +10,149 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     
     public IEnumerator<DiagnosticMessage> GetEnumerator() => diagnostics.GetEnumerator();
 
-    public void ReportInvalidNumber(TextSpan span, string literal, TypeSymbol type) {
+    public void ReportInvalidNumber(TextLocation location, string literal, TypeSymbol type) {
         var message = $"Number '{literal}' is not valid '{type}'";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportBadCharacter(TextSpan span, char character) {
+    public void ReportBadCharacter(TextLocation location, char character) {
         var message = $"Bad character input: '{character}'";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportUnterminatedString(TextSpan span) {
+    public void ReportUnterminatedString(TextLocation location) {
         var message = "Unterminated string literal";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportUnexpectedToken(TextSpan span, SyntaxKind actual, SyntaxKind expected) {
-        var actualString = SyntaxKindExtension.Literal(actual) is null ? $"<{actual}>" : $"'{SyntaxKindExtension.Literal(actual)}'";
-        var expectedString = SyntaxKindExtension.Literal(expected) is null ? $"<{expected}>" : $"'{SyntaxKindExtension.Literal(expected)}'";
-        var message = $"Unexpected token {actualString}, expected {expectedString}";
+    public void ReportUnexpectedToken(TextLocation location, SyntaxKind actual, SyntaxKind expected) {
+        var actualString = SyntaxKindExtension.Literal(actual) is null 
+            ? $"<{actual}>" 
+            : $"'{SyntaxKindExtension.Literal(actual)}'";
         
-        Report(span, message);
+        var expectedString = SyntaxKindExtension.Literal(expected) is null 
+            ? $"<{expected}>" 
+            : $"'{SyntaxKindExtension.Literal(expected)}'";
+        
+        var message = $"Unexpected token {actualString}, expected {expectedString}";
+        Report(location, message);
     }
 
-    public void ReportUndefinedUnaryOperator(TextSpan span, string literal, TypeSymbol type) {
+    public void ReportUndefinedUnaryOperator(TextLocation location, string literal, TypeSymbol type) {
         var message = $"Unary operator '{literal}' is not defined for type '{type}'";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportUndefinedBinaryOperator(TextSpan span, string literal, TypeSymbol left, TypeSymbol right) {
+    public void ReportUndefinedBinaryOperator(TextLocation location, string literal, TypeSymbol left, TypeSymbol right) {
         var message = $"Binary operator '{literal}' is not defined for types '{left}' and '{right}'";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportUndefinedIdentifier(TextSpan span, string literal) {
+    public void ReportUndefinedIdentifier(TextLocation location, string literal) {
         var message = $"Identifier '{literal}' is not defined in scope";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportUndefinedType(TextSpan span, string literal) {
+    public void ReportUndefinedType(TextLocation location, string literal) {
         var message = $"Type '{literal}' is not defined in scope";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportVariableRedeclaration(TextSpan span, string name) {
+    public void ReportVariableRedeclaration(TextLocation location, string name) {
         var message = $"Variable '{name}' is already declared in scope";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportCannotConvert(TextSpan span, TypeSymbol actual, TypeSymbol? expected, bool reportCastExisits = false) {
+    public void ReportCannotConvert(TextLocation location, TypeSymbol actual, TypeSymbol? expected, bool reportCastExisits = false) {
         var message = $"Cannot convert type '{actual}' to '{expected}'";
         if (reportCastExisits)
             message += ". An explicit cast exists (are you missing a cast?)";
 
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportCannotAssign(TextSpan span, string name) {
+    public void ReportCannotAssign(TextLocation location, string name) {
         var message = $"Cannot assign value to immutabe variable '{name}'";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportNonIntegerRange(TextSpan span) {
+    public void ReportNonIntegerRange(TextLocation location) {
         var message = $"Range expression initialized with non-integer type";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportUndefinedFunction(TextSpan span, string name) {
+    public void ReportUndefinedFunction(TextLocation location, string name) {
         var message = $"Function '{name}' does not exist";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportIncorrectArgumentCount(TextSpan span, string name, int expected, int actual) {
+    public void ReportIncorrectArgumentCount(TextLocation location, string name, int expected, int actual) {
         var message = $"Function '{name}' needs '{expected}' argument(s), but '{actual}' were provided";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportIncorrectArgumentType(TextSpan span, string name, TypeSymbol expected, TypeSymbol actual) {
+    public void ReportIncorrectArgumentType(TextLocation location, string name, TypeSymbol expected, TypeSymbol actual) {
         var message = $"Parameter '{name}' cannot be converted from '{actual}' to '{expected}'";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportVoidExpression(TextSpan span) {
+    public void ReportVoidExpression(TextLocation location) {
         var message = $"Expression must have a return value";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportSymbolAlreadyExists(TextSpan span, string name) {
+    public void ReportSymbolAlreadyExists(TextLocation location, string name) {
         var message = $"Symbol '{name}' already exists";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportParameterAlreadyExists(TextSpan span, string name) {
+    public void ReportParameterAlreadyExists(TextLocation location, string name) {
         var message = $"Parameter '{name}' already exists";
-        Report(span, message);
+        Report(location, message);
     }
     
-    public void ReportInvalidJump(TextSpan span, string literal) {
+    public void ReportInvalidJump(TextLocation location, string literal) {
         var message = $"No enclosing loop to {literal} out of";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportInvalidReturn(TextSpan span) {
+    public void ReportInvalidReturn(TextLocation location) {
         var message = $"Keyword 'return' is not present inside of a function";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportInvalidReturnExpression(TextSpan span, string name) {
+    public void ReportInvalidReturnExpression(TextLocation location, string name) {
         var message = $"Keyword 'return' cannot be used for a non-return function"; 
-        Report(span, message);
+        Report(location, message);
     }
     
-    public void ReportMissingReturnExpression(TextSpan span, string name, TypeSymbol type) {
+    public void ReportMissingReturnExpression(TextLocation location, string name, TypeSymbol type) {
         var message = $"A expression of type '{type}' expected for function '{name}'";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportNotAllPathsReturn(TextSpan span) {
+    public void ReportNotAllPathsReturn(TextLocation location) {
         var message = $"Not all code paths return a value";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportUndefinedVariable(TextSpan span, string name) {
+    public void ReportUndefinedVariable(TextLocation location, string name) {
         var message = $"Variable '{name}' does not exist";
-        Report(span, message);
+        Report(location, message);
     }
 
-    public void ReportNotAVariable(TextSpan span, string name) {
+    public void ReportNotAVariable(TextLocation location, string name) {
         var message = $"Symbol '{name}' is not a variable";
-        Report(span, message);
+        Report(location, message);
     }
     
-    public void ReportNotAFunction(TextSpan span, string name) {
+    public void ReportNotAFunction(TextLocation location, string name) {
         var message = $"Symbol '{name}' is not a function";
-        Report(span, message);
+        Report(location, message);
     }
 
-    private void Report(TextSpan span, string message) {
-        var diagnostic = new DiagnosticMessage(span, message);
+    private void Report(TextLocation location, string message) {
+        var diagnostic = new DiagnosticMessage(location, message);
         diagnostics.Add(diagnostic);
     }
 
@@ -155,8 +160,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     private readonly List<DiagnosticMessage> diagnostics = [];
 }
 
-public sealed class DiagnosticMessage(TextSpan span, string message) {
-    public TextSpan Span { get; } = span;
+public sealed class DiagnosticMessage(TextLocation location, string message) {
+    public TextLocation Location { get; } = location;
     public string Message { get; } = message;
 
     public override string ToString() => Message;

@@ -1,9 +1,10 @@
 namespace Sprig.Codegen.Syntax;
 
-public abstract class Clause : SyntaxNode {}
+public abstract class Clause(SyntaxTree syntaxTree) 
+    : SyntaxNode(syntaxTree) {}
 
-public sealed class TypeClause(SyntaxToken colonToken, SyntaxToken identifier)
-    : Clause {
+public sealed class TypeClause(SyntaxTree syntaxTree, SyntaxToken colonToken, SyntaxToken identifier)
+    : Clause(syntaxTree) {
 
     public SyntaxToken ColonToken { get; } = colonToken;
     public SyntaxToken Identifier { get; } = identifier;
@@ -11,8 +12,8 @@ public sealed class TypeClause(SyntaxToken colonToken, SyntaxToken identifier)
     public override SyntaxKind Kind => SyntaxKind.TypeClause;
 }
 
-public sealed class ElseClause(SyntaxToken elseToken, Statement body) 
-    : Clause {
+public sealed class ElseClause(SyntaxTree syntaxTree, SyntaxToken elseToken, Statement body) 
+    : Clause(syntaxTree) {
         
     public SyntaxToken ElseToken { get; } = elseToken;
     public Statement Body { get; } = body;
