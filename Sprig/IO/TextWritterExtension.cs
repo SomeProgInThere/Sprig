@@ -70,14 +70,14 @@ public static class TextWritterExtension {
         writer.ResetColor();
     }
 
-    public static void WriteDiagnostics(this TextWriter writer, IEnumerable<DiagnosticMessage> diagnostics, SyntaxTree syntaxTree) {
+    public static void WriteDiagnostics(this TextWriter writer, IEnumerable<DiagnosticMessage> diagnostics) {
         var orderedDiagnostics = diagnostics
             .OrderBy(diag => diag.Location.Source.FileName)
             .OrderBy(diag => diag.Location.Span.Start)
             .ThenBy(diag => diag.Location.Span.End);
 
         foreach (var diagnostic in orderedDiagnostics) {
-            var sourceText = syntaxTree.SourceText;
+            var sourceText = diagnostic.Location.Source;
             var span = diagnostic.Location.Span;
             var fileName = diagnostic.Location.Source.FileName;
 

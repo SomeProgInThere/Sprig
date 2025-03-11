@@ -20,16 +20,24 @@ internal sealed class Binder {
         }
     }
 
-    public static BoundGlobalScope BindGlobalScope(BoundGlobalScope? previous, CompilationUnit syntax) {
+    public static BoundGlobalScope BindGlobalScope(BoundGlobalScope? previous, ImmutableArray<SyntaxTree> syntaxTrees) {
         var parentScope = CreateParentScope(previous);
         var binder = new Binder(parentScope, null);
         
-        foreach (var function in syntax.Members.OfType<FunctionHeader>())
+        var functionHeaders = syntaxTrees
+            .SelectMany(tree => tree.Root.Members)
+            .OfType<FunctionHeader>();
+
+        foreach (var function in functionHeaders)
             binder.BindFunctionHeader(function);
+
+        var globalStatements = syntaxTrees
+            .SelectMany(tree => tree.Root.Members)
+            .OfType<GlobalStatment>();
 
         var statmentBuilder = ImmutableArray.CreateBuilder<BoundStatement>();
 
-        foreach (var globalStatement in syntax.Members.OfType<GlobalStatment>()) {
+        foreach (var globalStatement in globalStatements) {
             var boundStatement = binder.BindStatement(globalStatement.Statement);
             statmentBuilder.Add(boundStatement);
         }

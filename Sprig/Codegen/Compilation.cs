@@ -10,18 +10,20 @@ namespace Sprig.Codegen;
 
 public sealed class Compilation {
     
-    public Compilation(SyntaxTree syntaxTree) 
-        : this(null, syntaxTree) {}
+    public Compilation(params SyntaxTree[] syntaxTrees) 
+        : this(null, syntaxTrees) {}
 
-    private Compilation(Compilation? previous, SyntaxTree syntaxTree) {
+    private Compilation(Compilation? previous, params SyntaxTree[] syntaxTrees) {
         Previous = previous;
-        SyntaxTree = syntaxTree;
+        SyntaxTrees = [..syntaxTrees];
     }
 
     public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables, bool outputControlFlowGraph = false) {
-        var diagnostics = SyntaxTree.Diagnostics
+        var parseDiagnostics = SyntaxTrees.SelectMany(tree => tree.Diagnostics);
+
+        var diagnostics = parseDiagnostics
             .Concat(GlobalScope?.Diagnostics ?? [])
-            .ToImmutableArray();        
+            .ToImmutableArray();
         
         if (diagnostics.Any())
             return new EvaluationResult(diagnostics);
@@ -83,12 +85,12 @@ public sealed class Compilation {
     }
 
     public Compilation? Previous { get; }
-    public SyntaxTree SyntaxTree { get; }
+    public ImmutableArray<SyntaxTree> SyntaxTrees { get; }
 
     internal BoundGlobalScope? GlobalScope {
         get {
             if (globalScope is null) {
-                var prevGlobalScope = Binder.BindGlobalScope(Previous?.GlobalScope, SyntaxTree.Root);
+                var prevGlobalScope = Binder.BindGlobalScope(Previous?.GlobalScope, SyntaxTrees);
                 Interlocked.CompareExchange(ref globalScope, prevGlobalScope, null);
             }
             return globalScope;
