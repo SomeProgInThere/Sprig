@@ -1,26 +1,35 @@
 using System.Collections.Immutable;
 
-using Sprig.Codegen.Binding;
+using Sprig.Codegen.IRGeneration;
 using Sprig.Codegen.Symbols;
 
 namespace Sprig.Codegen;
 
-internal sealed class Evaluator(
-    ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functionBodies, 
-    BoundBlockStatement root, 
-    Dictionary<VariableSymbol, object> globals
-) {
-        
-    public object? Evaluate() {
-        locals.Push([]);
-        return EvaluateStatement(root);
+internal sealed class Evaluator {
+
+    public Evaluator(IRProgram program, Dictionary<VariableSymbol, object> variables) {
+        this.program = program;
+        globals = variables;
+
+        var current = program;
+        while (current != null) {
+            foreach (var function in current.Functions)
+                functions.Add(function.Key, function.Value);
+
+            current = current.Previous;
+        }
     }
 
-    private object? EvaluateStatement(BoundBlockStatement body) {
+    public object? Evaluate() {
+        locals.Push([]);
+        return EvaluateStatement(program.Statement);
+    }
+
+    private object? EvaluateStatement(IRBlockStatement body) {
         var labelTable = new Dictionary<LabelSymbol, int>();
 
         for (var i = 0; i < body.Statements.Length; i++) {
-            if (body.Statements[i] is BoundLabelStatement statement)
+            if (body.Statements[i] is IRLabelStatement statement)
                 labelTable.Add(statement.Label, i + 1);
         }
 
@@ -29,23 +38,23 @@ internal sealed class Evaluator(
             var statement = body.Statements[index];
             switch (statement.Kind) {
 
-                case BoundNodeKind.VariableDeclaration:
-                    EvaluateVariableDeclaration((BoundVariableDeclaration)statement);
+                case IRNodeKind.VariableDeclaration:
+                    EvaluateVariableDeclaration((IRVariableDeclaration)statement);
                     index++;
                     break;
 
-                case BoundNodeKind.ExpressionStatement:
-                    EvaluateExpressionStatement((BoundExpressionStatement)statement);
+                case IRNodeKind.ExpressionStatement:
+                    EvaluateExpressionStatement((IRExpressionStatement)statement);
                     index++;
                     break;
 
-                case BoundNodeKind.GotoStatement:
-                    var gotoStatement = (BoundGotoStatement)statement;
+                case IRNodeKind.GotoStatement:
+                    var gotoStatement = (IRGotoStatement)statement;
                     index = labelTable[gotoStatement.Label];
                     break;
 
-                case BoundNodeKind.ConditionalGotoStatement:
-                    var conditionalGotoStatement = (BoundConditionalGotoStatement)statement;
+                case IRNodeKind.ConditionalGotoStatement:
+                    var conditionalGotoStatement = (IRConditionalGotoStatement)statement;
                     var condition = (bool)EvaluateExpression(conditionalGotoStatement.Condition);
 
                     if (condition && conditionalGotoStatement.Jump 
@@ -56,12 +65,12 @@ internal sealed class Evaluator(
                         index++;
                     break;
 
-                case BoundNodeKind.LabelStatement:
+                case IRNodeKind.LabelStatement:
                     index++;
                     break;
 
-                case BoundNodeKind.ReturnStatement:
-                    var returnStatment = (BoundReturnStatment)statement;
+                case IRNodeKind.ReturnStatement:
+                    var returnStatment = (IRReturnStatment)statement;
                     lastValue = returnStatment.Expression is null
                         ? null
                         : EvaluateExpression(returnStatment.Expression);
@@ -76,32 +85,32 @@ internal sealed class Evaluator(
         return lastValue;
     }
 
-    private void EvaluateVariableDeclaration(BoundVariableDeclaration node) {
+    private void EvaluateVariableDeclaration(IRVariableDeclaration node) {
         var value = EvaluateExpression(node.Initializer);
         lastValue = value;
         AssignValue(node.Variable, value);
     }
     
-    private void EvaluateExpressionStatement(BoundExpressionStatement node) => lastValue = EvaluateExpression(node.Expression);
+    private void EvaluateExpressionStatement(IRExpressionStatement node) => lastValue = EvaluateExpression(node.Expression);
     
-    private object EvaluateExpression(BoundExpression? node) {
+    private object EvaluateExpression(IRExpression? node) {
         return node?.Kind switch {
-            BoundNodeKind.LiteralExpression     => EvaluateLiteralExpression((BoundLiteralExpression)node),
-            BoundNodeKind.VariableExpression    => EvaluateVariableExpression((BoundVariableExpression)node),
-            BoundNodeKind.AssignmentExpression  => EvaluateAssignmentExpression((BoundAssignmentExpression)node),
-            BoundNodeKind.UnaryExpression       => EvaluateUnaryExpression((BoundUnaryExpression)node),
-            BoundNodeKind.BinaryExpression      => EvaluateBinaryExpression((BoundBinaryExpression)node),
-            BoundNodeKind.RangeExpression       => EvaluateRangeExpression((BoundRangeExpression)node),
-            BoundNodeKind.CallExpression        => EvaluateCallExpression((BoundCallExpression)node),
-            BoundNodeKind.CastExpression        => EvaluateCastExpression((BoundCastExpression)node),
+            IRNodeKind.LiteralExpression     => EvaluateLiteralExpression((IRLiteralExpression)node),
+            IRNodeKind.VariableExpression    => EvaluateVariableExpression((IRVariableExpression)node),
+            IRNodeKind.AssignmentExpression  => EvaluateAssignmentExpression((IRAssignmentExpression)node),
+            IRNodeKind.UnaryExpression       => EvaluateUnaryExpression((IRUnaryExpression)node),
+            IRNodeKind.BinaryExpression      => EvaluateBinaryExpression((IRBinaryExpression)node),
+            IRNodeKind.RangeExpression       => EvaluateRangeExpression((IRRangeExpression)node),
+            IRNodeKind.CallExpression        => EvaluateCallExpression((IRCallExpression)node),
+            IRNodeKind.CastExpression        => EvaluateCastExpression((IRCastExpression)node),
             
             _ => throw new Exception($"Undefined node: {node?.Kind}"),
         };
     }
 
-    private static object EvaluateLiteralExpression(BoundLiteralExpression literal) => literal.Value;
+    private static object EvaluateLiteralExpression(IRLiteralExpression literal) => literal.Value;
     
-    private object EvaluateVariableExpression(BoundVariableExpression node) {
+    private object EvaluateVariableExpression(IRVariableExpression node) {
         var variable = node.Variable 
             ?? throw new Exception($"Node variable not initialized");
         
@@ -114,71 +123,47 @@ internal sealed class Evaluator(
         }
     }
 
-    private object EvaluateAssignmentExpression(BoundAssignmentExpression node) {
+    private object EvaluateAssignmentExpression(IRAssignmentExpression node) {
         var value = EvaluateExpression(node.Expression);
         AssignValue(node.Variable, value);
         return value;
     }
 
-    private object EvaluateUnaryExpression(BoundUnaryExpression node) {
+    private object EvaluateUnaryExpression(IRUnaryExpression node) {
         var operand = EvaluateExpression(node.Operand);
 
         if (node.Type == TypeSymbol.Float) {
             return node.Operator.Kind switch {
-                UnaryOperatorKind.Identity => (float)operand,
-                UnaryOperatorKind.Negetion => -(float)operand,
+                UnaryOperator.Identity => (float)operand,
+                UnaryOperator.Negetion => -(float)operand,
                 _ => throw new Exception($"Unexpected Unary operator: {node.Operator}"),
             };
         }
         
         switch (node.Operator.Kind) {
-            case UnaryOperatorKind.Identity:
+            case UnaryOperator.Identity:
                 return (int)operand;
                 
-            case UnaryOperatorKind.Negetion:
+            case UnaryOperator.Negetion:
                 return -(int)operand;
 
-            case UnaryOperatorKind.BitwiseNot:
+            case UnaryOperator.BitwiseNot:
                 return ~(int)operand;
 
-            case UnaryOperatorKind.LogicalNot:
+            case UnaryOperator.LogicalNot:
                 return !(bool)operand;
 
-            case UnaryOperatorKind.PostIncrement: {
-                var value = (int)operand;
-                value++;
-                return value;
-            }
-
-            case UnaryOperatorKind.PostDecrement: {
-                var value = (int)operand;
-                value--;
-                return value;
-            }
-                
-            case UnaryOperatorKind.PreIncrement: {
-                var value = (int)operand;
-                ++value;
-                return value;
-            }
-            
-            case UnaryOperatorKind.PreDecrement: {
-                var value = (int)operand;
-                --value;
-                return value;
-            }
-            
             default:
                 throw new Exception($"Unexpected Unary operator: {node.Operator}");
         }
     }
 
-    private object EvaluateBinaryExpression(BoundBinaryExpression node) {
+    private object EvaluateBinaryExpression(IRBinaryExpression node) {
         var left = EvaluateExpression(node.Left);
         var right = EvaluateExpression(node.Right);
 
         switch (node.Operator.Kind) {
-            case BinaryOperatorKind.Add: 
+            case BinaryOperator.Add: 
                 if (node.Type == TypeSymbol.String)
                     return (string)left + (string)right;
 
@@ -187,13 +172,13 @@ internal sealed class Evaluator(
 
                 return (int)left + (int)right;
             
-            case BinaryOperatorKind.Substact:            
+            case BinaryOperator.Substact:            
                 if (node.Type == TypeSymbol.Float)
                     return (float)left - (float)right;
 
                 return (int)left - (int)right;
             
-            case BinaryOperatorKind.Multiply:
+            case BinaryOperator.Multiply:
                 if (node.Type == TypeSymbol.String) {
                     var str = (string)left;
                     for (var i = 1; i < (int)right; i++)
@@ -207,76 +192,76 @@ internal sealed class Evaluator(
 
                 return (int)left * (int)right;
 
-            case BinaryOperatorKind.Divide:                 
+            case BinaryOperator.Divide:                 
                 if (node.Type == TypeSymbol.Float)
                     return (float)left / (float)right;
 
                 return (int)left / (int)right;
             
-            case BinaryOperatorKind.Modulus:            
+            case BinaryOperator.Modulus:            
                 if (node.Type == TypeSymbol.Float)
                     return (float)left % (float)right;
  
                 return (int)left % (int)right;
             
-            case BinaryOperatorKind.Remainder: 
+            case BinaryOperator.Remainder: 
                 return Math.DivRem((int)left, (int)right).Remainder;
             
-            case BinaryOperatorKind.RaisePower:             
+            case BinaryOperator.RaisePower:             
                 if (node.Type == TypeSymbol.Float)
                     return (float)Math.Pow((float)left, (float)right);
 
                 return (int)Math.Pow((int)left, (int)right);
              
-            case BinaryOperatorKind.LogicalAnd: 
+            case BinaryOperator.LogicalAnd: 
                 return (bool)left && (bool)right;
             
-            case BinaryOperatorKind.LogicalOr: 
+            case BinaryOperator.LogicalOr: 
                 return (bool)left || (bool)right;
 
-            case BinaryOperatorKind.BitwiseAnd: 
+            case BinaryOperator.BitwiseAnd: 
                 return (int)left & (int)right;
             
-            case BinaryOperatorKind.BitwiseOr: 
+            case BinaryOperator.BitwiseOr: 
                 return (int)left | (int)right;
             
-            case BinaryOperatorKind.BitwiseXor: 
+            case BinaryOperator.BitwiseXor: 
                 return (int)left ^ (int)right;
             
-            case BinaryOperatorKind.BitshiftLeft: 
+            case BinaryOperator.BitshiftLeft: 
                 return (int)left >> (int)right;
             
-            case BinaryOperatorKind.BitshiftRight: 
+            case BinaryOperator.BitshiftRight: 
                 return (int)left << (int)right;
 
-            case BinaryOperatorKind.GreaterThan:
+            case BinaryOperator.GreaterThan:
              if (node.Type == TypeSymbol.Float)
                     return (float)left > (float)right;
 
                 return (int)left > (int)right;
             
-            case BinaryOperatorKind.GreaterThanEqualsTo:
+            case BinaryOperator.GreaterThanEqualsTo:
              if (node.Type == TypeSymbol.Float)
                     return (float)left >= (float)right;
 
                 return (int)left >= (int)right;
             
-            case BinaryOperatorKind.LesserThan:
+            case BinaryOperator.LesserThan:
              if (node.Type == TypeSymbol.Float)
                     return (float)left < (float)right;
 
                 return (int)left < (int)right;
             
-            case BinaryOperatorKind.LesserThanEqualsTo:
+            case BinaryOperator.LesserThanEqualsTo:
              if (node.Type == TypeSymbol.Float)
                     return (float)left <= (float)right;
 
                 return (int)left <= (int)right;
 
-            case BinaryOperatorKind.Equals: 
+            case BinaryOperator.Equals: 
                 return Equals(left, right);
             
-            case BinaryOperatorKind.NotEquals: 
+            case BinaryOperator.NotEquals: 
                 return !Equals(left, right);
 
             default: 
@@ -284,13 +269,13 @@ internal sealed class Evaluator(
         };
     }
 
-    private object EvaluateRangeExpression(BoundRangeExpression node) {
+    private object EvaluateRangeExpression(IRRangeExpression node) {
         var lower = EvaluateExpression(node.Lower);
         var upper = EvaluateExpression(node.Upper);
         return (lower, upper);
     }
 
-    private object EvaluateCallExpression(BoundCallExpression node) {
+    private object EvaluateCallExpression(IRCallExpression node) {
         if (node.Function == BuiltinFunctions.Input) {
             return Console.ReadLine() ?? "";
         }
@@ -319,7 +304,7 @@ internal sealed class Evaluator(
             }
 
             locals.Push(stackframe);
-            var statement = functionBodies[node.Function];
+            var statement = functions[node.Function];
             var result = EvaluateStatement(statement);
             locals.Pop();
 
@@ -327,7 +312,7 @@ internal sealed class Evaluator(
         }
     }
 
-    private object EvaluateCastExpression(BoundCastExpression node) {
+    private object EvaluateCastExpression(IRCastExpression node) {
         var value = EvaluateExpression(node.Expression);
         
         if (node.Type == TypeSymbol.Bool)
@@ -357,7 +342,11 @@ internal sealed class Evaluator(
 
     private Random? random;
     private object? lastValue;
+
+    private readonly IRProgram program;
     private readonly Stack<Dictionary<VariableSymbol, object>> locals = [];
+    private readonly Dictionary<FunctionSymbol, IRBlockStatement> functions = [];
+    private readonly Dictionary<VariableSymbol, object> globals;
 }
 
 public sealed class EvaluationResult(ImmutableArray<DiagnosticMessage> diagnostics, object? result = null) {

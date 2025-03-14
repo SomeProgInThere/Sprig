@@ -1,11 +1,11 @@
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
-namespace Sprig.Codegen.Binding.ControlFlow;
+namespace Sprig.Codegen.IRGeneration.ControlFlow;
 
 internal class GraphBuilder {
 
-    public ControlFlowGraph Build(List<Block> blocks) {
+    public ControlFlowGraph Build(List<BasicBlock> blocks) {
         if (blocks.Count == 0)
             Connect(start, end);
         else
@@ -15,7 +15,7 @@ internal class GraphBuilder {
             foreach (var statement in block.Statements) {
 
                 blockFromStatement.Add(statement, block);
-                if (statement is BoundLabelStatement labelStatement)
+                if (statement is IRLabelStatement labelStatement)
                     blockFromLabel.Add(labelStatement.Label, block);
             }
         }
@@ -46,8 +46,8 @@ internal class GraphBuilder {
         return new ControlFlowGraph(start, end, blocks, branches);
     }
 
-    private void Connect(Block from, Block to, BoundExpression? condition = null) {
-        if (condition is BoundLiteralExpression literal) {
+    private void Connect(BasicBlock from, BasicBlock to, IRExpression? condition = null) {
+        if (condition is IRLiteralExpression literal) {
             var value = (bool)literal.Value;
             if (value)
                 condition = null;
@@ -55,24 +55,24 @@ internal class GraphBuilder {
             else return;
         }
         
-        var branch = new BlockBranch(from, to, condition);
+        var branch = new BasicBlockBranch(from, to, condition);
         from.Outgoing.Add(branch);
         to.Incoming.Add(branch);
         
         branches.Add(branch);
     }
 
-    private void Walk(BoundStatement statement, Block current, Block next, bool isLast) {
+    private void Walk(IRStatement statement, BasicBlock current, BasicBlock next, bool isLast) {
         switch (statement.Kind) {
             
-            case BoundNodeKind.GotoStatement:
-                var gotoStatement = (BoundGotoStatement)statement;
+            case IRNodeKind.GotoStatement:
+                var gotoStatement = (IRGotoStatement)statement;
                 var toBlock = blockFromLabel[gotoStatement.Label];
                 Connect(current, toBlock);
                 break;
             
-            case BoundNodeKind.ConditionalGotoStatement:
-                var conditionalGotoStatement = (BoundConditionalGotoStatement)statement;    
+            case IRNodeKind.ConditionalGotoStatement:
+                var conditionalGotoStatement = (IRConditionalGotoStatement)statement;    
                 var ifBlock = blockFromLabel[conditionalGotoStatement.Label];
                 var elseBlock = next;
 
@@ -90,13 +90,13 @@ internal class GraphBuilder {
                 Connect(current, elseBlock, elseCondition);
                 break;
 
-            case BoundNodeKind.ReturnStatement:
+            case IRNodeKind.ReturnStatement:
                 Connect(current, end);
                 break;
 
-            case BoundNodeKind.VariableDeclaration:
-            case BoundNodeKind.LabelStatement:
-            case BoundNodeKind.ExpressionStatement:
+            case IRNodeKind.VariableDeclaration:
+            case IRNodeKind.LabelStatement:
+            case IRNodeKind.ExpressionStatement:
                 if (isLast)
                     Connect(current, next);
                 break;
@@ -106,7 +106,7 @@ internal class GraphBuilder {
         }
     }
 
-    private void Remove(List<Block> blocks, Block block) {
+    private void Remove(List<BasicBlock> blocks, BasicBlock block) {
         foreach (var branch in block.Incoming) {
             branch.From.Outgoing.Remove(branch);
             branches.Remove(branch);
@@ -120,20 +120,20 @@ internal class GraphBuilder {
         blocks.Remove(block);
     }
 
-    private static BoundExpression Negate(BoundExpression condition) {
-        if (condition is BoundLiteralExpression literal) {
+    private static IRExpression Negate(IRExpression condition) {
+        if (condition is IRLiteralExpression literal) {
             var value = (bool)literal.Value;
-            return new BoundLiteralExpression(!value);
+            return new IRLiteralExpression(!value);
         }
 
-        var op = BoundUnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
-        return new BoundUnaryExpression(condition, op);
+        var op = IRUnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
+        return new IRUnaryExpression(condition, op);
     }
 
-    private readonly Dictionary<BoundStatement, Block> blockFromStatement = [];
-    private readonly Dictionary<LabelSymbol, Block> blockFromLabel = [];
-    private readonly List<BlockBranch> branches = [];
+    private readonly Dictionary<IRStatement, BasicBlock> blockFromStatement = [];
+    private readonly Dictionary<LabelSymbol, BasicBlock> blockFromLabel = [];
+    private readonly List<BasicBlockBranch> branches = [];
 
-    private readonly Block start = new(true);
-    private readonly Block end = new(false);
+    private readonly BasicBlock start = new(true);
+    private readonly BasicBlock end = new(false);
 }

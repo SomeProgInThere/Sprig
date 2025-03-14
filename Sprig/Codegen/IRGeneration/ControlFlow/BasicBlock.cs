@@ -1,12 +1,12 @@
 
 using System.CodeDom.Compiler;
 
-namespace Sprig.Codegen.Binding.ControlFlow;
+namespace Sprig.Codegen.IRGeneration.ControlFlow;
 
-internal sealed class Block {
-    public Block() {}
+internal sealed class BasicBlock {
+    public BasicBlock() {}
     
-    public Block(bool isStart) {
+    public BasicBlock(bool isStart) {
         IsStart = isStart;
         IsEnd = !isStart;
     }
@@ -30,12 +30,12 @@ internal sealed class Block {
     public bool IsStart { get; }
     public bool IsEnd { get; }
 
-    public List<BoundStatement> Statements { get; } = [];
-    public List<BlockBranch> Incoming { get; } = [];
-    public List<BlockBranch> Outgoing { get; } = [];
+    public List<IRStatement> Statements { get; } = [];
+    public List<BasicBlockBranch> Incoming { get; } = [];
+    public List<BasicBlockBranch> Outgoing { get; } = [];
 }
 
-internal sealed class BlockBranch(Block from, Block to, BoundExpression? condition) {
+internal sealed class BasicBlockBranch(BasicBlock from, BasicBlock to, IRExpression? condition) {
 
     public override string ToString() {
         if (Condition is null)
@@ -44,7 +44,7 @@ internal sealed class BlockBranch(Block from, Block to, BoundExpression? conditi
         return Condition.ToString();
     }
 
-    public Block From { get; } = from;
-    public Block To { get; } = to;
-    public BoundExpression? Condition { get; } = condition;
+    public BasicBlock From { get; } = from;
+    public BasicBlock To { get; } = to;
+    public IRExpression? Condition { get; } = condition;
 }

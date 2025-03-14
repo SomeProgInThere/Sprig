@@ -1,7 +1,7 @@
 
 using System.CodeDom.Compiler;
 using Sprig.Codegen;
-using Sprig.Codegen.Source;
+using Sprig.Codegen.Text;
 using Sprig.Codegen.Syntax;
 
 namespace Sprig.IO;
@@ -87,7 +87,7 @@ public static class TextWritterExtension {
             var lineNumber = lineIndex + 1;
 
             writer.WriteLine();
-            writer.WriteError($"{fileName} (ln {lineNumber}, col {column}) Error: ");
+            writer.WriteError($"{fileName} ({lineNumber}, {column}) Error: ");
             writer.WriteInfo($"{diagnostic}\n");
 
             var prefixSpan = TextSpan.CreateFromBounds(line.Start, span.Start);

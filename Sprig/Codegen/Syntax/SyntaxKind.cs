@@ -1,7 +1,7 @@
 namespace Sprig.Codegen.Syntax;
 
 public enum SyntaxKind {
-    // Tokens
+    // Special tokens
     WhitespaceToken,
     EndOfFileToken,
     BadToken,
@@ -9,6 +9,7 @@ public enum SyntaxKind {
     StringToken,
     NumberToken,
 
+    // Simple tokens
     PlusToken,
     MinusToken,
     StarToken,
@@ -25,7 +26,12 @@ public enum SyntaxKind {
     DotToken,
     CommaToken,
     ColonToken,
+    OpenParenthesisToken,
+    ClosedParenthesisToken,
+    OpenBraceToken,
+    ClosedBraceToken,
 
+    // Compound Tokens
     DoubleAmpersandToken,
     DoublePipeToken,
     DoublePlusToken,
@@ -47,11 +53,6 @@ public enum SyntaxKind {
     CircumflexEqualsToken,
     LeftArrowEqualsToken,
     RightArrowEqualsToken,
-
-    OpenParenthesisToken,
-    ClosedParenthesisToken,
-    OpenBraceToken,
-    ClosedBraceToken,
 
     // Keywords
     TrueKeyword,
@@ -85,7 +86,7 @@ public enum SyntaxKind {
     FunctionHeader,
     FunctionParameter,
     
-    // Clause
+    // Clauses
     TypeClause,
     ElseClause,
 

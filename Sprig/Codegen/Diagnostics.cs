@@ -1,6 +1,6 @@
 using System.Collections;
 
-using Sprig.Codegen.Source;
+using Sprig.Codegen.Text;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 

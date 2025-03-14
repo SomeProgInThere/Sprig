@@ -4,7 +4,7 @@ using Sprig.IO;
 
 namespace Sprig.Codegen.Symbols;
 
-internal static class SymbolPrinter {
+internal static class SymbolWriter {
 
     public static void WriteTo(Symbol symbol, TextWriter writer) {
         switch (symbol.Kind) {
@@ -68,6 +68,11 @@ internal static class SymbolPrinter {
         }
 
         writer.WritePunctuation(SyntaxKind.ClosedParenthesisToken);
-        writer.WriteLine();
+        
+        if (symbol.Type != TypeSymbol.Void) {
+            writer.WritePunctuation(SyntaxKind.ColonToken);
+            writer.WriteSpace();
+            symbol.Type.WriteTo(writer);
+        }
     }
 }

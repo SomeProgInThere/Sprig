@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using Sprig.Codegen.Source;
+using Sprig.Codegen.Text;
 
 namespace Sprig.Codegen.Syntax;
 
@@ -19,7 +19,7 @@ internal sealed class Parser {
            
         tokens = [..sourceTokens];
         syntaxTree = sourceSyntaxTree;
-        source = sourceSyntaxTree.SourceText;
+        source = sourceSyntaxTree.Source;
         Diagnostics = lexer.Diagnostics;
     }
 

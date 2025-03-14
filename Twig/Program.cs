@@ -3,10 +3,10 @@ using Sprig.Codegen.Syntax;
 using Sprig.IO;
 
 internal class Program {
-    private static void Main(string[] args) {
+    private static int Main(string[] args) {
         if (args.Length == 0) {
-            Console.Error.WriteLine("usage: sprig <source-path>");
-            return;
+            Console.Error.WriteLine("usage: twig <source-path>");
+            return 1;
         }
 
         var paths = GetFilePaths(args);
@@ -15,7 +15,7 @@ internal class Program {
 
         foreach (var path in paths) {
             if (!File.Exists(path)) {
-                Console.WriteLine($"error: file {paths} does not exist");
+                Console.Error.WriteLine($"error: file {paths} does not exist");
                 hasErrors = true;
                 continue;
             }
@@ -25,7 +25,7 @@ internal class Program {
         }
 
         if (hasErrors)
-            return;
+            return 1;
 
         var compilation = new Compilation([.. syntaxTrees]);
         var result = compilation.Evaluate([]);
@@ -35,6 +35,8 @@ internal class Program {
         else
             if (result.Result != null)
             Console.WriteLine(result.Result);
+
+        return 0;
     }
 
     private static IEnumerable<string> GetFilePaths(IEnumerable<string> args) {

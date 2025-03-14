@@ -1,6 +1,7 @@
-namespace Sprig.Codegen.Binding;
 
-internal enum BoundNodeKind {
+namespace Sprig.Codegen.IRGeneration;
+
+internal enum IRNodeKind {
     // Expressions
     LiteralExpression,
     VariableExpression,
@@ -24,4 +25,14 @@ internal enum BoundNodeKind {
     WhileStatement,
     DoWhileStatement,
     ForStatement,
+}
+
+internal abstract class IRNode {
+    public abstract IRNodeKind Kind { get; }
+
+    public override string ToString() {
+        using var writer = new StringWriter();
+        this.WriteTo(writer);
+        return writer.ToString();
+    }
 }

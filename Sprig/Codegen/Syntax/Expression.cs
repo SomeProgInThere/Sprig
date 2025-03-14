@@ -78,9 +78,9 @@ internal sealed class RangeExpression(
     SyntaxTree syntaxTree, Expression lowerBound, SyntaxToken rangeToken, Expression upperBound
 ) : Expression(syntaxTree)
 {
-    public Expression LowerBound { get; } = lowerBound;
+    public Expression Lower { get; } = lowerBound;
     public SyntaxToken RangeToken { get; } = rangeToken;
-    public Expression UpperBound { get; } = upperBound;
+    public Expression Upper { get; } = upperBound;
 
     public override SyntaxKind Kind => SyntaxKind.RangeExpression;
 }

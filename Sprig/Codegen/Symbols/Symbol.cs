@@ -14,7 +14,7 @@ public abstract class Symbol {
     public string Name { get; }
 
     public void WriteTo(TextWriter writer) {
-        SymbolPrinter.WriteTo(this, writer);
+        SymbolWriter.WriteTo(this, writer);
     }
 
     public override string ToString() {

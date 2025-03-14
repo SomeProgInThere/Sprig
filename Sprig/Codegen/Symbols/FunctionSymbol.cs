@@ -17,7 +17,7 @@ public sealed class FunctionSymbol(
 ) : Symbol(name) {
     
     public ImmutableArray<ParameterSymbol> Parameters { get; } = parameters;
-    public TypeSymbol ReturnType { get; } = returnType;
+    public TypeSymbol Type { get; } = returnType;
     public FunctionHeader? Header { get; } = header;
 
     public override SymbolKind Kind => SymbolKind.Function;

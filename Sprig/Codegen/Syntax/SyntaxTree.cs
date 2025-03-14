@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-using Sprig.Codegen.Source;
+using Sprig.Codegen.Text;
 
 namespace Sprig.Codegen.Syntax;
 
@@ -12,15 +12,15 @@ public sealed class SyntaxTree {
         return Parse(sourceText);
     }
 
-    public static SyntaxTree Parse(string source) {
-        var sourceText = SourceText.FromString(source);
+    public static SyntaxTree Parse(string text) {
+        var sourceText = SourceText.FromString(text);
         return Parse(sourceText);
     }
 
-    public static SyntaxTree Parse(SourceText sourceText) => new(sourceText, Parse);
+    public static SyntaxTree Parse(SourceText source) => new(source, Parse);
 
-    public static IEnumerable<SyntaxToken> ParseTokens(string source) {
-        var sourceText = SourceText.FromString(source);
+    public static IEnumerable<SyntaxToken> ParseTokens(string text) {
+        var sourceText = SourceText.FromString(text);
         return ParseTokens(sourceText, out _);
     }
 
@@ -50,8 +50,8 @@ public sealed class SyntaxTree {
         return [..tokens];
     }
 
-    private SyntaxTree(SourceText sourceText, ParseHandler handler) {
-        SourceText = sourceText;
+    private SyntaxTree(SourceText source, ParseHandler handler) {
+        Source = source;
         handler(this, out var root, out var diagnostics);
     
         Root = root;
@@ -74,7 +74,7 @@ public sealed class SyntaxTree {
         out ImmutableArray<DiagnosticMessage> diagnostics
     );
 
-    public SourceText SourceText { get; }
+    public SourceText Source { get; }
     public CompilationUnit Root { get; }
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; }
 }

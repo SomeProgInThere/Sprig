@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 
-namespace Sprig.Codegen.Source;
+namespace Sprig.Codegen.Text;
 
 public sealed class SourceText {
 
-    public static SourceText FromString(string source, string fileName = "") {
-        return new(source, fileName);
+    public static SourceText FromString(string text, string fileName = "") {
+        return new(text, fileName);
     }
 
     public ImmutableArray<TextLine> Lines { get; }
@@ -30,46 +30,46 @@ public sealed class SourceText {
         return lower - 1;
     }
 
-    public char this[int index] => Source[index];
-    public int Length => Source.Length;
+    public char this[int index] => Text[index];
+    public int Length => Text.Length;
 
-    public string ToString(int start, int length) => Source.Substring(start, length);
+    public string ToString(int start, int length) => Text.Substring(start, length);
 
-    public string ToString(TextSpan span) => Source.Substring(span.Start, span.Length);
+    public string ToString(TextSpan span) => Text.Substring(span.Start, span.Length);
 
-    public override string ToString() => Source;
+    public override string ToString() => Text;
 
-    private SourceText(string source, string fileName) {
-        Source = source;
+    private SourceText(string text, string fileName) {
+        Text = text;
         FileName = fileName;
-        Lines = ParseLines(this, source);
+        Lines = ParseLines(this, text);
     }
 
-    private static ImmutableArray<TextLine> ParseLines(SourceText sourceText, string source) {
+    private static ImmutableArray<TextLine> ParseLines(SourceText source, string text) {
         var result = ImmutableArray.CreateBuilder<TextLine>();
         var position = 0;
         var start = 0;
 
         while (position < source.Length) {
-            var lineBreakWidth = GetLineBreakWidth(source, position);
+            var lineBreakWidth = GetLineBreakWidth(text, position);
             if (lineBreakWidth == 0)
                 position++;
             else {
-                AddLine(result, sourceText, position, start, lineBreakWidth);
+                AddLine(result, source, position, start, lineBreakWidth);
                 position += lineBreakWidth;
                 start = position;
             }
         }
 
         if (position >= start)
-            AddLine(result, sourceText, position, start, 0);
+            AddLine(result, source, position, start, 0);
 
         return result.ToImmutable();
     }
 
-    private static int GetLineBreakWidth(string source, int position) {
-        var current = source[position];
-        var next = position + 1 >= source.Length ? '\0' : source[position + 1];
+    private static int GetLineBreakWidth(string text, int position) {
+        var current = text[position];
+        var next = position + 1 >= text.Length ? '\0' : text[position + 1];
 
         if (current == '\r' && next == '\n')
             return 2;
@@ -80,14 +80,14 @@ public sealed class SourceText {
         return 0;
     }
 
-    private static void AddLine(ImmutableArray<TextLine>.Builder result, SourceText sourceText, int position, int start, int lineBreakWidth) {
+    private static void AddLine(ImmutableArray<TextLine>.Builder result, SourceText source, int position, int start, int lineBreakWidth) {
         var length = position - start;
         var lengthWithLineBreak = length + lineBreakWidth;
-        var line = new TextLine(sourceText, start, length, lengthWithLineBreak);
+        var line = new TextLine(source, start, length, lengthWithLineBreak);
 
         result.Add(line);
     }
     
-    private string Source { get; }
+    private string Text { get; }
     public string FileName { get; }
 }

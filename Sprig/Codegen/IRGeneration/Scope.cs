@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using Sprig.Codegen.Symbols;
 
-namespace Sprig.Codegen.Binding;
+namespace Sprig.Codegen.IRGeneration;
 
-internal sealed class BoundScope(BoundScope? parent = null) {
+internal sealed class LocalScope(LocalScope? parent = null) {
 
     public bool TryDeclareSymbol(Symbol symbol) {
         symbols ??= [];
@@ -23,28 +23,32 @@ internal sealed class BoundScope(BoundScope? parent = null) {
     
     public ImmutableArray<Symbol> Symbols => symbols is null ? [] : [..symbols.Values];
 
-    public BoundScope? Parent { get; } = parent;
+    public LocalScope? Parent { get; } = parent;
     private Dictionary<string, Symbol>? symbols;
 }
 
-internal sealed class BoundGlobalScope(
-    BoundGlobalScope? previous,
+internal sealed class GlobalScope(
+    GlobalScope? previous,
     ImmutableArray<DiagnosticMessage> diagnostics,
     ImmutableArray<Symbol> symbols,
-    BoundBlockStatement statement
+    ImmutableArray<IRStatement> statements
 ) {
-    public BoundGlobalScope? Previous { get; } = previous;
+    public GlobalScope? Previous { get; } = previous;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public ImmutableArray<Symbol> Symbols { get; } = symbols;
-    public BoundBlockStatement Statement { get; } = statement;
+    public ImmutableArray<IRStatement> Statements { get; } = statements;
 }
 
-internal sealed class BoundProgram(
-    BoundGlobalScope globalScope,
+internal sealed class IRProgram(
+    IRProgram previous,
+    GlobalScope globalScope,
+    IRBlockStatement statement,
     ImmutableArray<DiagnosticMessage> diagnostics,
-    ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functions
+    ImmutableDictionary<FunctionSymbol, IRBlockStatement> functions
 ) {
-    public BoundGlobalScope GlobalScope { get; } = globalScope;
+    public IRProgram Previous { get; } = previous;
+    public GlobalScope GlobalScope { get; } = globalScope;
+    public IRBlockStatement Statement { get; } = statement;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
-    public ImmutableDictionary<FunctionSymbol, BoundBlockStatement> Functions { get; } = functions;
+    public ImmutableDictionary<FunctionSymbol, IRBlockStatement> Functions { get; } = functions;
 }

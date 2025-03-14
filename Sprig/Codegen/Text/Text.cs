@@ -1,4 +1,5 @@
-namespace Sprig.Codegen.Source;
+
+namespace Sprig.Codegen.Text;
 
 public readonly struct TextSpan(int start, int length) {
     public static TextSpan CreateFromBounds(int start, int end) {

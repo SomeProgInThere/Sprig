@@ -1,26 +1,26 @@
 
-namespace Sprig.Codegen.Binding.ControlFlow;
+namespace Sprig.Codegen.IRGeneration.ControlFlow;
 
-internal sealed class BlockBuilder {
+internal sealed class BasicBlockBuilder {
     
-    public List<Block> Build(BoundBlockStatement block) {
+    public List<BasicBlock> Build(IRBlockStatement block) {
         
         foreach (var statement in block.Statements) {
             switch (statement.Kind) {
-                case BoundNodeKind.LabelStatement:
+                case IRNodeKind.LabelStatement:
                     StartBlock();
                     statements.Add(statement);
                     break;
 
-                case BoundNodeKind.GotoStatement:
-                case BoundNodeKind.ConditionalGotoStatement:
-                case BoundNodeKind.ReturnStatement:
+                case IRNodeKind.GotoStatement:
+                case IRNodeKind.ConditionalGotoStatement:
+                case IRNodeKind.ReturnStatement:
                     statements.Add(statement);
                     StartBlock();
                     break;
                 
-                case BoundNodeKind.VariableDeclaration:
-                case BoundNodeKind.ExpressionStatement:
+                case IRNodeKind.VariableDeclaration:
+                case IRNodeKind.ExpressionStatement:
                     statements.Add(statement);
                     break;
 
@@ -39,13 +39,13 @@ internal sealed class BlockBuilder {
 
     private void EndBlock() {
         if (statements.Count > 0) {
-            var block = new Block();
+            var block = new BasicBlock();
             block.Statements.AddRange(statements);
             blocks.Add(block);
             statements.Clear();
         }
     }
     
-    private readonly List<BoundStatement> statements = [];
-    private readonly List<Block> blocks = [];
+    private readonly List<IRStatement> statements = [];
+    private readonly List<BasicBlock> blocks = [];
 }

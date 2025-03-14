@@ -1,22 +1,22 @@
 
-namespace Sprig.Codegen.Binding.ControlFlow;
+namespace Sprig.Codegen.IRGeneration.ControlFlow;
 
 internal class ControlFlowGraph {
 
-    public static ControlFlowGraph Create(BoundBlockStatement body) {
-        var blockBuilder = new BlockBuilder();
+    public static ControlFlowGraph Create(IRBlockStatement body) {
+        var blockBuilder = new BasicBlockBuilder();
         var blocks = blockBuilder.Build(body);
 
         var graphBuilder = new GraphBuilder();
         return graphBuilder.Build(blocks);
     }
 
-    public static bool AllPathsReturn(BoundBlockStatement body) {
+    public static bool AllPathsReturn(IRBlockStatement body) {
         var graph = Create(body);
         
         foreach (var branch in graph.End.Incoming) {
             var lastStatement = branch.From.Statements.LastOrDefault();
-            if (lastStatement == null || lastStatement.Kind != BoundNodeKind.ReturnStatement)
+            if (lastStatement == null || lastStatement.Kind != IRNodeKind.ReturnStatement)
                 return false;
         }
 
@@ -30,7 +30,7 @@ internal class ControlFlowGraph {
 
         writer.WriteLine("digraph G {");
         
-        var blockIds = new Dictionary<Block, string>();
+        var blockIds = new Dictionary<BasicBlock, string>();
         for (var i = 0; i < Blocks.Count; i++) {
             var id = $"N{i}";
             blockIds.Add(Blocks[i], id);
@@ -53,15 +53,15 @@ internal class ControlFlowGraph {
         writer.WriteLine("}");
     }
 
-    internal ControlFlowGraph(Block start, Block end, List<Block> blocks, List<BlockBranch> branches) {
+    internal ControlFlowGraph(BasicBlock start, BasicBlock end, List<BasicBlock> blocks, List<BasicBlockBranch> branches) {
         Start = start;
         End = end;
         Blocks = blocks;
         Branches = branches;
     }
 
-    public Block Start { get; }
-    public Block End { get; }
-    public List<Block> Blocks { get; }
-    public List<BlockBranch> Branches { get; }
+    public BasicBlock Start { get; }
+    public BasicBlock End { get; }
+    public List<BasicBlock> Blocks { get; }
+    public List<BasicBlockBranch> Branches { get; }
 }

@@ -1,6 +1,6 @@
 using System.Reflection;
 
-using Sprig.Codegen.Source;
+using Sprig.Codegen.Text;
 
 namespace Sprig.Codegen.Syntax;
 
@@ -55,7 +55,7 @@ public abstract class SyntaxNode(SyntaxTree syntaxTree) {
         writer.WriteLine();
     }
 
-    public TextLocation Location => new(SyntaxTree.SourceText, Span);
+    public TextLocation Location => new(SyntaxTree.Source, Span);
     
     public SyntaxTree SyntaxTree { get; } = syntaxTree;
 
