@@ -325,11 +325,14 @@ internal sealed class Binder {
     }
 
     private IRStatement BindReturnStatement(ReturnStatement syntax) {
-        var expression = syntax.Expression == null ? null : BindExpression(syntax.Expression);
+        var expression = syntax.Expression == null 
+            ? null 
+            : BindExpression(syntax.Expression);
         
-        if (function is null)
-            diagnostics.ReportInvalidReturn(syntax.ReturnKeyword.Location);
-
+        if (function is null) {
+            if (expression != null)
+                diagnostics.ReportInvalidReturnGlobalStatement(syntax.Expression.Location);
+        }
         else {
             if (function.Type == TypeSymbol.Void) {
                 if (expression != null)
@@ -338,8 +341,8 @@ internal sealed class Binder {
             else {
                 if (expression is null)
                     diagnostics.ReportMissingReturnExpression(syntax.ReturnKeyword.Location, function.Name, function.Type);
-                
-                expression = BindCast(syntax.Expression.Location, expression, function.Type);
+                else
+                    expression = BindCast(syntax.Expression.Location, expression, function.Type);
             }
         }
 

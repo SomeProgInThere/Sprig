@@ -2,3 +2,7 @@
 func getName(): string {
     return "sprig"
 }
+
+func hello() {
+    print("Hello")
+}

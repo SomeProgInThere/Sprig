@@ -111,18 +111,18 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
 
-    public void ReportInvalidReturn(TextLocation location) {
-        var message = $"Keyword 'return' is not present inside of a function";
+    public void ReportInvalidReturnExpression(TextLocation location, string name) {
+        var message = $"Keyword 'return' cannot be used for void function '{name}'";
         Report(location, message);
     }
 
-    public void ReportInvalidReturnExpression(TextLocation location, string name) {
-        var message = $"Keyword 'return' cannot be used for a non-return function"; 
+    public void ReportInvalidReturnGlobalStatement(TextLocation location) {
+        var message = $"Keyword 'return' cannot be used in global statements";
         Report(location, message);
     }
     
     public void ReportMissingReturnExpression(TextLocation location, string name, TypeSymbol type) {
-        var message = $"A expression of type '{type}' expected for function '{name}'";
+        var message = $"A return expression of type '{type}' expected for function '{name}'";
         Report(location, message);
     }
 
