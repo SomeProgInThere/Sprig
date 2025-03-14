@@ -22,7 +22,11 @@ internal sealed class Evaluator {
 
     public object? Evaluate() {
         locals.Push([]);
-        return EvaluateStatement(program.Statement);
+        if (program.MainFunction is null)
+            return null;
+
+        var body = functions[program.MainFunction];
+        return EvaluateStatement(body);
     }
 
     private object? EvaluateStatement(IRBlockStatement body) {

@@ -66,7 +66,7 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     public void ReportCannotConvert(TextLocation location, TypeSymbol actual, TypeSymbol? expected, bool reportCastExisits = false) {
         var message = $"Cannot convert type '{actual}' to '{expected}'";
         if (reportCastExisits)
-            message += ". An explicit cast exists (are you missing a cast?)";
+            message += ". An explicit cast exists, are you missing a cast?";
 
         Report(location, message);
     }
@@ -151,6 +151,21 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
     
+    public void ReportMainAlreadyExists(TextLocation location) {
+        var message = $"A 'main' function already exists. Global statements cannot be used";
+        Report(location, message);
+    }
+    
+    public void ReportIncorrectMainDefinition(TextLocation location) {
+        var message = $"Incorrect 'main' function definition. Should not conatin any parameters or return statement";
+        Report(location, message);
+    }
+
+    public void ReportMultipleGlobalStatements(TextLocation location) {
+        var message = $"Only one file can contain global statements";
+        Report(location, message);
+    }
+
     private void Report(TextLocation location, string message) {
         var diagnostic = new DiagnosticMessage(location, message);
         diagnostics.Add(diagnostic);

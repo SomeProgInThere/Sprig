@@ -30,23 +30,25 @@ internal sealed class LocalScope(LocalScope? parent = null) {
 internal sealed class GlobalScope(
     GlobalScope? previous,
     ImmutableArray<DiagnosticMessage> diagnostics,
+    FunctionSymbol mainFunction,
     ImmutableArray<Symbol> symbols,
     ImmutableArray<IRStatement> statements
 ) {
     public GlobalScope? Previous { get; } = previous;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
+    public FunctionSymbol MainFunction { get; } = mainFunction;
     public ImmutableArray<Symbol> Symbols { get; } = symbols;
     public ImmutableArray<IRStatement> Statements { get; } = statements;
 }
 
 internal sealed class IRProgram(
     IRProgram previous,
-    IRBlockStatement statement,
+    FunctionSymbol? mainFunction,
     ImmutableArray<DiagnosticMessage> diagnostics,
     ImmutableDictionary<FunctionSymbol, IRBlockStatement> functions
 ) {
     public IRProgram Previous { get; } = previous;
-    public IRBlockStatement Statement { get; } = statement;
+    public FunctionSymbol? MainFunction { get; } = mainFunction;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public ImmutableDictionary<FunctionSymbol, IRBlockStatement> Functions { get; } = functions;
 }

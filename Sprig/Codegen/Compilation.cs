@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 
 using Sprig.Codegen.IRGeneration;
-using Sprig.Codegen.IRGeneration.ControlFlow;
+// using Sprig.Codegen.IRGeneration.ControlFlow;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
 
@@ -17,7 +17,7 @@ public sealed class Compilation {
         SyntaxTrees = [..syntaxTrees];
     }
 
-    public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables, bool outputControlFlowGraph = false) {
+    public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables) {
         var parseDiagnostics = SyntaxTrees.SelectMany(tree => tree.Diagnostics);
 
         var diagnostics = parseDiagnostics
@@ -28,22 +28,22 @@ public sealed class Compilation {
             return new EvaluationResult(diagnostics);
         
         var program = GetProgram();
+ 
+        // if (outputControlFlowGraph) {
+        //     var appPath = Environment.GetCommandLineArgs()[0];
+        //     var appDirectory = Path.GetDirectoryName(appPath);
+        //     var graphPath = Path.Combine(appDirectory, "cfg.dot");
 
-        if (outputControlFlowGraph) {
-            var appPath = Environment.GetCommandLineArgs()[0];
-            var appDirectory = Path.GetDirectoryName(appPath);
-            var graphPath = Path.Combine(appDirectory, "cfg.dot");
+        //     var controlFlowStatments = !program.Statement.Statements.Any() 
+        //         && !program.Functions.IsEmpty
+        //             ? program.Functions.Last().Value
+        //             : program.Statement;
 
-            var controlFlowStatments = !program.Statement.Statements.Any() 
-                && !program.Functions.IsEmpty
-                    ? program.Functions.Last().Value
-                    : program.Statement;
+        //     var controlFlowGraph = ControlFlowGraph.Create(controlFlowStatments);
 
-            var controlFlowGraph = ControlFlowGraph.Create(controlFlowStatments);
-
-            using var writer = new StreamWriter(graphPath);
-            controlFlowGraph.WriteTo(writer);
-        }
+        //     using var writer = new StreamWriter(graphPath);
+        //     controlFlowGraph.WriteTo(writer);
+        // }
 
         if (program.Diagnostics.Any())
             return new EvaluationResult([..program.Diagnostics]);
@@ -57,20 +57,17 @@ public sealed class Compilation {
     public Compilation ContinueWith(SyntaxTree syntaxTree) => new(this, syntaxTree);
 
     public void EmitTree(TextWriter writer) {
-        var program = GetProgram();
+        var mainFunction = GlobalScope.MainFunction;
+        if (mainFunction != null) {
 
-        if (program.Statement.Statements.Any())
-            program.Statement.WriteTo(writer);
+            var program = GetProgram();
+            mainFunction.WriteTo(writer);
+            writer.WriteLine();
 
-        else {
-            foreach (var functionBody in program.Functions) {
-                if (!GlobalScope.Symbols.Contains(functionBody.Key))
-                    continue;
-                
-                functionBody.Key.WriteTo(writer);
-                writer.WriteLine();
-                functionBody.Value.WriteTo(writer);
-            }
+            if (!program.Functions.TryGetValue(mainFunction, out var body))
+                return;
+
+            body.WriteTo(writer);
         }
     }
 
@@ -78,9 +75,6 @@ public sealed class Compilation {
         var previous = Previous?.GetProgram();
         return Binder.BindProgram(previous, GlobalScope);
     }
-
-    public Compilation? Previous { get; }
-    public ImmutableArray<SyntaxTree> SyntaxTrees { get; }
 
     internal GlobalScope? GlobalScope {
         get {
@@ -91,6 +85,10 @@ public sealed class Compilation {
             return globalScope;
         }
     }
+
+    public Compilation? Previous { get; }
+    public FunctionSymbol MainFunction => GlobalScope.MainFunction;
+    public ImmutableArray<SyntaxTree> SyntaxTrees { get; }
 
     private GlobalScope? globalScope;
 }

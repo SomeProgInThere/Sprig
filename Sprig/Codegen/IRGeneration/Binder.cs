@@ -42,13 +42,49 @@ internal sealed class Binder {
             statments.Add(boundStatement);
         }
 
-        var symbols = binder.scope.Symbols;
-        var diagnostics = binder.Diagnostics.ToImmutableArray();
+        // Check for multiple global statements
 
+        var firstGlobalStatementPerTree = syntaxTrees
+            .Select(tree => tree.Root.Members.OfType<GlobalStatment>()
+            .FirstOrDefault())
+            .Where(statement => statement != null)
+            .ToArray();
+
+        if (firstGlobalStatementPerTree.Length > 1) {
+            foreach (var globalStatement in firstGlobalStatementPerTree)
+                binder.Diagnostics.ReportMultipleGlobalStatements(globalStatement.Location);
+        }
+
+        var symbols = binder.scope.Symbols;
+
+        // Check for main function or generate one if not declared
+
+        var mainFunction = symbols
+            .OfType<FunctionSymbol>()
+            .FirstOrDefault(f => f.Name == "main");
+
+        if (mainFunction != null) {
+            if (mainFunction.Type != TypeSymbol.Void || mainFunction.Parameters.Any())
+                binder.Diagnostics.ReportIncorrectMainDefinition(mainFunction.Header.Identifier.Location);
+        }
+
+        if (globalStatements.Any()) {
+            if (mainFunction != null) {
+                binder.Diagnostics.ReportMainAlreadyExists(mainFunction.Header.Identifier.Location);
+
+                foreach (var globalStatement in firstGlobalStatementPerTree)
+                    binder.Diagnostics.ReportMainAlreadyExists(globalStatement.Location);                
+            }
+            else {
+                mainFunction = new FunctionSymbol("$main", [], TypeSymbol.Void);
+            }
+        }
+
+        var diagnostics = binder.Diagnostics.ToImmutableArray();
         if (previous != null)
             diagnostics = diagnostics.InsertRange(0, previous.Diagnostics);
 
-        return new GlobalScope(previous, diagnostics, symbols, statments.ToImmutable());
+        return new GlobalScope(previous, diagnostics, mainFunction, symbols, statments.ToImmutable());
     }
 
     public static IRProgram BindProgram(IRProgram previous, GlobalScope globalScope) {
@@ -71,8 +107,12 @@ internal sealed class Binder {
             diagnostics = diagnostics.AddRange(binder.Diagnostics);
         }
 
-        var statement = Lowerer.Lower(new IRBlockStatement(globalScope.Statements));
-        return new IRProgram(previous, statement, diagnostics, functions.ToImmutable());
+        if (globalScope.MainFunction != null && globalScope.Statements.Any()) {
+            var body = Lowerer.Lower(new IRBlockStatement(globalScope.Statements));
+            functions.Add(globalScope.MainFunction, body);
+        }
+
+        return new IRProgram(previous, globalScope.MainFunction, diagnostics, functions.ToImmutable());
     }
 
     public Diagnostics Diagnostics => diagnostics;
@@ -422,7 +462,7 @@ internal sealed class Binder {
     }
 
     private static IRExpression BindLiteralExpression(LiteralExpression syntax) {
-        var value = syntax.Value ?? int.MinValue;
+        var value = syntax.Value;
         return new IRLiteralExpression(value);
     }
 
