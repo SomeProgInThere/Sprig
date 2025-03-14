@@ -91,11 +91,6 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
 
-    public void ReportIncorrectArgumentType(TextLocation location, string name, TypeSymbol expected, TypeSymbol actual) {
-        var message = $"Parameter '{name}' cannot be converted from '{actual}' to '{expected}'";
-        Report(location, message);
-    }
-
     public void ReportVoidExpression(TextLocation location) {
         var message = $"Expression must have a return value";
         Report(location, message);

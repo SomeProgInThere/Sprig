@@ -410,21 +410,9 @@ internal sealed class Binder {
 
         bool hasErrors = false;
         for (var i = 0; i < boundArguments.Count; i++) {
-            var parameter = function.Parameters[i];
             var argument = boundArguments[i];
-            
-            if (argument.Type != parameter.Type) {
-                if (argument.Type != TypeSymbol.Error)
-
-                    diagnostics.ReportIncorrectArgumentType(
-                        syntax.Arguments[i].Location, 
-                        parameter.Name, 
-                        parameter.Type, 
-                        argument.Type
-                    );
-                
-                hasErrors = true;
-            }
+            var parameter = function.Parameters[i];
+            boundArguments[i] = BindCast(syntax.Arguments[i].Location, argument, parameter.Type);
         }
 
         if (hasErrors)
@@ -575,6 +563,7 @@ internal sealed class Binder {
         "int"       => TypeSymbol.Int,
         "string"    => TypeSymbol.String,
         "float"     => TypeSymbol.Float,
+        "any"       => TypeSymbol.Any,
         _ => null,
     };
 

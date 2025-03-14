@@ -7,8 +7,9 @@ public sealed class TypeSymbol : Symbol {
     public static readonly TypeSymbol Float = new("float");
     public static readonly TypeSymbol String = new("string");
 
+    public static readonly TypeSymbol Any = new("any");
     public static readonly TypeSymbol Void = new("void");
-    public static readonly TypeSymbol Error = new("error-type");
+    public static readonly TypeSymbol Error = new("?");
 
     public bool IsError => this == Error;
 

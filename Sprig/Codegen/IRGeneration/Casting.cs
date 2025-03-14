@@ -24,7 +24,19 @@ public class Casting {
     public static Casting TypeOf(TypeSymbol from, TypeSymbol to) {
         if (from == to)
             return Identity;
-        
+
+        if (from != TypeSymbol.Void && to == TypeSymbol.Any)
+            return Implicit;
+
+        if (from == TypeSymbol.Int) {
+            if (to == TypeSymbol.Float) {
+                return Implicit;
+            }
+        }
+
+        if (from == TypeSymbol.Any && to != TypeSymbol.Void)
+            return Explicit;
+
         if (from == TypeSymbol.Bool || from == TypeSymbol.Int || from == TypeSymbol.Float) {
             if (to == TypeSymbol.String)
                 return Explicit;
@@ -34,12 +46,6 @@ public class Casting {
             }
         }
         
-        if (from == TypeSymbol.Int) {
-            if (to == TypeSymbol.Float) {
-                return Implicit;
-            }
-        }
-
         return None;
     }
 }

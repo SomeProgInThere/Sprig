@@ -139,23 +139,15 @@ internal sealed class Evaluator {
                 _ => throw new Exception($"Unexpected Unary operator: {node.Operator}"),
             };
         }
-        
-        switch (node.Operator.Kind) {
-            case UnaryOperator.Identity:
-                return (int)operand;
-                
-            case UnaryOperator.Negetion:
-                return -(int)operand;
 
-            case UnaryOperator.BitwiseNot:
-                return ~(int)operand;
-
-            case UnaryOperator.LogicalNot:
-                return !(bool)operand;
-
-            default:
-                throw new Exception($"Unexpected Unary operator: {node.Operator}");
-        }
+        return node.Operator.Kind switch {
+            UnaryOperator.Identity   => (int)operand,
+            UnaryOperator.Negetion   => -(int)operand,
+            UnaryOperator.BitwiseNot => ~(int)operand,
+            UnaryOperator.LogicalNot => !(bool)operand,
+            
+            _ => throw new Exception($"Unexpected Unary operator: {node.Operator}"),
+        };
     }
 
     private object EvaluateBinaryExpression(IRBinaryExpression node) {
@@ -308,13 +300,16 @@ internal sealed class Evaluator {
             var result = EvaluateStatement(statement);
             locals.Pop();
 
-            return result ?? 0;
+            return result ?? "";
         }
     }
 
     private object EvaluateCastExpression(IRCastExpression node) {
         var value = EvaluateExpression(node.Expression);
         
+        if (node.Type == TypeSymbol.Any)
+            return value;
+
         if (node.Type == TypeSymbol.Bool)
             return Convert.ToBoolean(value);
         
