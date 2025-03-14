@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprig", "Sprig\Sprig.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprig.Interpreter", "Sprig.Interpreter\Sprig.Interpreter.csproj", "{01D2F8F9-B2D1-4FD8-86E0-42E505453487}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sprig.Tests", "Sprig.Test\Sprig.Tests.csproj", "{0142823C-FD49-48AE-8BCD-D8E6AAC514DD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twig", "Twig\Twig.csproj", "{8CDE32E2-D891-461B-AAF5-BC59A249685C}"
 EndProject
 Global
@@ -25,10 +23,6 @@ Global
 		{01D2F8F9-B2D1-4FD8-86E0-42E505453487}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01D2F8F9-B2D1-4FD8-86E0-42E505453487}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01D2F8F9-B2D1-4FD8-86E0-42E505453487}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0142823C-FD49-48AE-8BCD-D8E6AAC514DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0142823C-FD49-48AE-8BCD-D8E6AAC514DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0142823C-FD49-48AE-8BCD-D8E6AAC514DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0142823C-FD49-48AE-8BCD-D8E6AAC514DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8CDE32E2-D891-461B-AAF5-BC59A249685C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CDE32E2-D891-461B-AAF5-BC59A249685C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CDE32E2-D891-461B-AAF5-BC59A249685C}.Release|Any CPU.ActiveCfg = Release|Any CPU

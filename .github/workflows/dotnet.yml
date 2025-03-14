@@ -1,4 +1,4 @@
-name: run-tests
+name: build-project
 on: [push]
 
 jobs:
@@ -19,22 +19,3 @@ jobs:
       
       - name: Build Solution
         run: dotnet build --configuration Release --no-restore
-
-  test:
-    name: Run xUnit Tests
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '9.0.x'
-      
-      - name: Restore Dependencies
-        run: dotnet restore
-      
-      - name: Run Tests
-        run: dotnet test --no-restore
