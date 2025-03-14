@@ -76,7 +76,7 @@ public sealed class Compilation {
 
     private IRProgram GetProgram() {
         var previous = Previous?.GetProgram();
-        return IRBinder.BindProgram(previous, GlobalScope);
+        return Binder.BindProgram(previous, GlobalScope);
     }
 
     public Compilation? Previous { get; }
@@ -85,7 +85,7 @@ public sealed class Compilation {
     internal GlobalScope? GlobalScope {
         get {
             if (globalScope is null) {
-                var prevGlobalScope = IRBinder.BindGlobalScope(Previous?.GlobalScope, SyntaxTrees);
+                var prevGlobalScope = Binder.BindGlobalScope(Previous?.GlobalScope, SyntaxTrees);
                 Interlocked.CompareExchange(ref globalScope, prevGlobalScope, null);
             }
             return globalScope;

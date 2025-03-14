@@ -7,9 +7,9 @@ using Sprig.Codegen.Syntax;
 
 namespace Sprig.Codegen.IRGeneration;
 
-internal sealed class IRBinder {
+internal sealed class Binder {
 
-    public IRBinder(LocalScope? parent, FunctionSymbol? function) {
+    public Binder(LocalScope? parent, FunctionSymbol? function = null) {
         this.parent = parent;
         this.function = function;
         scope = new LocalScope(parent);
@@ -22,7 +22,7 @@ internal sealed class IRBinder {
 
     public static GlobalScope BindGlobalScope(GlobalScope? previous, ImmutableArray<SyntaxTree> syntaxTrees) {
         var parentScope = CreateParentScope(previous);
-        var binder = new IRBinder(parentScope, null);
+        var binder = new Binder(parentScope);
         
         var functionHeaders = syntaxTrees
             .SelectMany(tree => tree.Root.Members)
@@ -35,11 +35,11 @@ internal sealed class IRBinder {
             .SelectMany(tree => tree.Root.Members)
             .OfType<GlobalStatment>();
 
-        var statmentBuilder = ImmutableArray.CreateBuilder<IRStatement>();
+        var statments = ImmutableArray.CreateBuilder<IRStatement>();
 
         foreach (var globalStatement in globalStatements) {
-            var boundStatement = binder.BindStatement(globalStatement.Statement);
-            statmentBuilder.Add(boundStatement);
+            var boundStatement = binder.BindGlobalStatement(globalStatement.Statement);
+            statments.Add(boundStatement);
         }
 
         var symbols = binder.scope.Symbols;
@@ -48,21 +48,22 @@ internal sealed class IRBinder {
         if (previous != null)
             diagnostics = diagnostics.InsertRange(0, previous.Diagnostics);
 
-        return new GlobalScope(previous, diagnostics, symbols, statmentBuilder.ToImmutable());
+        return new GlobalScope(previous, diagnostics, symbols, statments.ToImmutable());
     }
 
     public static IRProgram BindProgram(IRProgram previous, GlobalScope globalScope) {
         var parentScope = CreateParentScope(globalScope);
+        
         var functions = ImmutableDictionary.CreateBuilder<FunctionSymbol, IRBlockStatement>();
         var diagnostics = ImmutableArray<DiagnosticMessage>.Empty;
 
         foreach (var symbol in globalScope.Symbols.Where(s => s is FunctionSymbol)) {
             var function = symbol as FunctionSymbol;
-            
-            var binder = new IRBinder(parentScope, function);
+
+            var binder = new Binder(parentScope, function);
             var body = binder.BindStatement(function.Header.Body);
-            
             var loweredBody = Lowerer.Lower(body);
+            
             if (function.Type != TypeSymbol.Void && !ControlFlowGraph.AllPathsReturn(loweredBody))
                 binder.diagnostics.ReportNotAllPathsReturn(function.Header.Identifier.Location);
 
@@ -71,7 +72,7 @@ internal sealed class IRBinder {
         }
 
         var statement = Lowerer.Lower(new IRBlockStatement(globalScope.Statements));
-        return new IRProgram(previous, globalScope, statement, diagnostics, functions.ToImmutable());
+        return new IRProgram(previous, statement, diagnostics, functions.ToImmutable());
     }
 
     public Diagnostics Diagnostics => diagnostics;
@@ -101,7 +102,7 @@ internal sealed class IRBinder {
     }
 
     private static LocalScope? CreateRootScope() {
-        var result = new LocalScope(null);
+        var result = new LocalScope();
     
         foreach (var function in BuiltinFunctions.All())
             result.TryDeclareSymbol(function);
@@ -127,7 +128,12 @@ internal sealed class IRBinder {
         }
 
         var type = BindTypeClause(syntax.ReturnType) ?? TypeSymbol.Void;
-        var function = new FunctionSymbol(syntax.Identifier.Literal, parameters.ToImmutable(), type, syntax);
+        var function = new FunctionSymbol(
+            syntax.Identifier.Literal, 
+            parameters.ToImmutable(), 
+            type, 
+            syntax
+        );
         
         if (!scope.TryDeclareSymbol(function))
             diagnostics.ReportSymbolAlreadyExists(syntax.Identifier.Location, function.Name);
@@ -144,6 +150,14 @@ internal sealed class IRBinder {
         }
 
         return type;
+    }
+    
+    private IRStatement BindGlobalStatement(Statement syntax) {
+        var boundStatement = BindStatement(syntax);
+        if (boundStatement is IRExpressionStatement es && !AllowExpression(es))
+            diagnostics.ReportInvalidExpressionStatement(syntax.Location);
+
+        return boundStatement;    
     }
 
     private IRStatement BindStatement(Statement syntax) {
@@ -163,12 +177,27 @@ internal sealed class IRBinder {
         };
     }
 
+    private static bool AllowExpression(IRExpressionStatement statement) {
+        var condition = 
+            statement.Expression.Kind == IRNodeKind.ErrorExpression ||
+            statement.Expression.Kind == IRNodeKind.AssignmentExpression ||
+            statement.Expression.Kind == IRNodeKind.CallExpression;
+        
+        return condition;
+    }
+
     private IRStatement BindBlockStatement(BlockStatement syntax) {
         var statements = ImmutableArray.CreateBuilder<IRStatement>();
         scope = new LocalScope(scope);
 
-        foreach (var statement in syntax.Statements) {
-            var boundStatement = BindStatement(statement);
+        for (var i = 0; i < syntax.Statements.Length; i++) {
+            var boundStatement = BindStatement(syntax.Statements[i]);
+
+            if (boundStatement is IRExpressionStatement statement) {
+                if (!AllowExpression(statement))
+                    diagnostics.ReportInvalidExpressionStatement(syntax.Statements[i].Location);
+            }
+
             statements.Add(boundStatement);
         }
 
@@ -300,10 +329,10 @@ internal sealed class IRBinder {
     private static IRStatement BindErrorStatement() 
         => new IRExpressionStatement(new IRErrorExpression());
 
-    private IRExpression BindExpression(Expression syntax, bool isVoid = false) {
+    private IRExpression BindExpression(Expression syntax, bool voidExpression = false) {
         var result = BindExpressionInternal(syntax);
 
-        if (!isVoid && result.Type == TypeSymbol.Void) {
+        if (!voidExpression && result.Type == TypeSymbol.Void) {
             diagnostics.ReportVoidExpression(syntax.Location);
             return new IRErrorExpression();
         }

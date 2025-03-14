@@ -41,13 +41,11 @@ internal sealed class GlobalScope(
 
 internal sealed class IRProgram(
     IRProgram previous,
-    GlobalScope globalScope,
     IRBlockStatement statement,
     ImmutableArray<DiagnosticMessage> diagnostics,
     ImmutableDictionary<FunctionSymbol, IRBlockStatement> functions
 ) {
     public IRProgram Previous { get; } = previous;
-    public GlobalScope GlobalScope { get; } = globalScope;
     public IRBlockStatement Statement { get; } = statement;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public ImmutableDictionary<FunctionSymbol, IRBlockStatement> Functions { get; } = functions;

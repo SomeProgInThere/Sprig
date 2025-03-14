@@ -1,13 +1,11 @@
  
-func fib(n: int): int {
-    if n <= 1
-        return n
-
-    return fib(n - 1) + fib(n - 2)
+func greet(name: string) {
+    var x = 1
+    for i in 0..10 {
+        x = x + i
+    }
+    print("Hello " + name + "! " + string(x))
 }
 
-let n = 10
-for i in 0..n {
-    let f = fib(i)
-    print(string(f))
-}
+let name = "sprig"
+greet(name)

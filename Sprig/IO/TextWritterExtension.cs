@@ -93,7 +93,7 @@ public static class TextWritterExtension {
             var prefixSpan = TextSpan.CreateFromBounds(line.Start, span.Start);
             var suffixSpan = TextSpan.CreateFromBounds(span.End, line.End);
 
-            var prefix = sourceText.ToString(prefixSpan);
+            var prefix = sourceText.ToString(prefixSpan).TrimStart();
             var error = sourceText.ToString(span);
             var suffix = sourceText.ToString(suffixSpan);
 
