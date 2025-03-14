@@ -1,5 +1,5 @@
 
-using Sprig.Codegen.Source;
+using Sprig.Codegen.Text;
 
 namespace Sprig.Tests;
 

@@ -1,7 +1,7 @@
 
 using System.Collections.Immutable;
 using System.Text;
-using Sprig.Codegen.Source;
+using Sprig.Codegen.Text;
 
 namespace Sprig.Tests;
 
