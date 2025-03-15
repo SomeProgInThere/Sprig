@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 
 using Sprig.Codegen.IRGeneration;
-// using Sprig.Codegen.IRGeneration.ControlFlow;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
 
@@ -9,12 +8,15 @@ namespace Sprig.Codegen;
 
 public sealed class Compilation {
     
-    public Compilation(params SyntaxTree[] syntaxTrees) 
-        : this(null, syntaxTrees) {}
+    public static Compilation Create(params SyntaxTree[] syntaxTrees) {
+        return new Compilation(previous: null, syntaxTrees);
+    }
 
-    private Compilation(Compilation? previous, params SyntaxTree[] syntaxTrees) {
-        Previous = previous;
-        SyntaxTrees = [..syntaxTrees];
+    public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath) {
+        var program = GetProgram();
+        var emitter = new Emitter();
+        
+        return emitter.Emit(program, moduleName, references, outputPath);
     }
 
     public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables) {
@@ -28,23 +30,6 @@ public sealed class Compilation {
             return new EvaluationResult(diagnostics);
         
         var program = GetProgram();
- 
-        // if (outputControlFlowGraph) {
-        //     var appPath = Environment.GetCommandLineArgs()[0];
-        //     var appDirectory = Path.GetDirectoryName(appPath);
-        //     var graphPath = Path.Combine(appDirectory, "cfg.dot");
-
-        //     var controlFlowStatments = !program.Statement.Statements.Any() 
-        //         && !program.Functions.IsEmpty
-        //             ? program.Functions.Last().Value
-        //             : program.Statement;
-
-        //     var controlFlowGraph = ControlFlowGraph.Create(controlFlowStatments);
-
-        //     using var writer = new StreamWriter(graphPath);
-        //     controlFlowGraph.WriteTo(writer);
-        // }
-
         if (program.Diagnostics.Any())
             return new EvaluationResult([..program.Diagnostics]);
 
@@ -69,6 +54,11 @@ public sealed class Compilation {
 
             body.WriteTo(writer);
         }
+    }
+
+    private Compilation(Compilation? previous, params SyntaxTree[] syntaxTrees) {
+        Previous = previous;
+        SyntaxTrees = [..syntaxTrees];
     }
 
     private IRProgram GetProgram() {

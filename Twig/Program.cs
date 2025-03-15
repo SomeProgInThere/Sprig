@@ -1,56 +1,113 @@
-﻿using Sprig.Codegen;
+﻿using System.CommandLine;
+
+using Sprig.Codegen;
 using Sprig.Codegen.Syntax;
 using Sprig.IO;
 
-internal class Program {
-    private static int Main(string[] args) {
-        if (args.Length == 0) {
-            Console.Error.WriteLine("usage: twig <source-path>");
-            return 1;
-        }
+class Program {
 
-        var paths = GetFilePaths(args);
-        var syntaxTrees = new List<SyntaxTree>();
-        var hasErrors = false;
+    static async Task<int> Main(string[] args) {
+        var rootCommand = new RootCommand("Twig: CLI for sprig language");
+        
+        var buildCommand = new Command("build", "Compiles the given source");
+        var sourcePathsArgument = new Argument<List<string>>(
+            name: "source-paths",
+            description: "Paths to the source files"
+        );
+        
+        var referencePathsOption = new Option<string>(
+            name: "--reference",
+            description: "Path of the assembly to reference"
+        );
+        
+        referencePathsOption.AddAlias("-r");
+        referencePathsOption.AllowMultipleArgumentsPerToken = true;
+        
+        var moduleNameOption = new Option<string>(
+            name: "--module",
+            description: "Name of the module"
+        );
 
-        foreach (var path in paths) {
-            if (!File.Exists(path)) {
-                Console.Error.WriteLine($"error: file {paths} does not exist");
-                hasErrors = true;
-                continue;
-            }
+        moduleNameOption.AddAlias("-m");
+        
+        var outputOption = new Option<string>(
+            name: "--output",
+            description: "Output path of the assembly to create"
+        );
 
-            var syntaxTree = SyntaxTree.Load(path);
-            syntaxTrees.Add(syntaxTree);
-        }
+        outputOption.AddAlias("-o");
 
-        if (hasErrors)
-            return 1;
+        buildCommand.Add(sourcePathsArgument);
+        
+        buildCommand.Add(referencePathsOption);
+        buildCommand.Add(moduleNameOption);
+        buildCommand.Add(outputOption);
 
-        var compilation = new Compilation([..syntaxTrees]);
-        var result = compilation.Evaluate([]);
+        rootCommand.Add(buildCommand);
 
-        if (result.Diagnostics.Any())
-            Console.Error.WriteDiagnostics(result.Diagnostics);
-        else
-            if (result.Result != null)
-            Console.WriteLine(result.Result);
+        buildCommand.SetHandler((sourcePaths, reference, module, output) => {                
+                var referencePaths = new List<string>();
+                if (reference != null)
+                    referencePaths.Add(reference);
+                
+                if (sourcePaths.Count == 0) {
+                    PrintError("no source paths provided");
+                    return;
+                }
 
-        return 0;
+                var outputPath = output ?? Path.ChangeExtension(sourcePaths[0], ".exe");
+                var moduleName = module ?? Path.GetFileNameWithoutExtension(outputPath);
+                
+                var syntaxTrees = new List<SyntaxTree>();
+                var hasErrors = false;
+                
+                foreach (var path in sourcePaths) {
+                    if (!File.Exists(path)) {
+                        PrintError($"source file '{path}' does not exist");
+                        hasErrors = true;
+                        continue;
+                    }
+                
+                    var syntaxTree = SyntaxTree.Load(path);
+                    syntaxTrees.Add(syntaxTree);
+                }
+
+                if (referencePaths.Count != 0) {
+                    foreach (var path in referencePaths) {
+                        if (!File.Exists(path)) {
+                            PrintError($"reference file '{path}' does not exist");
+                            hasErrors = true;
+                            continue;
+                        }                
+                    }
+                }
+
+                if (hasErrors)
+                    return;
+
+                var compilation = Compilation.Create([..syntaxTrees]);
+                var diagnostics = compilation.Emit(moduleName, [..referencePaths], outputPath);
+
+                if (diagnostics.Any()) {
+                    Console.Error.WriteDiagnostics(diagnostics);
+                    return;
+                }
+            },
+            sourcePathsArgument,
+            referencePathsOption,
+            moduleNameOption,
+            outputOption
+        );
+
+        return await rootCommand.InvokeAsync(args);
     }
 
-    private static IEnumerable<string> GetFilePaths(IEnumerable<string> args) {
-        var result = new SortedSet<string>();
-        
-        foreach (var path in args) {
-            if (Directory.Exists(path)) {
-                result.UnionWith(Directory.EnumerateFiles(path, "*.sg",  SearchOption.AllDirectories));
-            }
-            else {
-                result.Add(path);
-            }
-        }
-
-        return result;
+    private static void PrintError(string message) {
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+        Console.Error.Write("error: ");
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.Error.Write(message);
+        Console.ResetColor();
+        Console.WriteLine();
     }
 }

@@ -1,6 +1,1 @@
-
-func main() {
-    let name = getName()
-    print("Hello, " + name)
-    hello()
-}
+print("Hello world")

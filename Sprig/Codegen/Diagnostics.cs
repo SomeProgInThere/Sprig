@@ -3,12 +3,13 @@ using System.Collections;
 using Sprig.Codegen.Text;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
+using Mono.Cecil;
 
 namespace Sprig.Codegen;
 
 public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     
-    public IEnumerator<DiagnosticMessage> GetEnumerator() => diagnostics.GetEnumerator();
+    // Language Errors
 
     public void ReportInvalidNumber(TextLocation location, string literal, TypeSymbol type) {
         var message = $"Number '{literal}' is not valid '{type}'";
@@ -166,13 +167,48 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
 
+    // .NET Assembly Linkage Errors
+
+    public void ReportInvalidReferenceLinking(string path) {
+        var message = $"Cannot link invalid .NET assembly: '{path}'";
+        Report(default, message);
+    }
+
+    public void ReportRequiredTypeNotFound(string? typeName, string metadataName) {
+        var message = typeName is null 
+            ? $"Required type '{metadataName}' could not be resolved from references"
+            : $"Required type '{typeName}' ('{metadataName}') could not be resolved from references";
+
+        Report(default, message);
+    }
+
+    public void ReportRequiredTypeAmbiguous(string? typeName, string metadataName, TypeDefinition[] foundTypes) {
+        var assemblyName = foundTypes.Select(t => t.Module.Assembly.Name.Name);
+        var assemblyNameList = string.Join("', '", assemblyName);
+
+        var message = typeName is null 
+            ? $"Required type '{typeName}' was found in multiple references: {assemblyNameList}"
+            : $"Required type '{typeName}' ('{metadataName}') was found in multiple references: {assemblyNameList}";
+
+
+        Report(default, message);
+    }
+    
+    public void ReportRequiredMethodNotFound(string typeName, string methodName, string[] parameterTypeNames) {
+        var parameterTypeNameList = string.Join(", ", parameterTypeNames);
+        var message = $"Required method '{typeName}.{methodName}({parameterTypeNameList})' could not be resolved from references";
+        Report(default, message);
+    }
+
     private void Report(TextLocation location, string message) {
         var diagnostic = new DiagnosticMessage(location, message);
         diagnostics.Add(diagnostic);
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public IEnumerator<DiagnosticMessage> GetEnumerator() => diagnostics.GetEnumerator();
+
     private readonly List<DiagnosticMessage> diagnostics = [];
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 public sealed class DiagnosticMessage(TextLocation location, string message) {

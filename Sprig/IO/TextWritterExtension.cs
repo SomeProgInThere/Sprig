@@ -71,18 +71,26 @@ public static class TextWritterExtension {
     }
 
     public static void WriteDiagnostics(this TextWriter writer, IEnumerable<DiagnosticMessage> diagnostics) {
+        
+        foreach (var diagnostic in diagnostics.Where(diag => diag.Location.Source is null)) {
+            writer.WriteError(diagnostic.Message);
+            writer.WriteLine();
+        }
+
         var orderedDiagnostics = diagnostics
-            .OrderBy(diag => diag.Location.Source.FileName)
+            .Where(diag => diag.Location.Source != null)
+            .OrderBy(diag => diag.Location.FileName)
             .OrderBy(diag => diag.Location.Span.Start)
             .ThenBy(diag => diag.Location.Span.End);
 
         foreach (var diagnostic in orderedDiagnostics) {
-            var sourceText = diagnostic.Location.Source;
-            var span = diagnostic.Location.Span;
-            var fileName = diagnostic.Location.Source.FileName;
 
-            var lineIndex = sourceText.GetLineIndex(span.Start);
-            var line = sourceText.Lines[lineIndex];
+            var fileName = diagnostic.Location.FileName;
+            var source = diagnostic.Location.Source;
+            var span = diagnostic.Location.Span;
+
+            var lineIndex = source.GetLineIndex(span.Start);
+            var line = source.Lines[lineIndex];
             var column = span.Start - line.Start + 1;
             var lineNumber = lineIndex + 1;
 
@@ -93,9 +101,9 @@ public static class TextWritterExtension {
             var prefixSpan = TextSpan.CreateFromBounds(line.Start, span.Start);
             var suffixSpan = TextSpan.CreateFromBounds(span.End, line.End);
 
-            var prefix = sourceText.ToString(prefixSpan).TrimStart();
-            var error = sourceText.ToString(span);
-            var suffix = sourceText.ToString(suffixSpan);
+            var prefix = source.ToString(prefixSpan).TrimStart();
+            var error = source.ToString(span);
+            var suffix = source.ToString(suffixSpan);
 
             writer.WriteInfo($"\t--> {lineNumber, 1} | {prefix}");
             writer.WriteError(error);

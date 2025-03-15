@@ -32,6 +32,8 @@ public readonly struct TextLocation(SourceText source, TextSpan span) {
     public SourceText Source { get; } = source;
     public TextSpan Span { get; } = span;
 
+    public readonly string FileName => Source.FileName;
+
     public readonly int StartLine => Source.GetLineIndex(Span.Start);
     public readonly int StartChar => Span.Start - Source.Lines[StartLine].Start;
     
