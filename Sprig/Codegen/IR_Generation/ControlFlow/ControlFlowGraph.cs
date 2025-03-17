@@ -1,9 +1,9 @@
 
-namespace Sprig.Codegen.IRGeneration.ControlFlow;
+namespace Sprig.Codegen.IR_Generation.ControlFlow;
 
 internal class ControlFlowGraph {
 
-    public static ControlFlowGraph Create(IRBlockStatement body) {
+    public static ControlFlowGraph Create(IR_BlockStatement body) {
         var blockBuilder = new BasicBlockBuilder();
         var blocks = blockBuilder.Build(body);
 
@@ -11,12 +11,12 @@ internal class ControlFlowGraph {
         return graphBuilder.Build(blocks);
     }
 
-    public static bool AllPathsReturn(IRBlockStatement body) {
+    public static bool AllPathsReturn(IR_BlockStatement body) {
         var graph = Create(body);
         
         foreach (var branch in graph.End.Incoming) {
             var lastStatement = branch.From.Statements.LastOrDefault();
-            if (lastStatement == null || lastStatement.Kind != IRNodeKind.ReturnStatement)
+            if (lastStatement == null || lastStatement.Kind != IR_NodeKind.ReturnStatement)
                 return false;
         }
 

@@ -3,7 +3,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
-using Sprig.Codegen.IRGeneration;
+using Sprig.Codegen.IR_Generation;
 using Sprig.Codegen.Symbols;
 
 namespace Sprig.Codegen;
@@ -145,7 +145,7 @@ internal sealed class Emitter(IRProgram program) {
         programMethods.Add(header, method);
     }
     
-    private void EmitFunctionBody(FunctionSymbol header, IRBlockStatement body) {
+    private void EmitFunctionBody(FunctionSymbol header, IR_BlockStatement body) {
         var method = programMethods[header];
         
         locals.Clear();
@@ -160,37 +160,37 @@ internal sealed class Emitter(IRProgram program) {
             var instructionIndex = labels[target.Target];
             var targetInstruction = processor.Body.Instructions[instructionIndex];
             var instruction = processor.Body.Instructions[target.Index];
-            
+
             instruction.Operand = targetInstruction;
         }
 
         method.Body.OptimizeMacros();
     }
 
-    private void EmitStatement(ILProcessor processor, IRStatement node) {
+    private void EmitStatement(ILProcessor processor, IR_Statement node) {
         switch (node.Kind) {
-            case IRNodeKind.VariableDeclaration:
-                EmitVariableDeclaration(processor, (IRVariableDeclaration)node);
+            case IR_NodeKind.VariableDeclaration:
+                EmitVariableDeclaration(processor, (IR_VariableDeclaration)node);
                 break;
 
-            case IRNodeKind.LabelStatement:
-                EmitLabel(processor, (IRLabelStatement)node);
+            case IR_NodeKind.LabelStatement:
+                EmitLabel(processor, (IR_LabelStatement)node);
                 break;
 
-            case IRNodeKind.GotoStatement:
-                EmitGoto(processor, (IRGotoStatement)node);
+            case IR_NodeKind.GotoStatement:
+                EmitGoto(processor, (IR_GotoStatement)node);
                 break;
 
-            case IRNodeKind.ConditionalGotoStatement:
-                EmitConditionalGoto(processor, (IRConditionalGotoStatement)node);
+            case IR_NodeKind.ConditionalGotoStatement:
+                EmitConditionalGoto(processor, (IR_ConditionalGotoStatement)node);
                 break;
 
-            case IRNodeKind.ReturnStatement:
-                EmitReturn(processor, (IRReturnStatment)node);
+            case IR_NodeKind.ReturnStatement:
+                EmitReturn(processor, (IR_ReturnStatment)node);
                 break;
 
-            case IRNodeKind.ExpressionStatement:
-                EmitExpressionStatement(processor, (IRExpressionStatement)node);
+            case IR_NodeKind.ExpressionStatement:
+                EmitExpressionStatement(processor, (IR_ExpressionStatement)node);
                 break;
             
             default:
@@ -198,7 +198,7 @@ internal sealed class Emitter(IRProgram program) {
         }
     }
 
-    private void EmitVariableDeclaration(ILProcessor processor, IRVariableDeclaration node) {
+    private void EmitVariableDeclaration(ILProcessor processor, IR_VariableDeclaration node) {
         var type = knownTypes[node.Variable.Type];
         var variable = new VariableDefinition(type);
         
@@ -209,18 +209,18 @@ internal sealed class Emitter(IRProgram program) {
         processor.Emit(OpCodes.Stloc, variable);
     }
 
-    private void EmitLabel(ILProcessor processor, IRLabelStatement node) {
+    private void EmitLabel(ILProcessor processor, IR_LabelStatement node) {
         labels.Add(node.Label, processor.Body.Instructions.Count);        
     }
 
-    private void EmitGoto(ILProcessor processor, IRGotoStatement node) {
+    private void EmitGoto(ILProcessor processor, IR_GotoStatement node) {
         var targetLabel = new TargetLabel(processor.Body.Instructions.Count, node.Label); 
         targetLabels.Add(targetLabel);
         
         processor.Emit(OpCodes.Br, Instruction.Create(OpCodes.Nop));
     }
 
-    private void EmitConditionalGoto(ILProcessor processor, IRConditionalGotoStatement node) {
+    private void EmitConditionalGoto(ILProcessor processor, IR_ConditionalGotoStatement node) {
         EmitExpression(processor, node.Condition);
         var opCode = node.Jump ? OpCodes.Brtrue : OpCodes.Brfalse;
 
@@ -230,48 +230,48 @@ internal sealed class Emitter(IRProgram program) {
         processor.Emit(opCode, Instruction.Create(OpCodes.Nop));
     }
 
-    private void EmitReturn(ILProcessor processor, IRReturnStatment node) {
+    private void EmitReturn(ILProcessor processor, IR_ReturnStatment node) {
         if (node.Expression != null)
             EmitExpression(processor, node.Expression);
 
         processor.Emit(OpCodes.Ret);
     }
 
-    private void EmitExpressionStatement(ILProcessor processor, IRExpressionStatement node) {
+    private void EmitExpressionStatement(ILProcessor processor, IR_ExpressionStatement node) {
         EmitExpression(processor, node.Expression);
 
         if (node.Expression.Type != TypeSymbol.Void)
             processor.Emit(OpCodes.Pop);
     } 
 
-    private void EmitExpression(ILProcessor processor, IRExpression node) {
+    private void EmitExpression(ILProcessor processor, IR_Expression node) {
         switch (node.Kind) {
-            case IRNodeKind.LiteralExpression:
-                EmitLiteral(processor, (IRLiteralExpression)node);
+            case IR_NodeKind.LiteralExpression:
+                EmitLiteral(processor, (IR_LiteralExpression)node);
                 break;
 
-            case IRNodeKind.VariableExpression:
-                EmitStoreVariable(processor, (IRVariableExpression)node);
+            case IR_NodeKind.VariableExpression:
+                EmitStoreVariable(processor, (IR_VariableExpression)node);
                 break;
 
-            case IRNodeKind.AssignmentExpression:
-                EmitAssignmentOperation(processor, (IRAssignmentExpression)node);
+            case IR_NodeKind.AssignmentExpression:
+                EmitAssignmentOperation(processor, (IR_AssignmentExpression)node);
                 break;
             
-            case IRNodeKind.UnaryExpression:
-                EmitUnaryOperation(processor, (IRUnaryExpression)node);
+            case IR_NodeKind.UnaryExpression:
+                EmitUnaryOperation(processor, (IR_UnaryExpression)node);
                 break;
             
-            case IRNodeKind.BinaryExpression:
-                EmitBinaryOperation(processor, (IRBinaryExpression)node);
+            case IR_NodeKind.BinaryExpression:
+                EmitBinaryOperation(processor, (IR_BinaryExpression)node);
                 break;
             
-            case IRNodeKind.CallExpression:
-                EmitCall(processor, (IRCallExpression)node);
+            case IR_NodeKind.CallExpression:
+                EmitCall(processor, (IR_CallExpression)node);
                 break;
             
-            case IRNodeKind.CastExpression:
-                EmitCasted(processor, (IRCastExpression)node);
+            case IR_NodeKind.CastExpression:
+                EmitCasted(processor, (IR_CastExpression)node);
                 break;
             
             default:
@@ -279,7 +279,7 @@ internal sealed class Emitter(IRProgram program) {
         }
     }
 
-    private static void EmitLiteral(ILProcessor processor, IRLiteralExpression node) {
+    private static void EmitLiteral(ILProcessor processor, IR_LiteralExpression node) {
         if (node.Type == TypeSymbol.Bool) {
             var value = (bool)node.Value;
             var instruction = value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
@@ -306,7 +306,7 @@ internal sealed class Emitter(IRProgram program) {
         }
     }
 
-    private void EmitStoreVariable(ILProcessor processor, IRVariableExpression node) {
+    private void EmitStoreVariable(ILProcessor processor, IR_VariableExpression node) {
         if (node.Variable is ParameterSymbol parameter) {
             processor.Emit(OpCodes.Ldarg, parameter.Index);
         } 
@@ -316,7 +316,7 @@ internal sealed class Emitter(IRProgram program) {
         }
     }
     
-    private void EmitAssignmentOperation(ILProcessor processor, IRAssignmentExpression node) {
+    private void EmitAssignmentOperation(ILProcessor processor, IR_AssignmentExpression node) {
         var variable = locals[node.Variable];
 
         EmitExpression(processor, node.Expression);
@@ -324,7 +324,7 @@ internal sealed class Emitter(IRProgram program) {
         processor.Emit(OpCodes.Stloc, variable);
     }
     
-    private void EmitUnaryOperation(ILProcessor processor, IRUnaryExpression node) {
+    private void EmitUnaryOperation(ILProcessor processor, IR_UnaryExpression node) {
         EmitExpression(processor, node.Operand);
         
         switch (node.Operator.Kind) {
@@ -350,7 +350,7 @@ internal sealed class Emitter(IRProgram program) {
         } 
     }
 
-    private void EmitBinaryOperation(ILProcessor processor, IRBinaryExpression node) {
+    private void EmitBinaryOperation(ILProcessor processor, IR_BinaryExpression node) {
         EmitExpression(processor, node.Left);
         EmitExpression(processor, node.Right);
 
@@ -462,7 +462,7 @@ internal sealed class Emitter(IRProgram program) {
         }
     }
 
-    private void EmitCall(ILProcessor processor, IRCallExpression node) {
+    private void EmitCall(ILProcessor processor, IR_CallExpression node) {
         foreach (var argument in node.Arguments)
             EmitExpression(processor, argument);
 
@@ -478,7 +478,7 @@ internal sealed class Emitter(IRProgram program) {
         }
     }
 
-    private void EmitCasted(ILProcessor processor, IRCastExpression node) {
+    private void EmitCasted(ILProcessor processor, IR_CastExpression node) {
         EmitExpression(processor, node.Expression);
 
         var needsBoxing = node.Expression.Type == TypeSymbol.Bool 

@@ -1,7 +1,7 @@
 
 using System.CodeDom.Compiler;
 
-namespace Sprig.Codegen.IRGeneration.ControlFlow;
+namespace Sprig.Codegen.IR_Generation.ControlFlow;
 
 internal sealed class BasicBlock {
     public BasicBlock() {}
@@ -30,12 +30,12 @@ internal sealed class BasicBlock {
     public bool IsStart { get; }
     public bool IsEnd { get; }
 
-    public List<IRStatement> Statements { get; } = [];
+    public List<IR_Statement> Statements { get; } = [];
     public List<BasicBlockBranch> Incoming { get; } = [];
     public List<BasicBlockBranch> Outgoing { get; } = [];
 }
 
-internal sealed class BasicBlockBranch(BasicBlock from, BasicBlock to, IRExpression? condition) {
+internal sealed class BasicBlockBranch(BasicBlock from, BasicBlock to, IR_Expression? condition) {
 
     public override string ToString() {
         if (Condition is null)
@@ -46,5 +46,5 @@ internal sealed class BasicBlockBranch(BasicBlock from, BasicBlock to, IRExpress
 
     public BasicBlock From { get; } = from;
     public BasicBlock To { get; } = to;
-    public IRExpression? Condition { get; } = condition;
+    public IR_Expression? Condition { get; } = condition;
 }

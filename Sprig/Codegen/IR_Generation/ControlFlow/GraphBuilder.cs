@@ -1,7 +1,7 @@
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
-namespace Sprig.Codegen.IRGeneration.ControlFlow;
+namespace Sprig.Codegen.IR_Generation.ControlFlow;
 
 internal class GraphBuilder {
 
@@ -15,7 +15,7 @@ internal class GraphBuilder {
             foreach (var statement in block.Statements) {
 
                 blockFromStatement.Add(statement, block);
-                if (statement is IRLabelStatement labelStatement)
+                if (statement is IR_LabelStatement labelStatement)
                     blockFromLabel.Add(labelStatement.Label, block);
             }
         }
@@ -46,8 +46,8 @@ internal class GraphBuilder {
         return new ControlFlowGraph(start, end, blocks, branches);
     }
 
-    private void Connect(BasicBlock from, BasicBlock to, IRExpression? condition = null) {
-        if (condition is IRLiteralExpression literal) {
+    private void Connect(BasicBlock from, BasicBlock to, IR_Expression? condition = null) {
+        if (condition is IR_LiteralExpression literal) {
             var value = (bool)literal.Value;
             if (value)
                 condition = null;
@@ -62,17 +62,17 @@ internal class GraphBuilder {
         branches.Add(branch);
     }
 
-    private void Walk(IRStatement statement, BasicBlock current, BasicBlock next, bool isLast) {
+    private void Walk(IR_Statement statement, BasicBlock current, BasicBlock next, bool isLast) {
         switch (statement.Kind) {
             
-            case IRNodeKind.GotoStatement:
-                var gotoStatement = (IRGotoStatement)statement;
+            case IR_NodeKind.GotoStatement:
+                var gotoStatement = (IR_GotoStatement)statement;
                 var toBlock = blockFromLabel[gotoStatement.Label];
                 Connect(current, toBlock);
                 break;
             
-            case IRNodeKind.ConditionalGotoStatement:
-                var conditionalGotoStatement = (IRConditionalGotoStatement)statement;    
+            case IR_NodeKind.ConditionalGotoStatement:
+                var conditionalGotoStatement = (IR_ConditionalGotoStatement)statement;    
                 var ifBlock = blockFromLabel[conditionalGotoStatement.Label];
                 var elseBlock = next;
 
@@ -90,13 +90,13 @@ internal class GraphBuilder {
                 Connect(current, elseBlock, elseCondition);
                 break;
 
-            case IRNodeKind.ReturnStatement:
+            case IR_NodeKind.ReturnStatement:
                 Connect(current, end);
                 break;
 
-            case IRNodeKind.VariableDeclaration:
-            case IRNodeKind.LabelStatement:
-            case IRNodeKind.ExpressionStatement:
+            case IR_NodeKind.VariableDeclaration:
+            case IR_NodeKind.LabelStatement:
+            case IR_NodeKind.ExpressionStatement:
                 if (isLast)
                     Connect(current, next);
                 break;
@@ -120,17 +120,17 @@ internal class GraphBuilder {
         blocks.Remove(block);
     }
 
-    private static IRExpression Negate(IRExpression condition) {
-        if (condition is IRLiteralExpression literal) {
+    private static IR_Expression Negate(IR_Expression condition) {
+        if (condition is IR_LiteralExpression literal) {
             var value = (bool)literal.Value;
-            return new IRLiteralExpression(!value);
+            return new IR_LiteralExpression(!value);
         }
 
-        var op = IRUnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
-        return new IRUnaryExpression(condition, op);
+        var op = IR_UnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
+        return new IR_UnaryExpression(condition, op);
     }
 
-    private readonly Dictionary<IRStatement, BasicBlock> blockFromStatement = [];
+    private readonly Dictionary<IR_Statement, BasicBlock> blockFromStatement = [];
     private readonly Dictionary<LabelSymbol, BasicBlock> blockFromLabel = [];
     private readonly List<BasicBlockBranch> branches = [];
 

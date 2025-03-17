@@ -1,7 +1,7 @@
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
-namespace Sprig.Codegen.IRGeneration;
+namespace Sprig.Codegen.IR_Generation;
 
 internal enum BinaryOperator {
     Add,

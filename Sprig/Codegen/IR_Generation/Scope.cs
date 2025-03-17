@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Sprig.Codegen.Symbols;
 
-namespace Sprig.Codegen.IRGeneration;
+namespace Sprig.Codegen.IR_Generation;
 
 internal sealed class LocalScope(LocalScope? parent = null) {
 
@@ -32,23 +32,23 @@ internal sealed class GlobalScope(
     ImmutableArray<DiagnosticMessage> diagnostics,
     FunctionSymbol mainFunction,
     ImmutableArray<Symbol> symbols,
-    ImmutableArray<IRStatement> statements
+    ImmutableArray<IR_Statement> statements
 ) {
     public GlobalScope? Previous { get; } = previous;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public FunctionSymbol MainFunction { get; } = mainFunction;
     public ImmutableArray<Symbol> Symbols { get; } = symbols;
-    public ImmutableArray<IRStatement> Statements { get; } = statements;
+    public ImmutableArray<IR_Statement> Statements { get; } = statements;
 }
 
 internal sealed class IRProgram(
     IRProgram previous,
     FunctionSymbol? mainFunction,
     ImmutableArray<DiagnosticMessage> diagnostics,
-    ImmutableDictionary<FunctionSymbol, IRBlockStatement> functions
+    ImmutableDictionary<FunctionSymbol, IR_BlockStatement> functions
 ) {
     public IRProgram Previous { get; } = previous;
     public FunctionSymbol? MainFunction { get; } = mainFunction;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
-    public ImmutableDictionary<FunctionSymbol, IRBlockStatement> Functions { get; } = functions;
+    public ImmutableDictionary<FunctionSymbol, IR_BlockStatement> Functions { get; } = functions;
 }

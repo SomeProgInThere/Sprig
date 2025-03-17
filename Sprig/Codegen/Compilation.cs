@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-using Sprig.Codegen.IRGeneration;
+using Sprig.Codegen.IR_Generation;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
 

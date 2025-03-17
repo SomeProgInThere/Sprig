@@ -1,7 +1,7 @@
 
-namespace Sprig.Codegen.IRGeneration;
+namespace Sprig.Codegen.IR_Generation;
 
-internal enum IRNodeKind {
+internal enum IR_NodeKind {
     // Expressions
     LiteralExpression,
     VariableExpression,
@@ -27,8 +27,8 @@ internal enum IRNodeKind {
     ForStatement,
 }
 
-internal abstract class IRNode {
-    public abstract IRNodeKind Kind { get; }
+internal abstract class IR_Node {
+    public abstract IR_NodeKind Kind { get; }
 
     public override string ToString() {
         using var writer = new StringWriter();

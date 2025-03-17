@@ -1,6 +1,6 @@
 using Sprig.Codegen.Symbols;
 
-namespace Sprig.Codegen.IRGeneration;
+namespace Sprig.Codegen.IR_Generation;
 
 public class Casting {
 
