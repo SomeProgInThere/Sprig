@@ -7,13 +7,13 @@ namespace Sprig.Codegen.IRGeneration;
 
 internal sealed class Lowerer() : IRTreeRewriter {
 
-    public static IRBlockStatement Lower(IRStatement statement) {
+    public static IRBlockStatement Lower(FunctionSymbol function, IRStatement statement) {
         var lowerer = new Lowerer();
         var result = lowerer.RewriteStatement(statement);
-		return FlattenStatements(result);
+		return FlattenStatements(function, result);
     }
 
-	private static IRBlockStatement FlattenStatements(IRStatement statement) {
+	private static IRBlockStatement FlattenStatements(FunctionSymbol function, IRStatement statement) {
 		var builder = ImmutableArray.CreateBuilder<IRStatement>();
 		var stack = new Stack<IRStatement>();
 		stack.Push(statement);
@@ -29,10 +29,20 @@ internal sealed class Lowerer() : IRTreeRewriter {
 			}
 		}
 
+		if (function.Type == TypeSymbol.Void) {
+			if (builder.Count == 0 || AllowedFallThrough(builder.Last()))
+				builder.Add(new IRReturnStatment(null));
+		}
+
 		return new IRBlockStatement(builder.ToImmutable());
 	}
 
-	private LabelSymbol GenerateLabel() {
+    private static bool AllowedFallThrough(IRStatement statement) {
+        return statement.Kind != IRNodeKind.ReturnStatement 
+			&& statement.Kind != IRNodeKind.GotoStatement;
+    }
+
+    private LabelSymbol GenerateLabel() {
 		var name = $"label{++labelCount}";
 		return new LabelSymbol(name);
 	}

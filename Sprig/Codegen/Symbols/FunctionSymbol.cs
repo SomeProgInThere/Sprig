@@ -3,8 +3,10 @@ using Sprig.Codegen.Syntax;
 
 namespace Sprig.Codegen.Symbols;
 
-public sealed class ParameterSymbol(string name, TypeSymbol type)
+public sealed class ParameterSymbol(string name, TypeSymbol type, int index)
     : VariableSymbol(name, true, type, VariableScope.Local) {
+    
+    public int Index { get; } = index;
     
     public override SymbolKind Kind => SymbolKind.Parameter;
 }

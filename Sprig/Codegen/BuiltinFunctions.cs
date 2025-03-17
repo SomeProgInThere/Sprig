@@ -7,7 +7,7 @@ internal static class BuiltinFunctions {
 
     public static readonly FunctionSymbol Print = new(
         "print", 
-        [new ParameterSymbol("text", TypeSymbol.String)], 
+        [new ParameterSymbol("text", TypeSymbol.String, 0)], 
         TypeSymbol.Void
     );
 
@@ -19,7 +19,10 @@ internal static class BuiltinFunctions {
 
     public static readonly FunctionSymbol Random = new(
         "rand",
-        [new ParameterSymbol("min", TypeSymbol.Int), new ParameterSymbol("max", TypeSymbol.Int)], 
+        [
+            new ParameterSymbol("min", TypeSymbol.Int, 0), 
+            new ParameterSymbol("max", TypeSymbol.Int, 0)
+        ], 
         TypeSymbol.Int
     );
 

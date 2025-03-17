@@ -37,6 +37,9 @@ public class Casting {
         if (from == TypeSymbol.Any && to != TypeSymbol.Void)
             return Explicit;
 
+        if (from == TypeSymbol.Bool && to == TypeSymbol.Int)
+            return Explicit;
+        
         if (from == TypeSymbol.Bool || from == TypeSymbol.Int || from == TypeSymbol.Float) {
             if (to == TypeSymbol.String)
                 return Explicit;

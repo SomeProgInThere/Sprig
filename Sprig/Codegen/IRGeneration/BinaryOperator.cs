@@ -5,22 +5,17 @@ namespace Sprig.Codegen.IRGeneration;
 
 internal enum BinaryOperator {
     Add,
-    AddAssign,
     Substact,
     Multiply,
     Divide,
     Remainder,
-    RaisePower,
-    Modulus,
     LogicalAnd,
     LogicalOr,
-    LogicalXor,
     Equals,
     NotEquals,
     BitwiseAnd,
     BitwiseOr,
     BitwiseXor,
-    BitwiseNot,
     BitshiftLeft,
     BitshiftRight,
     GreaterThan,
@@ -65,19 +60,16 @@ internal sealed class IRBinaryOperator(
         new IRBinaryOperator(SyntaxKind.MinusToken,               BinaryOperator.Substact,    TypeSymbol.Int),
         new IRBinaryOperator(SyntaxKind.StarToken,                BinaryOperator.Multiply,    TypeSymbol.Int),
         new IRBinaryOperator(SyntaxKind.SlashToken,               BinaryOperator.Divide,      TypeSymbol.Int),
-        new IRBinaryOperator(SyntaxKind.PercentToken,             BinaryOperator.Modulus,     TypeSymbol.Int),
         new IRBinaryOperator(SyntaxKind.DoubleSlashToken,         BinaryOperator.Remainder,   TypeSymbol.Int),
-        new IRBinaryOperator(SyntaxKind.DoubleStarToken,          BinaryOperator.RaisePower,  TypeSymbol.Int),
         
         // Float operations
         new IRBinaryOperator(SyntaxKind.PlusToken,                BinaryOperator.Add,         TypeSymbol.Float),
         new IRBinaryOperator(SyntaxKind.MinusToken,               BinaryOperator.Substact,    TypeSymbol.Float),
         new IRBinaryOperator(SyntaxKind.StarToken,                BinaryOperator.Multiply,    TypeSymbol.Float),
         new IRBinaryOperator(SyntaxKind.SlashToken,               BinaryOperator.Divide,      TypeSymbol.Float),
-        new IRBinaryOperator(SyntaxKind.PercentToken,             BinaryOperator.Modulus,     TypeSymbol.Float),
+        new IRBinaryOperator(SyntaxKind.DoubleSlashToken,         BinaryOperator.Remainder,   TypeSymbol.Float),
 
         // Bitwise operations
-        new IRBinaryOperator(SyntaxKind.TildeToken,               BinaryOperator.BitwiseNot,  TypeSymbol.Int),
         new IRBinaryOperator(SyntaxKind.AmpersandToken,           BinaryOperator.BitwiseAnd,  TypeSymbol.Int), 
         new IRBinaryOperator(SyntaxKind.PipeToken,                BinaryOperator.BitwiseOr,   TypeSymbol.Int), 
         new IRBinaryOperator(SyntaxKind.CircumflexToken,          BinaryOperator.BitwiseXor,  TypeSymbol.Int),
@@ -107,9 +99,8 @@ internal sealed class IRBinaryOperator(
         new IRBinaryOperator(SyntaxKind.BangEqualsToken,          BinaryOperator.NotEquals,   TypeSymbol.Bool),
 
         // String operations
-        new IRBinaryOperator(SyntaxKind.DoubleEqualsToken, BinaryOperator.Equals, TypeSymbol.String),
-        new IRBinaryOperator(SyntaxKind.BangEqualsToken, BinaryOperator.NotEquals, TypeSymbol.String),
-        new IRBinaryOperator(SyntaxKind.PlusToken, BinaryOperator.Add, TypeSymbol.String),
-        new IRBinaryOperator(SyntaxKind.StarToken, BinaryOperator.Multiply, TypeSymbol.String, TypeSymbol.Int, TypeSymbol.String),
+        new IRBinaryOperator(SyntaxKind.DoubleEqualsToken,  BinaryOperator.Equals,      TypeSymbol.String),
+        new IRBinaryOperator(SyntaxKind.BangEqualsToken,    BinaryOperator.NotEquals,   TypeSymbol.String),
+        new IRBinaryOperator(SyntaxKind.PlusToken,          BinaryOperator.Add,         TypeSymbol.String),
     ];
 }

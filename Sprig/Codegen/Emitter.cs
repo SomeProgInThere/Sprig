@@ -1,50 +1,47 @@
 using System.Collections.Immutable;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 using Sprig.Codegen.IRGeneration;
 using Sprig.Codegen.Symbols;
 
 namespace Sprig.Codegen;
 
-internal sealed class Emitter {
+internal sealed class Emitter(IRProgram program) {
 
-    public ImmutableArray<DiagnosticMessage> Emit(
-        IRProgram program, string moduleName, string[] references, string outputPath) {
-        
-        if (program.Diagnostics.Any())
-            return program.Diagnostics;
-
+    public void LoadReferences(string moduleName, string[] references) {
         foreach (var reference in references) {
             try {
                 var assembly = AssemblyDefinition.ReadAssembly(reference);
-                assemblies.Add(assembly);
+                referenceAssemblies.Add(assembly);
             } 
             catch (BadImageFormatException) {
                 diagnostics.ReportInvalidReferenceLinking(reference);
             }
         }
 
+        var assemblyName = new AssemblyNameDefinition(moduleName, new Version(1, 0));
+        programAssembly = AssemblyDefinition.CreateAssembly(assemblyName, moduleName, ModuleKind.Console);        
+         
         var builtinTypes = new List<(TypeSymbol type, string metadataName)>() {
             (TypeSymbol.Any,    "System.Object"),
             (TypeSymbol.Void,   "System.Void"),
+            (TypeSymbol.Bool,   "System.Boolean"),
             (TypeSymbol.Int,    "System.Int32"),
             (TypeSymbol.Float,  "System.Single"),
             (TypeSymbol.String, "System.String"),
         };
 
-        var assemblyName = new AssemblyNameDefinition(moduleName, new Version(1, 0));
-        var assemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyName, moduleName, ModuleKind.Console);
-        
         TypeReference? ResolveType(string? typeName, string metadataName) {
-            var foundTypes = assemblies
+            var foundTypes = referenceAssemblies
                 .SelectMany(assembly => assembly.Modules)
                 .SelectMany(module => module.Types)
                 .Where(type => type.FullName == metadataName)
                 .ToArray();
 
             if (foundTypes.Length == 1) {
-                var typeReference = assemblyDefinition.MainModule.ImportReference(foundTypes[0]);
+                var typeReference = programAssembly.MainModule.ImportReference(foundTypes[0]);
                 return typeReference;
             }
 
@@ -56,9 +53,9 @@ internal sealed class Emitter {
 
             return null;
         }
-
+        
         MethodReference? ResolveMethod(string typeName, string methodName, string[] parameterTypeNames) {
-            var foundTypes = assemblies
+            var foundTypes = referenceAssemblies
                 .SelectMany(assembly => assembly.Modules)
                 .SelectMany(module => module.Types)
                 .Where(type => type.FullName == typeName)
@@ -84,7 +81,7 @@ internal sealed class Emitter {
                     if (!allParameteresMatch)
                         continue;
 
-                    var methodReference = assemblyDefinition.MainModule.ImportReference(method);
+                    var methodReference = programAssembly.MainModule.ImportReference(method);
                     return methodReference;
                 }
 
@@ -102,50 +99,432 @@ internal sealed class Emitter {
         }
 
         foreach (var (typeSymbol, metadataName) in builtinTypes) {
-            var typeReference = ResolveType(typeSymbol.Name, metadataName);
-            knownTypes.Add(typeSymbol, typeReference);
+            var type = ResolveType(typeSymbol.Name, metadataName);
+            knownTypes.Add(typeSymbol, type);
         }
 
-        var consoleType = assemblies
-                .SelectMany(assembly => assembly.Modules)
-                .SelectMany(module => module.Types)
-                .Where(type => type.FullName == "System.Console")
-                .ToArray();
-
-        var consoleWriteLineReference = ResolveMethod("System.Console", "WriteLine", ["System.String"]);
-
-        if (diagnostics.Any())
-            return [..diagnostics];
+        resolvedMethods.Add("WriteLine",    ResolveMethod("System.Console", "WriteLine", ["System.String"]));
+        resolvedMethods.Add("ReadLine",     ResolveMethod("System.Console", "ReadLine", []));
+        resolvedMethods.Add("Concat",       ResolveMethod("System.String", "Concat", ["System.String", "System.String"]));
+        resolvedMethods.Add("ObjectEquals", ResolveMethod("System.Object", "Equals", ["System.Object", "System.Object"]));
         
-        /*
-            static sealed class Program {
-                void Main() {
-                    System.Console.WriteLine("Hello World!");
-                }
-            }
-        */
-
-        var objectType = knownTypes[TypeSymbol.Any];
-        var typeDefinition = new TypeDefinition("", "Program", TypeAttributes.Abstract | TypeAttributes.Sealed, objectType);
-        assemblyDefinition.MainModule.Types.Add(typeDefinition);
-
-        var voidType = knownTypes[TypeSymbol.Void];
-        var mainMethod = new MethodDefinition("Main", MethodAttributes.Private | MethodAttributes.Static, voidType);
-        typeDefinition.Methods.Add(mainMethod);
-
-        var ilProcessor = mainMethod.Body.GetILProcessor();
-        
-        ilProcessor.Emit(OpCodes.Ldstr, "Hello from Sprig!");
-        ilProcessor.Emit(OpCodes.Call, consoleWriteLineReference);
-        ilProcessor.Emit(OpCodes.Ret);
-
-        assemblyDefinition.EntryPoint = mainMethod;
-        assemblyDefinition.Write(outputPath);
-
-        return [..diagnostics];
+        resolvedMethods.Add("ConvertToBoolean", ResolveMethod("System.Convert", "ToBoolean", ["System.Object"]));
+        resolvedMethods.Add("ConvertToInt32",   ResolveMethod("System.Convert", "ToInt32", ["System.Object"]));
+        resolvedMethods.Add("ConvertToSingle",  ResolveMethod("System.Convert", "ToSingle", ["System.Object"]));
+        resolvedMethods.Add("ConvertToString",  ResolveMethod("System.Convert", "ToString", ["System.Object"]));
     }
 
-    private readonly Dictionary<TypeSymbol, TypeReference> knownTypes = [];
-    private readonly List<AssemblyDefinition> assemblies = [];
+    public void Emit(string outputPath) {
+        var objectType = knownTypes[TypeSymbol.Any];
+        mainProgram = new TypeDefinition("", "Program", TypeAttributes.Abstract | TypeAttributes.Sealed, objectType);
+        programAssembly.MainModule.Types.Add(mainProgram);
+
+        foreach (var header in program.Functions.Keys)
+            EmitFunctionHeader(header);
+
+        foreach (var (header, body) in program.Functions)
+            EmitFunctionBody(header, body);
+
+        if (program.MainFunction != null)
+            programAssembly.EntryPoint = programMethods[program.MainFunction];
+        
+        programAssembly.Write(outputPath);
+    }
+
+    private void EmitFunctionHeader(FunctionSymbol header) {
+        var functionType = knownTypes[header.Type];
+        var method = new MethodDefinition(header.Name, MethodAttributes.Private | MethodAttributes.Static, functionType);
+
+        foreach (var parameter in header.Parameters) {
+            var parameterType = knownTypes[parameter.Type];
+            var parameterDefinition = new ParameterDefinition(parameter.Name, ParameterAttributes.None, parameterType);
+            method.Parameters.Add(parameterDefinition);
+        }
+
+        mainProgram.Methods.Add(method);
+        programMethods.Add(header, method);
+    }
+    
+    private void EmitFunctionBody(FunctionSymbol header, IRBlockStatement body) {
+        var method = programMethods[header];
+        
+        locals.Clear();
+        labels.Clear();
+        targetLabels.Clear();
+
+        var processor = method.Body.GetILProcessor();
+        foreach (var statement in body.Statements)
+            EmitStatement(processor, statement);
+
+        foreach (var target in targetLabels) {
+            var instructionIndex = labels[target.Target];
+            var targetInstruction = processor.Body.Instructions[instructionIndex];
+            var instruction = processor.Body.Instructions[target.Index];
+            
+            instruction.Operand = targetInstruction;
+        }
+
+        method.Body.OptimizeMacros();
+    }
+
+    private void EmitStatement(ILProcessor processor, IRStatement node) {
+        switch (node.Kind) {
+            case IRNodeKind.VariableDeclaration:
+                EmitVariableDeclaration(processor, (IRVariableDeclaration)node);
+                break;
+
+            case IRNodeKind.LabelStatement:
+                EmitLabel(processor, (IRLabelStatement)node);
+                break;
+
+            case IRNodeKind.GotoStatement:
+                EmitGoto(processor, (IRGotoStatement)node);
+                break;
+
+            case IRNodeKind.ConditionalGotoStatement:
+                EmitConditionalGoto(processor, (IRConditionalGotoStatement)node);
+                break;
+
+            case IRNodeKind.ReturnStatement:
+                EmitReturn(processor, (IRReturnStatment)node);
+                break;
+
+            case IRNodeKind.ExpressionStatement:
+                EmitExpressionStatement(processor, (IRExpressionStatement)node);
+                break;
+            
+            default:
+                throw new Exception($"Unexpected statement: {node.Kind}");
+        }
+    }
+
+    private void EmitVariableDeclaration(ILProcessor processor, IRVariableDeclaration node) {
+        var type = knownTypes[node.Variable.Type];
+        var variable = new VariableDefinition(type);
+        
+        locals.Add(node.Variable, variable);
+        processor.Body.Variables.Add(variable);
+
+        EmitExpression(processor, node.Initializer);
+        processor.Emit(OpCodes.Stloc, variable);
+    }
+
+    private void EmitLabel(ILProcessor processor, IRLabelStatement node) {
+        labels.Add(node.Label, processor.Body.Instructions.Count);        
+    }
+
+    private void EmitGoto(ILProcessor processor, IRGotoStatement node) {
+        var targetLabel = new TargetLabel(processor.Body.Instructions.Count, node.Label); 
+        targetLabels.Add(targetLabel);
+        
+        processor.Emit(OpCodes.Br, Instruction.Create(OpCodes.Nop));
+    }
+
+    private void EmitConditionalGoto(ILProcessor processor, IRConditionalGotoStatement node) {
+        EmitExpression(processor, node.Condition);
+        var opCode = node.Jump ? OpCodes.Brtrue : OpCodes.Brfalse;
+
+        var targetLabel = new TargetLabel(processor.Body.Instructions.Count, node.Label); 
+        targetLabels.Add(targetLabel);
+        
+        processor.Emit(opCode, Instruction.Create(OpCodes.Nop));
+    }
+
+    private void EmitReturn(ILProcessor processor, IRReturnStatment node) {
+        if (node.Expression != null)
+            EmitExpression(processor, node.Expression);
+
+        processor.Emit(OpCodes.Ret);
+    }
+
+    private void EmitExpressionStatement(ILProcessor processor, IRExpressionStatement node) {
+        EmitExpression(processor, node.Expression);
+
+        if (node.Expression.Type != TypeSymbol.Void)
+            processor.Emit(OpCodes.Pop);
+    } 
+
+    private void EmitExpression(ILProcessor processor, IRExpression node) {
+        switch (node.Kind) {
+            case IRNodeKind.LiteralExpression:
+                EmitLiteral(processor, (IRLiteralExpression)node);
+                break;
+
+            case IRNodeKind.VariableExpression:
+                EmitStoreVariable(processor, (IRVariableExpression)node);
+                break;
+
+            case IRNodeKind.AssignmentExpression:
+                EmitAssignmentOperation(processor, (IRAssignmentExpression)node);
+                break;
+            
+            case IRNodeKind.UnaryExpression:
+                EmitUnaryOperation(processor, (IRUnaryExpression)node);
+                break;
+            
+            case IRNodeKind.BinaryExpression:
+                EmitBinaryOperation(processor, (IRBinaryExpression)node);
+                break;
+            
+            case IRNodeKind.CallExpression:
+                EmitCall(processor, (IRCallExpression)node);
+                break;
+            
+            case IRNodeKind.CastExpression:
+                EmitCasted(processor, (IRCastExpression)node);
+                break;
+            
+            default:
+                throw new Exception($"Unexpected expression: {node.Kind}");
+        }
+    }
+
+    private static void EmitLiteral(ILProcessor processor, IRLiteralExpression node) {
+        if (node.Type == TypeSymbol.Bool) {
+            var value = (bool)node.Value;
+            var instruction = value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
+            processor.Emit(instruction);
+        }
+
+        else if (node.Type == TypeSymbol.Int) {
+            var value = (int)node.Value;
+            processor.Emit(OpCodes.Ldc_I4, value);
+        }
+
+        else if (node.Type == TypeSymbol.Float) {
+            var value = (float)node.Value;
+            processor.Emit(OpCodes.Ldc_R4, value);
+        }
+
+        else if (node.Type == TypeSymbol.String) {
+            var value = (string)node.Value;
+            processor.Emit(OpCodes.Ldstr, value);
+        }
+
+        else {
+            throw new Exception($"Unexpected literal type: {node.Type}");
+        }
+    }
+
+    private void EmitStoreVariable(ILProcessor processor, IRVariableExpression node) {
+        if (node.Variable is ParameterSymbol parameter) {
+            processor.Emit(OpCodes.Ldarg, parameter.Index);
+        } 
+        else {
+            var variable = locals[node.Variable];
+            processor.Emit(OpCodes.Ldloc, variable);
+        }
+    }
+    
+    private void EmitAssignmentOperation(ILProcessor processor, IRAssignmentExpression node) {
+        var variable = locals[node.Variable];
+
+        EmitExpression(processor, node.Expression);
+        processor.Emit(OpCodes.Dup);
+        processor.Emit(OpCodes.Stloc, variable);
+    }
+    
+    private void EmitUnaryOperation(ILProcessor processor, IRUnaryExpression node) {
+        EmitExpression(processor, node.Operand);
+        
+        switch (node.Operator.Kind) {
+            case UnaryOperator.Identity:
+                // Do nothing
+                break;
+
+            case UnaryOperator.Negetion:
+                processor.Emit(OpCodes.Neg);
+                break;
+
+            case UnaryOperator.BitwiseNot:
+                processor.Emit(OpCodes.Not);
+                break;
+
+            case UnaryOperator.LogicalNot:
+                processor.Emit(OpCodes.Ldc_I4_0);
+                processor.Emit(OpCodes.Ceq);
+                break;
+
+            default:
+                throw new Exception($"Unexpected unary operation: {node.Operator}");
+        } 
+    }
+
+    private void EmitBinaryOperation(ILProcessor processor, IRBinaryExpression node) {
+        EmitExpression(processor, node.Left);
+        EmitExpression(processor, node.Right);
+
+        switch (node.Operator.Kind) {
+            case BinaryOperator.Add:
+                // string + string
+                if (node.Left.Type == TypeSymbol.String && node.Left.Type == TypeSymbol.String)
+                    processor.Emit(OpCodes.Call, resolvedMethods["Concat"]);
+
+                processor.Emit(OpCodes.Add);
+                break;
+                
+            case BinaryOperator.Substact:
+                processor.Emit(OpCodes.Sub);
+                break;
+
+            case BinaryOperator.Multiply:
+                processor.Emit(OpCodes.Mul);
+                break;
+            
+            case BinaryOperator.Divide:
+                processor.Emit(OpCodes.Div);
+                break;
+            
+            case BinaryOperator.Remainder:
+                processor.Emit(OpCodes.Rem);
+                break;
+
+            case BinaryOperator.Equals:
+                // any == any
+                // string == string
+                if (
+                    (node.Left.Type == TypeSymbol.Any && node.Right.Type == TypeSymbol.Any) ||
+                    (node.Left.Type == TypeSymbol.String && node.Right.Type == TypeSymbol.String)
+                ) {
+                    processor.Emit(OpCodes.Call, resolvedMethods["ObjectEquals"]);
+                    return;
+                }
+
+                processor.Emit(OpCodes.Ceq);
+                break;
+            
+            case BinaryOperator.NotEquals:
+                // any != any
+                // string != string
+                if (
+                    (node.Left.Type == TypeSymbol.Any && node.Right.Type == TypeSymbol.Any) ||
+                    (node.Left.Type == TypeSymbol.String && node.Right.Type == TypeSymbol.String)
+                ) {
+                    processor.Emit(OpCodes.Call, resolvedMethods["ObjectEquals"]);
+                    processor.Emit(OpCodes.Ldc_I4_0);
+                    processor.Emit(OpCodes.Ceq);
+                    return;
+                }
+
+                processor.Emit(OpCodes.Ceq);
+                processor.Emit(OpCodes.Ldc_I4_0);
+                processor.Emit(OpCodes.Ceq);
+                break;
+            
+            // Implement short circuit evaluation
+            case BinaryOperator.LogicalAnd:
+            case BinaryOperator.BitwiseAnd:
+                processor.Emit(OpCodes.And);
+                break;
+            
+            // Implement short circuit evaluation
+            case BinaryOperator.LogicalOr:
+            case BinaryOperator.BitwiseOr:
+                processor.Emit(OpCodes.Or);
+                break;
+        
+            case BinaryOperator.BitwiseXor:
+                processor.Emit(OpCodes.Xor);
+                break;
+            
+            case BinaryOperator.BitshiftLeft:
+                processor.Emit(OpCodes.And);
+                processor.Emit(OpCodes.Shl);
+                break;
+            
+            case BinaryOperator.BitshiftRight:
+                processor.Emit(OpCodes.And);
+                processor.Emit(OpCodes.Shr);
+                break;
+            
+            case BinaryOperator.GreaterThan:
+                processor.Emit(OpCodes.Cgt);
+                break;
+            
+            case BinaryOperator.GreaterThanEqualsTo:
+                processor.Emit(OpCodes.Clt);
+                processor.Emit(OpCodes.Ldc_I4_0);
+                processor.Emit(OpCodes.Ceq);
+                break;
+            
+            case BinaryOperator.LesserThan:
+                processor.Emit(OpCodes.Clt);
+                break;
+            
+            case BinaryOperator.LesserThanEqualsTo:
+                processor.Emit(OpCodes.Cgt);
+                processor.Emit(OpCodes.Ldc_I4_0);
+                processor.Emit(OpCodes.Ceq);
+                break;
+
+            default:
+                throw new Exception($"Unexpected binary operation: {node.Operator}");
+        }
+    }
+
+    private void EmitCall(ILProcessor processor, IRCallExpression node) {
+        foreach (var argument in node.Arguments)
+            EmitExpression(processor, argument);
+
+        if (node.Function == BuiltinFunctions.Print)
+            processor.Emit(OpCodes.Call, resolvedMethods["WriteLine"]);
+        
+        else if (node.Function == BuiltinFunctions.Input)
+            processor.Emit(OpCodes.Call, resolvedMethods["ReadLine"]);
+
+        else {
+            var method = programMethods[node.Function];
+            processor.Emit(OpCodes.Call, method);
+        }
+    }
+
+    private void EmitCasted(ILProcessor processor, IRCastExpression node) {
+        EmitExpression(processor, node.Expression);
+
+        var needsBoxing = node.Expression.Type == TypeSymbol.Bool 
+            || node.Expression.Type == TypeSymbol.Int;
+
+        if (needsBoxing)
+            processor.Emit(OpCodes.Box, knownTypes[node.Expression.Type]);
+        
+        if (node.Type == TypeSymbol.Any) {
+            // Do nothing
+        }
+        
+        else if (node.Type == TypeSymbol.Bool)
+            processor.Emit(OpCodes.Call, resolvedMethods["ConvertToBoolean"]);
+
+        else if (node.Type == TypeSymbol.Int)
+            processor.Emit(OpCodes.Call, resolvedMethods["ConvertToInt32"]);
+
+        else if (node.Type == TypeSymbol.Float)
+            processor.Emit(OpCodes.Call, resolvedMethods["ConvertToSingle"]);
+
+        else if (node.Type == TypeSymbol.String)
+            processor.Emit(OpCodes.Call, resolvedMethods["ConvertToString"]);
+
+        else
+            throw new Exception($"Unexpected cast from: {node.Expression.Type} to: {node.Type}");
+    }
+
+    public ImmutableArray<DiagnosticMessage> Diagonostics => [..diagnostics];
+
     private readonly Diagnostics diagnostics = [];
+    private readonly List<AssemblyDefinition> referenceAssemblies = [];
+    private readonly List<TargetLabel> targetLabels = []; 
+
+    private readonly Dictionary<TypeSymbol, TypeReference> knownTypes = [];
+    private readonly Dictionary<VariableSymbol, VariableDefinition> locals = [];
+    private readonly Dictionary<FunctionSymbol, MethodDefinition> programMethods = [];
+    
+    private readonly Dictionary<string, MethodReference> resolvedMethods = [];
+    private readonly Dictionary<LabelSymbol, int> labels = [];
+
+    private AssemblyDefinition? programAssembly;
+    private TypeDefinition? mainProgram;
+}
+
+internal sealed class TargetLabel(int index, LabelSymbol target) {
+    public int Index { get; } = index;
+    public LabelSymbol Target { get; } = target;
 }

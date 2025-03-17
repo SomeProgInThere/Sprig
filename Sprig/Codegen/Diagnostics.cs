@@ -187,9 +187,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         var assemblyNameList = string.Join("', '", assemblyName);
 
         var message = typeName is null 
-            ? $"Required type '{typeName}' was found in multiple references: {assemblyNameList}"
+            ? $"Required type '{metadataName}' was found in multiple references: {assemblyNameList}"
             : $"Required type '{typeName}' ('{metadataName}') was found in multiple references: {assemblyNameList}";
-
 
         Report(default, message);
     }

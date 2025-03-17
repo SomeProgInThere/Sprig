@@ -14,29 +14,14 @@ public sealed class Compilation {
 
     public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath) {
         var program = GetProgram();
-        var emitter = new Emitter();
-        
-        return emitter.Emit(program, moduleName, references, outputPath);
-    }
-
-    public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables) {
-        var parseDiagnostics = SyntaxTrees.SelectMany(tree => tree.Diagnostics);
-
-        var diagnostics = parseDiagnostics
-            .Concat(GlobalScope?.Diagnostics ?? [])
-            .ToImmutableArray();
-        
-        if (diagnostics.Any())
-            return new EvaluationResult(diagnostics);
-        
-        var program = GetProgram();
         if (program.Diagnostics.Any())
-            return new EvaluationResult([..program.Diagnostics]);
+            return program.Diagnostics;
 
-        var evaluator = new Evaluator(program, variables);
-        var result = evaluator.Evaluate();
+        var emitter = new Emitter(program);
+        emitter.LoadReferences(moduleName, references);
+        emitter.Emit(outputPath);
 
-        return new EvaluationResult([], result);
+        return [..emitter.Diagonostics];
     }
 
     public Compilation ContinueWith(SyntaxTree syntaxTree) => new(this, syntaxTree);

@@ -62,9 +62,9 @@ internal sealed class IRIfStatement(IRExpression condition, IRStatement ifStatem
     public override IRNodeKind Kind => IRNodeKind.IfStatement;
 }
 
-internal sealed class IRReturnStatment(IRExpression expression) 
+internal sealed class IRReturnStatment(IRExpression? expression) 
     : IRStatement {
 
-    public IRExpression Expression { get; } = expression;
+    public IRExpression? Expression { get; } = expression;
     public override IRNodeKind Kind => IRNodeKind.ReturnStatement;
 }

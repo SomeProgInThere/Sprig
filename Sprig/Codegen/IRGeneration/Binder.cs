@@ -98,7 +98,7 @@ internal sealed class Binder {
 
             var binder = new Binder(parentScope, function);
             var body = binder.BindStatement(function.Header.Body);
-            var loweredBody = Lowerer.Lower(body);
+            var loweredBody = Lowerer.Lower(function, body);
             
             if (function.Type != TypeSymbol.Void && !ControlFlowGraph.AllPathsReturn(loweredBody))
                 binder.diagnostics.ReportNotAllPathsReturn(function.Header.Identifier.Location);
@@ -108,7 +108,7 @@ internal sealed class Binder {
         }
 
         if (globalScope.MainFunction != null && globalScope.Statements.Any()) {
-            var body = Lowerer.Lower(new IRBlockStatement(globalScope.Statements));
+            var body = Lowerer.Lower(globalScope.MainFunction, new IRBlockStatement(globalScope.Statements));
             functions.Add(globalScope.MainFunction, body);
         }
 
@@ -162,7 +162,7 @@ internal sealed class Binder {
                 diagnostics.ReportParameterAlreadyExists(parameter.Location, parameterName);
 
             else {
-                var parameterSymbol = new ParameterSymbol(parameterName, parameterType);
+                var parameterSymbol = new ParameterSymbol(parameterName, parameterType, parameters.Count);
                 parameters.Add(parameterSymbol);
             }
         }
