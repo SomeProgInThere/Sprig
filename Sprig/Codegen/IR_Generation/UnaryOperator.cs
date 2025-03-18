@@ -29,10 +29,10 @@ internal sealed class IR_UnaryOperator(SyntaxKind syntaxKind, UnaryOperator kind
     public TypeSymbol Type { get; } = type;
 
     private static readonly IR_UnaryOperator[] operators = [
-        new IR_UnaryOperator(SyntaxKind.PlusToken,  UnaryOperator.Identity,   TypeSymbol.Int),
-        new IR_UnaryOperator(SyntaxKind.MinusToken, UnaryOperator.Negetion,   TypeSymbol.Int),
-        new IR_UnaryOperator(SyntaxKind.TildeToken, UnaryOperator.BitwiseNot, TypeSymbol.Int),
+        new IR_UnaryOperator(SyntaxKind.PlusToken,  UnaryOperator.Identity,   TypeSymbol.Int32),
+        new IR_UnaryOperator(SyntaxKind.MinusToken, UnaryOperator.Negetion,   TypeSymbol.Int32),
+        new IR_UnaryOperator(SyntaxKind.TildeToken, UnaryOperator.BitwiseNot, TypeSymbol.Int32),
         
-        new IR_UnaryOperator(SyntaxKind.BangToken,  UnaryOperator.LogicalNot, TypeSymbol.Bool),
+        new IR_UnaryOperator(SyntaxKind.BangToken,  UnaryOperator.LogicalNot, TypeSymbol.Boolean),
     ];
 }

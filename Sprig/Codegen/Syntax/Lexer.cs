@@ -231,7 +231,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
             if (!int.TryParse(literal, out var intResult)) {
                 var span = new TextSpan(start, length);
                 var location = new TextLocation(syntaxTree.Source, span);
-                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Int);
+                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Int32);
             }
             value = intResult;
         }
@@ -239,7 +239,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
             if (!float.TryParse(literal, out var floatResult)) {
                 var span = new TextSpan(start, length);
                 var location = new TextLocation(syntaxTree.Source, span);
-                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Float);
+                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Double);
             }
             value = floatResult;
         }

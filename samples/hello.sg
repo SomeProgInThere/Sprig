@@ -1,6 +1,5 @@
 
 func main() {
-    for i in 0..10 {
-        print(string(i))
-    }
+    let x = 10
+    print(10)
 }

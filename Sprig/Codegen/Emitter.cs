@@ -8,7 +8,7 @@ using Sprig.Codegen.Symbols;
 
 namespace Sprig.Codegen;
 
-internal sealed class Emitter(IRProgram program) {
+internal sealed class Emitter(IR_Program program) {
 
     public void LoadReferences(string moduleName, string[] references) {
         foreach (var reference in references) {
@@ -25,12 +25,12 @@ internal sealed class Emitter(IRProgram program) {
         programAssembly = AssemblyDefinition.CreateAssembly(assemblyName, moduleName, ModuleKind.Console);        
          
         var builtinTypes = new List<(TypeSymbol type, string metadataName)>() {
-            (TypeSymbol.Any,    "System.Object"),
-            (TypeSymbol.Void,   "System.Void"),
-            (TypeSymbol.Bool,   "System.Boolean"),
-            (TypeSymbol.Int,    "System.Int32"),
-            (TypeSymbol.Float,  "System.Single"),
-            (TypeSymbol.String, "System.String"),
+            (TypeSymbol.Any,     "System.Object"),
+            (TypeSymbol.Void,    "System.Void"),
+            (TypeSymbol.Boolean,    "System.Boolean"),
+            (TypeSymbol.Int32,     "System.Int32"),
+            (TypeSymbol.Double, "System.Double"),
+            (TypeSymbol.String,  "System.String"),
         };
 
         TypeReference? ResolveType(string? typeName, string metadataName) {
@@ -110,8 +110,12 @@ internal sealed class Emitter(IRProgram program) {
         
         resolvedMethods.Add("ConvertToBoolean", ResolveMethod("System.Convert", "ToBoolean", ["System.Object"]));
         resolvedMethods.Add("ConvertToInt32",   ResolveMethod("System.Convert", "ToInt32", ["System.Object"]));
-        resolvedMethods.Add("ConvertToSingle",  ResolveMethod("System.Convert", "ToSingle", ["System.Object"]));
+        resolvedMethods.Add("ConvertToDouble",  ResolveMethod("System.Convert", "ToDouble", ["System.Object"]));
         resolvedMethods.Add("ConvertToString",  ResolveMethod("System.Convert", "ToString", ["System.Object"]));
+        
+        randType = ResolveType(null, "System.Random");
+        resolvedMethods.Add("RandCtor", ResolveMethod("System.Random", ".ctor", []));
+        resolvedMethods.Add("RandNext", ResolveMethod("System.Random", "Next", ["System.Int32", "System.Int32"]));
     }
 
     public void Emit(string outputPath) {
@@ -280,20 +284,20 @@ internal sealed class Emitter(IRProgram program) {
     }
 
     private static void EmitLiteral(ILProcessor processor, IR_LiteralExpression node) {
-        if (node.Type == TypeSymbol.Bool) {
+        if (node.Type == TypeSymbol.Boolean) {
             var value = (bool)node.Value;
             var instruction = value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
             processor.Emit(instruction);
         }
 
-        else if (node.Type == TypeSymbol.Int) {
+        else if (node.Type == TypeSymbol.Int32) {
             var value = (int)node.Value;
             processor.Emit(OpCodes.Ldc_I4, value);
         }
 
-        else if (node.Type == TypeSymbol.Float) {
-            var value = (float)node.Value;
-            processor.Emit(OpCodes.Ldc_R4, value);
+        else if (node.Type == TypeSymbol.Double) {
+            var value = (double)node.Value;
+            processor.Emit(OpCodes.Ldc_R8, value);
         }
 
         else if (node.Type == TypeSymbol.String) {
@@ -463,6 +467,19 @@ internal sealed class Emitter(IRProgram program) {
     }
 
     private void EmitCall(ILProcessor processor, IR_CallExpression node) {
+        if (node.Function == BuiltinFunctions.RandInt) {
+            if (randField is null)
+                EmitRandomField();
+
+            processor.Emit(OpCodes.Ldsfld, randField);
+            
+            foreach (var argument in node.Arguments)
+                EmitExpression(processor, argument);
+
+            processor.Emit(OpCodes.Callvirt, resolvedMethods["RandNext"]);
+            return;
+        }
+
         foreach (var argument in node.Arguments)
             EmitExpression(processor, argument);
 
@@ -478,11 +495,36 @@ internal sealed class Emitter(IRProgram program) {
         }
     }
 
+    private void EmitRandomField() {
+        randField = new FieldDefinition(
+            "$rand",
+            FieldAttributes.Static | FieldAttributes.Private,
+            randType
+        );
+        mainProgram.Fields.Add(randField);
+
+        var staticCtor = new MethodDefinition(
+            ".cctor",
+            MethodAttributes.Static | 
+            MethodAttributes.Private | 
+            MethodAttributes.SpecialName |
+            MethodAttributes.RTSpecialName,
+            knownTypes[TypeSymbol.Void]
+        );
+        mainProgram.Methods.Insert(0, staticCtor);
+
+        var processor = staticCtor.Body.GetILProcessor();
+        
+        processor.Emit(OpCodes.Newobj, resolvedMethods["RandCtor"]);
+        processor.Emit(OpCodes.Stsfld, randField);
+        processor.Emit(OpCodes.Ret);
+    }
+
     private void EmitCasted(ILProcessor processor, IR_CastExpression node) {
         EmitExpression(processor, node.Expression);
 
-        var needsBoxing = node.Expression.Type == TypeSymbol.Bool 
-            || node.Expression.Type == TypeSymbol.Int;
+        var needsBoxing = node.Expression.Type == TypeSymbol.Boolean 
+            || node.Expression.Type == TypeSymbol.Int32;
 
         if (needsBoxing)
             processor.Emit(OpCodes.Box, knownTypes[node.Expression.Type]);
@@ -491,14 +533,14 @@ internal sealed class Emitter(IRProgram program) {
             // Do nothing
         }
         
-        else if (node.Type == TypeSymbol.Bool)
+        else if (node.Type == TypeSymbol.Boolean)
             processor.Emit(OpCodes.Call, resolvedMethods["ConvertToBoolean"]);
 
-        else if (node.Type == TypeSymbol.Int)
+        else if (node.Type == TypeSymbol.Int32)
             processor.Emit(OpCodes.Call, resolvedMethods["ConvertToInt32"]);
 
-        else if (node.Type == TypeSymbol.Float)
-            processor.Emit(OpCodes.Call, resolvedMethods["ConvertToSingle"]);
+        else if (node.Type == TypeSymbol.Double)
+            processor.Emit(OpCodes.Call, resolvedMethods["ConvertToDouble"]);
 
         else if (node.Type == TypeSymbol.String)
             processor.Emit(OpCodes.Call, resolvedMethods["ConvertToString"]);
@@ -508,6 +550,7 @@ internal sealed class Emitter(IRProgram program) {
     }
 
     public ImmutableArray<DiagnosticMessage> Diagonostics => [..diagnostics];
+
 
     private readonly Diagnostics diagnostics = [];
     private readonly List<AssemblyDefinition> referenceAssemblies = [];
@@ -522,6 +565,9 @@ internal sealed class Emitter(IRProgram program) {
 
     private AssemblyDefinition? programAssembly;
     private TypeDefinition? mainProgram;
+
+    public TypeReference? randType;
+    private FieldDefinition? randField;
 }
 
 internal sealed class TargetLabel(int index, LabelSymbol target) {

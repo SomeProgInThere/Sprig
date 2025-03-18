@@ -41,13 +41,13 @@ internal sealed class GlobalScope(
     public ImmutableArray<IR_Statement> Statements { get; } = statements;
 }
 
-internal sealed class IRProgram(
-    IRProgram previous,
+internal sealed class IR_Program(
+    IR_Program previous,
     FunctionSymbol? mainFunction,
     ImmutableArray<DiagnosticMessage> diagnostics,
     ImmutableDictionary<FunctionSymbol, IR_BlockStatement> functions
 ) {
-    public IRProgram Previous { get; } = previous;
+    public IR_Program Previous { get; } = previous;
     public FunctionSymbol? MainFunction { get; } = mainFunction;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public ImmutableDictionary<FunctionSymbol, IR_BlockStatement> Functions { get; } = functions;

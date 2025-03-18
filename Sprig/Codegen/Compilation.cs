@@ -46,7 +46,7 @@ public sealed class Compilation {
         SyntaxTrees = [..syntaxTrees];
     }
 
-    private IRProgram GetProgram() {
+    private IR_Program GetProgram() {
         var previous = Previous?.GetProgram();
         return Binder.BindProgram(previous, GlobalScope);
     }

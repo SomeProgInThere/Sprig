@@ -126,7 +126,7 @@ internal class GraphBuilder {
             return new IR_LiteralExpression(!value);
         }
 
-        var op = IR_UnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
+        var op = IR_UnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Boolean);
         return new IR_UnaryExpression(condition, op);
     }
 

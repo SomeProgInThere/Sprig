@@ -87,7 +87,7 @@ internal sealed class Binder {
         return new GlobalScope(previous, diagnostics, mainFunction, symbols, statments.ToImmutable());
     }
 
-    public static IRProgram BindProgram(IRProgram previous, GlobalScope globalScope) {
+    public static IR_Program BindProgram(IR_Program previous, GlobalScope globalScope) {
         var parentScope = CreateParentScope(globalScope);
         
         var functions = ImmutableDictionary.CreateBuilder<FunctionSymbol, IR_BlockStatement>();
@@ -112,7 +112,7 @@ internal sealed class Binder {
             functions.Add(globalScope.MainFunction, body);
         }
 
-        return new IRProgram(previous, globalScope.MainFunction, diagnostics, functions.ToImmutable());
+        return new IR_Program(previous, globalScope.MainFunction, diagnostics, functions.ToImmutable());
     }
 
     public Diagnostics Diagnostics => diagnostics;
@@ -226,7 +226,7 @@ internal sealed class Binder {
         return condition;
     }
 
-    private IR_Statement BindBlockStatement(BlockStatement syntax) {
+    private IR_BlockStatement BindBlockStatement(BlockStatement syntax) {
         var statements = ImmutableArray.CreateBuilder<IR_Statement>();
         scope = new LocalScope(scope);
 
@@ -245,7 +245,7 @@ internal sealed class Binder {
         return new IR_BlockStatement(statements.ToImmutable());
     }
 
-    private IR_Statement BindVariableDeclaration(VariableDeclarationStatement syntax) {
+    private IR_VariableDeclaration BindVariableDeclaration(VariableDeclarationStatement syntax) {
         var mutable = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
         TypeSymbol? explicitType = null;
         
@@ -266,8 +266,8 @@ internal sealed class Binder {
         return new IR_VariableDeclaration(variable, castInitializer);
     }
 
-    private IR_Statement BindIfStatement(IfStatement syntax) {
-        var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
+    private IR_IfStatement BindIfStatement(IfStatement syntax) {
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
         var body = BindStatement(syntax.Body);
         
         var elseBody = syntax.ElseClause switch {
@@ -278,24 +278,24 @@ internal sealed class Binder {
         return new IR_IfStatement(condition, body, elseBody);
     }
 
-    private IR_Statement BindWhileStatement(WhileStatement syntax) {
-        var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
+    private IR_WhileStatement BindWhileStatement(WhileStatement syntax) {
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
         return new IR_WhileStatement(condition, body, jumpLabel);
     }
 
-    private IR_Statement BindDoWhileStatement(DoWhileStatement syntax) {
+    private IR_DoWhileStatement BindDoWhileStatement(DoWhileStatement syntax) {
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
-        var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
+        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
         return new IR_DoWhileStatement(body, condition, jumpLabel);
     }
 
-    private IR_Statement BindForStatement(ForStatement syntax) {
+    private IR_ForStatement BindForStatement(ForStatement syntax) {
         var range = BindExpression(syntax.Range);
 
         scope = new LocalScope(scope);
 
-        var variable = BindVariableDeclaration(syntax.Identifier, true, TypeSymbol.Int);
+        var variable = BindVariableDeclaration(syntax.Identifier, true, TypeSymbol.Int32);
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
 
         if (scope.Parent != null)
@@ -324,7 +324,7 @@ internal sealed class Binder {
         return new IR_GotoStatement(continueLabel);
     }
 
-    private IR_Statement BindReturnStatement(ReturnStatement syntax) {
+    private IR_ReturnStatment BindReturnStatement(ReturnStatement syntax) {
         var expression = syntax.Expression == null 
             ? null 
             : BindExpression(syntax.Expression);
@@ -349,7 +349,7 @@ internal sealed class Binder {
         return new IR_ReturnStatment(expression);
     }
 
-    private IR_Statement BindExpressionStatement(ExpressionStatement syntax) {
+    private IR_ExpressionStatement BindExpressionStatement(ExpressionStatement syntax) {
         var expression = BindExpression(syntax.Expression, true);
         return new IR_ExpressionStatement(expression);
     }
@@ -369,8 +369,7 @@ internal sealed class Binder {
         return boundBody;
     }
 
-    private static IR_Statement BindErrorStatement() 
-        => new IR_ExpressionStatement(new IR_ErrorExpression());
+    private static IR_ExpressionStatement BindErrorStatement() => new(new IR_ErrorExpression());
 
     private IR_Expression BindExpression(Expression syntax, bool voidExpression = false) {
         var result = BindExpressionInternal(syntax);
@@ -542,7 +541,7 @@ internal sealed class Binder {
         if (lower.Type.IsError || upper.Type.IsError)
             return new IR_ErrorExpression();
 
-        if (lower.Type != TypeSymbol.Int) {
+        if (lower.Type != TypeSymbol.Int32) {
             diagnostics.ReportNonIntegerRange(syntax.Lower.Location);
             return new IR_ErrorExpression();
         }
@@ -602,10 +601,10 @@ internal sealed class Binder {
     }
 
     private static TypeSymbol? LookupType(string name) => name switch {
-        "bool"      => TypeSymbol.Bool,
-        "int"       => TypeSymbol.Int,
-        "string"    => TypeSymbol.String,
-        "float"     => TypeSymbol.Float,
+        "bool"      => TypeSymbol.Boolean,
+        "int"       => TypeSymbol.Int32,
+        "str"       => TypeSymbol.String,
+        "decimal"   => TypeSymbol.Double,
         "any"       => TypeSymbol.Any,
         _ => null,
     };

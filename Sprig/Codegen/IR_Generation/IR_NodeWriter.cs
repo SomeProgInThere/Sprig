@@ -143,13 +143,13 @@ internal static class IRNodeWriter {
     private static void WriteLiteralExpression(IR_LiteralExpression node, IndentedTextWriter writer) {
         var value = node.Value.ToString() ?? "?";
         
-        if (node.Type == TypeSymbol.Bool)
+        if (node.Type == TypeSymbol.Boolean)
             writer.WriteIdentifier(value);
 
-        else if (node.Type == TypeSymbol.Int)
+        else if (node.Type == TypeSymbol.Int32)
             writer.WriteNumber(value);
             
-        else if (node.Type == TypeSymbol.Float)
+        else if (node.Type == TypeSymbol.Double)
             writer.WriteNumber(value);
 
         else if (node.Type == TypeSymbol.String) {

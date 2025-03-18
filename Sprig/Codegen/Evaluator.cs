@@ -287,7 +287,7 @@
 //             var max = (int)EvaluateExpression(node.Arguments[1]);
             
 //             random ??= new Random();
-//             return random.Next(min, max);
+//             return random.Next();
 //         }
 
 //         else {
@@ -308,7 +308,7 @@
 //         }
 //     }
 
-//     private object EvaluateCastExpression(IRCastExpression node) {
+//     private object EvaluateCastExpression(IR_CastExpression node) {
 //         var value = EvaluateExpression(node.Expression);
         
 //         if (node.Type == TypeSymbol.Any)
@@ -344,7 +344,7 @@
 
 //     private readonly IRProgram program;
 //     private readonly Stack<Dictionary<VariableSymbol, object>> locals = [];
-//     private readonly Dictionary<FunctionSymbol, IRBlockStatement> functions = [];
+//     private readonly Dictionary<FunctionSymbol, IR_BlockStatement> functions = [];
 //     private readonly Dictionary<VariableSymbol, object> globals;
 // }
 

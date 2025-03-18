@@ -14,9 +14,9 @@ internal sealed class IR_LiteralExpression(object value)
 
     public override IR_NodeKind Kind => IR_NodeKind.LiteralExpression;
     public override TypeSymbol Type { get; } = value switch {
-        bool    => TypeSymbol.Bool,
-        int     => TypeSymbol.Int,
-        float   => TypeSymbol.Float,
+        bool    => TypeSymbol.Boolean,
+        int     => TypeSymbol.Int32,
+        float   => TypeSymbol.Double,
         string  => TypeSymbol.String,
         
         _ => throw new Exception($"Unexpected literal '{value}' of type '{value.GetType()}'"),
@@ -39,7 +39,7 @@ internal sealed class IR_VariableExpression(VariableSymbol variable)
     public VariableSymbol Variable { get; } = variable;
     
     public override IR_NodeKind Kind => IR_NodeKind.VariableExpression;
-    public override TypeSymbol Type => Variable?.Type ?? TypeSymbol.Int;
+    public override TypeSymbol Type => Variable?.Type ?? TypeSymbol.Int32;
 }
 
 internal sealed class IR_AssignmentExpression(VariableSymbol variable, IR_Expression expression)

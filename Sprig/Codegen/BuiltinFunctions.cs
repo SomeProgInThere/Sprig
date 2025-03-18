@@ -7,7 +7,7 @@ internal static class BuiltinFunctions {
 
     public static readonly FunctionSymbol Print = new(
         "print", 
-        [new ParameterSymbol("text", TypeSymbol.String, 0)], 
+        [new ParameterSymbol("arg", TypeSymbol.String, 0)], 
         TypeSymbol.Void
     );
 
@@ -17,15 +17,15 @@ internal static class BuiltinFunctions {
         TypeSymbol.String
     );
 
-    public static readonly FunctionSymbol Random = new(
+    public static readonly FunctionSymbol RandInt = new(
         "rand",
         [
-            new ParameterSymbol("min", TypeSymbol.Int, 0), 
-            new ParameterSymbol("max", TypeSymbol.Int, 0)
+            new ParameterSymbol("min", TypeSymbol.Int32, 0), 
+            new ParameterSymbol("max", TypeSymbol.Int32, 0),
         ], 
-        TypeSymbol.Int
+        TypeSymbol.Int32
     );
-
+    
     internal static IEnumerable<FunctionSymbol?> All()
         => typeof(BuiltinFunctions)
             .GetFields(BindingFlags.Public | BindingFlags.Static)

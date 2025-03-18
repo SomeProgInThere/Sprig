@@ -128,13 +128,13 @@ internal sealed class Lowerer() : IR_TreeRewriter {
         var variableDeclaration = new IR_VariableDeclaration(node.Variable, range.Lower);
         var variable = new IR_VariableExpression(node.Variable);
 
-		var upperSymbol = new VariableSymbol("upper", true, TypeSymbol.Int, VariableScope.Local);
+		var upperSymbol = new VariableSymbol("upper", true, TypeSymbol.Int32, VariableScope.Local);
 		var upperDeclaration = new IR_VariableDeclaration(upperSymbol, range.Upper);
 
         var condition = new IR_BinaryExpression(
             variable,
             new IR_VariableExpression(upperSymbol),
-            IRBinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int, TypeSymbol.Int) 
+            IRBinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int32, TypeSymbol.Int32) 
                 ?? throw new Exception("Invaild binary operation")
         );
 
@@ -144,7 +144,7 @@ internal sealed class Lowerer() : IR_TreeRewriter {
             new IR_AssignmentExpression(node.Variable, new IR_BinaryExpression(
                     variable,
                     new IR_LiteralExpression(1),
-                    IRBinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int, TypeSymbol.Int)
+                    IRBinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int32, TypeSymbol.Int32)
                         ?? throw new Exception("Invalid binary operation")
                 )
             )
