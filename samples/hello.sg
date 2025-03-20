@@ -1,5 +1,9 @@
 
-func main() {
-    let x = 10
-    print(10)
+func main() 
+{
+    for i in 0..10 
+    {
+        let x = rand(1, 100)
+        print(str(x + i / 2))
+    }
 }
