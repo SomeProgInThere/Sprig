@@ -103,7 +103,7 @@ internal sealed class Emitter(IR_Program program) {
             knownTypes.Add(typeSymbol, type);
         }
 
-        resolvedMethods.Add("WriteLine",    ResolveMethod("System.Console", "WriteLine", ["System.String"]));
+        resolvedMethods.Add("WriteLine",    ResolveMethod("System.Console", "WriteLine", ["System.Object"]));
         resolvedMethods.Add("ReadLine",     ResolveMethod("System.Console", "ReadLine", []));
         resolvedMethods.Add("Concat",       ResolveMethod("System.String", "Concat", ["System.String", "System.String"]));
         resolvedMethods.Add("ObjectEquals", ResolveMethod("System.Object", "Equals", ["System.Object", "System.Object"]));
