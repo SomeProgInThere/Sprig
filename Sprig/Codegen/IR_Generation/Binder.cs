@@ -155,7 +155,7 @@ internal sealed class Binder {
         var existantParameters = new HashSet<string>();
 
         foreach(var parameter in syntax.Parameters) {
-            var parameterName = parameter.Identifier.Literal;
+            var parameterName = parameter.Identifier.Text;
             var parameterType = BindTypeClause(parameter.Type) ?? TypeSymbol.Error;
             
             if (!existantParameters.Add(parameterName))
@@ -169,7 +169,7 @@ internal sealed class Binder {
 
         var type = BindTypeClause(syntax.ReturnType) ?? TypeSymbol.Void;
         var function = new FunctionSymbol(
-            syntax.Identifier.Literal, 
+            syntax.Identifier.Text, 
             parameters.ToImmutable(), 
             type, 
             syntax
@@ -183,10 +183,10 @@ internal sealed class Binder {
         TypeSymbol? type = null;
         if (clause != null) {
             var typeIdentifier = clause.Identifier;
-            type = LookupType(typeIdentifier.Literal);
+            type = LookupType(typeIdentifier.Text);
 
             if (type is null)
-                diagnostics.ReportUndefinedType(typeIdentifier.Location, typeIdentifier.Literal);
+                diagnostics.ReportUndefinedType(typeIdentifier.Location, typeIdentifier.Text);
         }
 
         return type;
@@ -251,10 +251,10 @@ internal sealed class Binder {
         
         if (syntax.TypeClause != null) {
             var typeIdentifier = syntax.TypeClause?.Identifier;
-            explicitType = LookupType(typeIdentifier.Literal);
+            explicitType = LookupType(typeIdentifier.Text);
 
             if (explicitType is null)
-                diagnostics.ReportUndefinedType(typeIdentifier.Location, typeIdentifier.Literal);
+                diagnostics.ReportUndefinedType(typeIdentifier.Location, typeIdentifier.Text);
         }
 
         var initializer = BindExpression(syntax.Initializer);
@@ -306,7 +306,7 @@ internal sealed class Binder {
 
     private IR_Statement BindBreakStatement(BreakStatement syntax) {
         if (loopJumps.Count < 0) {
-            diagnostics.ReportInvalidJump(syntax.BreakKeyword.Location, syntax.BreakKeyword.Literal);
+            diagnostics.ReportInvalidJump(syntax.BreakKeyword.Location, syntax.BreakKeyword.Text);
             return BindErrorStatement();
         }
 
@@ -316,7 +316,7 @@ internal sealed class Binder {
 
     private IR_Statement BindContinueStatement(ContinueStatement syntax) {
         if (loopJumps.Count < 0) {
-            diagnostics.ReportInvalidJump(syntax.ContinueKeyword.Location, syntax.ContinueKeyword.Literal);
+            diagnostics.ReportInvalidJump(syntax.ContinueKeyword.Location, syntax.ContinueKeyword.Text);
             return BindErrorStatement();
         }
 
@@ -402,7 +402,7 @@ internal sealed class Binder {
     }
 
     private IR_Expression BindCallExpression(CallExpression syntax) {
-        if (syntax.Arguments.Count == 1 && LookupType(syntax.Identifier.Literal) is TypeSymbol type)
+        if (syntax.Arguments.Count == 1 && LookupType(syntax.Identifier.Text) is TypeSymbol type)
             return BindCast(syntax.Arguments[0], type, true);
 
         var boundArguments = ImmutableArray.CreateBuilder<IR_Expression>();
@@ -412,14 +412,14 @@ internal sealed class Binder {
             boundArguments.Add(boundArgument);
         }
 
-        var symbol = scope.TryLookupSymbol(syntax.Identifier.Literal);
+        var symbol = scope.TryLookupSymbol(syntax.Identifier.Text);
         if (symbol is null) {
-            diagnostics.ReportUndefinedFunction(syntax.Identifier.Location, syntax.Identifier.Literal);
+            diagnostics.ReportUndefinedFunction(syntax.Identifier.Location, syntax.Identifier.Text);
             return new IR_ErrorExpression();
         }
 
         if (symbol is not FunctionSymbol function) {
-            diagnostics.ReportNotAFunction(syntax.Identifier.Location, syntax.Identifier.Literal);
+            diagnostics.ReportNotAFunction(syntax.Identifier.Location, syntax.Identifier.Text);
             return new IR_ErrorExpression();
         }
 
@@ -474,7 +474,7 @@ internal sealed class Binder {
         if (identifier.IsMissing)
             return new IR_ErrorExpression();
         
-        var variable = BindVariableReference(identifier.Literal, identifier.Location);
+        var variable = BindVariableReference(identifier.Text, identifier.Location);
         if (variable is null)
             return new IR_ErrorExpression();
 
@@ -482,7 +482,7 @@ internal sealed class Binder {
     }
 
     private IR_Expression BindAssignmentExpression(AssignmentExpression syntax) {
-        var name = syntax.Identifier.Literal;
+        var name = syntax.Identifier.Text;
         var expression = BindExpression(syntax.Expression);
         
         if (syntax.Identifier.IsMissing)
@@ -509,7 +509,7 @@ internal sealed class Binder {
 
         var op = IR_UnaryOperator.Bind(token.Kind, operand.Type);
         if (op == null) {
-            diagnostics.ReportUndefinedUnaryOperator(token.Location, token.Literal, operand.Type);
+            diagnostics.ReportUndefinedUnaryOperator(token.Location, token.Text, operand.Type);
             return new IR_ErrorExpression();
         }
 
@@ -527,7 +527,7 @@ internal sealed class Binder {
         var op = IRBinaryOperator.Bind(token.Kind, left.Type, right.Type);
         
         if (op == null) {
-            diagnostics.ReportUndefinedBinaryOperator(token.Location, token.Literal, left.Type, right.Type);
+            diagnostics.ReportUndefinedBinaryOperator(token.Location, token.Text, left.Type, right.Type);
             return new IR_ErrorExpression();
         }
 
@@ -574,7 +574,7 @@ internal sealed class Binder {
     }
 
     private VariableSymbol BindVariableDeclaration(SyntaxToken identifier, bool mutable, TypeSymbol type) {
-        var name = identifier.Literal;
+        var name = identifier.Text;
         var exists = !identifier.IsMissing;
 
         var scope = function is null ? VariableScope.Global : VariableScope.Local; 

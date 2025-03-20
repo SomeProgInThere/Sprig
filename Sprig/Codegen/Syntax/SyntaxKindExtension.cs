@@ -66,7 +66,7 @@ internal static class SyntaxKindExtension {
         };
     }
 
-    public static string? Literal(this SyntaxKind kind) {
+    public static string? Text(this SyntaxKind kind) {
         return kind switch {
             SyntaxKind.PlusToken                => "+",
             SyntaxKind.MinusToken               => "-",

@@ -6,16 +6,16 @@ public sealed class SyntaxToken(
     SyntaxTree syntaxTree, 
     SyntaxKind kind, 
     int position, 
-    string literal, 
+    string text, 
     object? value = null
 ) 
     : SyntaxNode(syntaxTree) {
 
     public int Position { get; } = position;
-    public string Literal { get; } = literal;
+    public string Text { get; } = text;
     public object? Value { get; } = value;
-    public bool IsMissing => Literal == "";
+    public bool IsMissing => Text == "";
 
-    public override TextSpan Span => new(Position, Literal?.Length ?? 0);
+    public override TextSpan Span => new(Position, Text?.Length ?? 0);
     public override SyntaxKind Kind { get; } = kind;
 }

@@ -11,8 +11,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     
     // Language Errors
 
-    public void ReportInvalidNumber(TextLocation location, string literal, TypeSymbol type) {
-        var message = $"Number '{literal}' is not valid '{type}'";
+    public void ReportInvalidNumber(TextLocation location, string text, TypeSymbol type) {
+        var message = $"Number '{text}' is not valid '{type}'";
         Report(location, message);
     }
 
@@ -27,35 +27,35 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
     }
 
     public void ReportUnexpectedToken(TextLocation location, SyntaxKind actual, SyntaxKind expected) {
-        var actualString = SyntaxKindExtension.Literal(actual) is null 
+        var actualString = SyntaxKindExtension.Text(actual) is null 
             ? $"<{actual}>" 
-            : $"'{SyntaxKindExtension.Literal(actual)}'";
+            : $"'{SyntaxKindExtension.Text(actual)}'";
         
-        var expectedString = SyntaxKindExtension.Literal(expected) is null 
+        var expectedString = SyntaxKindExtension.Text(expected) is null 
             ? $"<{expected}>" 
-            : $"'{SyntaxKindExtension.Literal(expected)}'";
+            : $"'{SyntaxKindExtension.Text(expected)}'";
         
         var message = $"Unexpected token {actualString}, expected {expectedString}";
         Report(location, message);
     }
 
-    public void ReportUndefinedUnaryOperator(TextLocation location, string literal, TypeSymbol type) {
-        var message = $"Unary operator '{literal}' is not defined for type '{type}'";
+    public void ReportUndefinedUnaryOperator(TextLocation location, string text, TypeSymbol type) {
+        var message = $"Unary operator '{text}' is not defined for type '{type}'";
         Report(location, message);
     }
 
-    public void ReportUndefinedBinaryOperator(TextLocation location, string literal, TypeSymbol left, TypeSymbol right) {
-        var message = $"Binary operator '{literal}' is not defined for types '{left}' and '{right}'";
+    public void ReportUndefinedBinaryOperator(TextLocation location, string text, TypeSymbol left, TypeSymbol right) {
+        var message = $"Binary operator '{text}' is not defined for types '{left}' and '{right}'";
         Report(location, message);
     }
 
-    public void ReportUndefinedIdentifier(TextLocation location, string literal) {
-        var message = $"Identifier '{literal}' is not defined in scope";
+    public void ReportUndefinedIdentifier(TextLocation location, string text) {
+        var message = $"Identifier '{text}' is not defined in scope";
         Report(location, message);
     }
 
-    public void ReportUndefinedType(TextLocation location, string literal) {
-        var message = $"Type '{literal}' is not defined in scope";
+    public void ReportUndefinedType(TextLocation location, string text) {
+        var message = $"Type '{text}' is not defined in scope";
         Report(location, message);
     }
 
@@ -107,8 +107,8 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
     
-    public void ReportInvalidJump(TextLocation location, string literal) {
-        var message = $"No enclosing loop to {literal} out of";
+    public void ReportInvalidJump(TextLocation location, string text) {
+        var message = $"No enclosing loop to {text} out of";
         Report(location, message);
     }
 

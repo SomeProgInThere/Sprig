@@ -149,7 +149,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
         }
         
         var length = position - start;
-        var literal = kind.Literal() ?? syntaxTree.Source.ToString(start, length);
+        var literal = kind.Text() ?? syntaxTree.Source.ToString(start, length);
         return new SyntaxToken(syntaxTree, kind, start, literal, value);
     }
 

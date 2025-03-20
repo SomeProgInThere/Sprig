@@ -30,7 +30,7 @@ public static class TextWritterExtension {
 
     public static void WriteKeyword(this TextWriter writer, SyntaxKind token) {
         writer.SetForeground(ConsoleColor.Blue);
-        writer.Write(token.Literal());
+        writer.Write(token.Text());
         writer.ResetColor();
     }
 
@@ -66,7 +66,7 @@ public static class TextWritterExtension {
 
     public static void WritePunctuation(this TextWriter writer, SyntaxKind token) {
         writer.SetForeground(ConsoleColor.Gray);
-        writer.Write(token.Literal());
+        writer.Write(token.Text());
         writer.ResetColor();
     }
 
