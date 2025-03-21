@@ -40,7 +40,7 @@ public static class TextWritterExtension {
         writer.ResetColor();
     }
 
-    public static void WriteInfo(this TextWriter writer, string text) {
+    public static void WriteText(this TextWriter writer, string text) {
         writer.SetForeground(ConsoleColor.Gray);
         writer.Write(text);
         writer.ResetColor();
@@ -96,7 +96,7 @@ public static class TextWritterExtension {
 
             writer.WriteLine();
             writer.WriteError($"{fileName} ({lineNumber}, {column}) Error: ");
-            writer.WriteInfo($"{diagnostic}\n");
+            writer.WriteText($"{diagnostic}\n");
 
             var prefixSpan = TextSpan.CreateFromBounds(line.Start, span.Start);
             var suffixSpan = TextSpan.CreateFromBounds(span.End, line.End);
@@ -105,9 +105,9 @@ public static class TextWritterExtension {
             var error = source.ToString(span);
             var suffix = source.ToString(suffixSpan);
 
-            writer.WriteInfo($"\t--> {lineNumber, 1} | {prefix}");
+            writer.WriteText($"\t--> {lineNumber, 1} | {prefix}");
             writer.WriteError(error);
-            writer.WriteInfo($"{suffix}\n");
+            writer.WriteText($"{suffix}\n");
         }
 
         writer.WriteLine();

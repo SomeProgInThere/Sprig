@@ -6,6 +6,7 @@ internal abstract class IR_TreeRewriter {
 
     public virtual IR_Statement RewriteStatement(IR_Statement node) => node.Kind switch {
         IR_NodeKind.BlockStatement                => RewriteBlockStatement((IR_BlockStatement)node),
+        IR_NodeKind.NopStatement                  => RewriteNopStatement((IR_NopStatement)node),
         IR_NodeKind.ExpressionStatement           => RewriteExpressionStatement((IR_ExpressionStatement)node),
         IR_NodeKind.GotoStatement                 => RewriteGotoStatement((IR_GotoStatement)node),
         IR_NodeKind.ConditionalGotoStatement      => RewriteConditionalGotoStatement((IR_ConditionalGotoStatement)node),
@@ -20,9 +21,11 @@ internal abstract class IR_TreeRewriter {
         _ => throw new Exception($"Unexpected node: {node.Kind}"),
     };
 
-    private static IR_Statement RewriteGotoStatement(IR_GotoStatement node) => node;
+    protected virtual IR_Statement RewriteNopStatement(IR_NopStatement node) => node;
 
-    private IR_Statement RewriteConditionalGotoStatement(IR_ConditionalGotoStatement node){
+    protected virtual IR_Statement RewriteGotoStatement(IR_GotoStatement node) => node;
+
+    protected virtual IR_Statement RewriteConditionalGotoStatement(IR_ConditionalGotoStatement node){
         var condition = RewriteExpression(node.Condition);
         if (condition == node.Condition)
             return node;
@@ -30,7 +33,7 @@ internal abstract class IR_TreeRewriter {
         return new IR_ConditionalGotoStatement(node.Label, condition, node.Jump);
     }
 
-    private static IR_Statement RewriteLabelStatement(IR_LabelStatement node) => node;
+    protected virtual IR_Statement RewriteLabelStatement(IR_LabelStatement node) => node;
 
     protected virtual IR_Statement RewriteReturnStatment(IR_ReturnStatment node) {
         var expression = node.Expression is null 
@@ -154,7 +157,7 @@ internal abstract class IR_TreeRewriter {
         if (operand == node.Operand)
             return node;
         
-        return new IR_UnaryExpression(operand, node.Operator);
+        return new IR_UnaryExpression(node.Operator, operand);
     }
 
     protected virtual IR_Expression RewriteBinaryExpression(IR_BinaryExpression node) {

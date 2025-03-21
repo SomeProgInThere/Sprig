@@ -181,6 +181,10 @@ internal sealed class Emitter(IR_Program program) {
                 EmitLabel(processor, (IR_LabelStatement)node);
                 break;
 
+            case IR_NodeKind.NopStatement:
+                EmitNop(processor);
+                break;
+
             case IR_NodeKind.GotoStatement:
                 EmitGoto(processor, (IR_GotoStatement)node);
                 break;
@@ -215,6 +219,10 @@ internal sealed class Emitter(IR_Program program) {
 
     private void EmitLabel(ILProcessor processor, IR_LabelStatement node) {
         labels.Add(node.Label, processor.Body.Instructions.Count);        
+    }
+
+    private static void EmitNop(ILProcessor processor){
+        processor.Emit(OpCodes.Nop);
     }
 
     private void EmitGoto(ILProcessor processor, IR_GotoStatement node) {

@@ -55,6 +55,10 @@ internal static class IRNodeWriter {
             case IR_NodeKind.BlockStatement: 
                 WriteBlockStatement((IR_BlockStatement)node, writer);
                 break;
+
+            case IR_NodeKind.NopStatement: 
+                WriteNopStatement(writer);
+                break;
                 
             case IR_NodeKind.VariableDeclaration: 
                 WriteVariableDeclaration((IR_VariableDeclaration)node, writer);
@@ -244,6 +248,11 @@ internal static class IRNodeWriter {
         writer.WriteLine();
     }
 
+    private static void WriteNopStatement(IndentedTextWriter writer) {
+        writer.WriteText("nop");
+        writer.WriteLine();
+    }
+
     private static void WriteVariableDeclaration(IR_VariableDeclaration node, IndentedTextWriter writer) {
         writer.WriteKeyword(node.Variable.Mutable ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword);
         writer.WriteSpace();
@@ -263,19 +272,19 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteGotoStatement(IR_GotoStatement node, IndentedTextWriter writer) {
-        writer.WriteInfo("goto");
+        writer.WriteText("goto");
         writer.WriteSpace();
         writer.WriteIdentifier(node.Label.Name);
         writer.WriteLine();
     }
 
     private static void WriteConditionalGoto(IR_ConditionalGotoStatement node, IndentedTextWriter writer) {
-        writer.WriteInfo("goto");
+        writer.WriteText("goto");
         writer.WriteSpace();
         writer.WriteIdentifier(node.Label.Name);
 
         writer.WriteSpace();
-        writer.WriteInfo(node.Jump ? "if" : "if not");
+        writer.WriteText(node.Jump ? "if" : "if not");
         writer.WriteSpace();
         
         node.Condition.WriteTo(writer);

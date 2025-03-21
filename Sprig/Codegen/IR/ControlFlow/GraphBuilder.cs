@@ -96,6 +96,7 @@ internal class GraphBuilder {
 
             case IR_NodeKind.VariableDeclaration:
             case IR_NodeKind.LabelStatement:
+            case IR_NodeKind.NopStatement:
             case IR_NodeKind.ExpressionStatement:
                 if (isLast)
                     Connect(current, next);
@@ -126,8 +127,8 @@ internal class GraphBuilder {
             return new IR_LiteralExpression(!value);
         }
 
-        var op = UnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Boolean);
-        return new IR_UnaryExpression(condition, op);
+        var op = IR_UnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Boolean);
+        return new IR_UnaryExpression(op, condition);
     }
 
     private readonly Dictionary<IR_Statement, BasicBlock> blockFromStatement = [];

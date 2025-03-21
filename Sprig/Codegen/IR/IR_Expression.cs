@@ -45,6 +45,8 @@ internal sealed class IR_VariableExpression(VariableSymbol variable)
     
     public override IR_NodeKind Kind => IR_NodeKind.VariableExpression;
     public override TypeSymbol Type => Variable?.Type ?? TypeSymbol.Int32;
+
+    public override IR_Constant? ConstantValue => Variable.Constant;
 }
 
 internal sealed class IR_AssignmentExpression(VariableSymbol variable, IR_Expression expression)

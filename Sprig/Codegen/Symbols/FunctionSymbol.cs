@@ -4,7 +4,7 @@ using Sprig.Codegen.Syntax;
 namespace Sprig.Codegen.Symbols;
 
 public sealed class ParameterSymbol(string name, TypeSymbol type, int index)
-    : VariableSymbol(name, true, type, VariableScope.Local) {
+    : VariableSymbol(name, true, type, VariableScope.Local, null) {
     
     public int Index { get; } = index;
     

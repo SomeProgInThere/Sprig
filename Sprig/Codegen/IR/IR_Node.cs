@@ -14,6 +14,7 @@ internal enum IR_NodeKind {
     ErrorExpression,
 
     // Statements
+    NopStatement,
     BlockStatement,
     VariableDeclaration,
     LabelStatement,

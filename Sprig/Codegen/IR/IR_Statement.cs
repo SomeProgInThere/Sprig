@@ -5,6 +5,10 @@ namespace Sprig.Codegen.IR;
 
 internal abstract class IR_Statement : IR_Node {}
 
+internal sealed class IR_NopStatement : IR_Statement {
+    public override IR_NodeKind Kind => IR_NodeKind.NopStatement;
+}
+
 internal sealed class IR_BlockStatement(ImmutableArray<IR_Statement> statements)
     : IR_Statement {
         

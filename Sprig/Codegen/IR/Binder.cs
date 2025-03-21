@@ -261,7 +261,7 @@ internal sealed class Binder {
 
         var variableType = explicitType ?? initializer.Type;
         var castInitializer = BindCast(syntax.Initializer.Location, initializer, variableType);
-        var variable = BindVariableDeclaration(syntax.Identifier, mutable, variableType);
+        var variable = BindVariableDeclaration(syntax.Identifier, mutable, variableType, initializer.ConstantValue);
 
         return new IR_VariableDeclaration(variable, castInitializer);
     }
@@ -281,21 +281,22 @@ internal sealed class Binder {
     private IR_WhileStatement BindWhileStatement(WhileStatement syntax) {
         var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
+
         return new IR_WhileStatement(condition, body, jumpLabel);
     }
 
     private IR_DoWhileStatement BindDoWhileStatement(DoWhileStatement syntax) {
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
         var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
+        
         return new IR_DoWhileStatement(body, condition, jumpLabel);
     }
 
     private IR_ForStatement BindForStatement(ForStatement syntax) {
         var range = BindExpression(syntax.Range);
-
         scope = new LocalScope(scope);
 
-        var variable = BindVariableDeclaration(syntax.Identifier, true, TypeSymbol.Int32);
+        var variable = BindVariableDeclaration(syntax.Identifier, mutable: true, TypeSymbol.Int32);
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
 
         if (scope.Parent != null)
@@ -350,7 +351,7 @@ internal sealed class Binder {
     }
 
     private IR_ExpressionStatement BindExpressionStatement(ExpressionStatement syntax) {
-        var expression = BindExpression(syntax.Expression, true);
+        var expression = BindExpression(syntax.Expression, voidExpression: true);
         return new IR_ExpressionStatement(expression);
     }
 
@@ -403,7 +404,7 @@ internal sealed class Binder {
 
     private IR_Expression BindCallExpression(CallExpression syntax) {
         if (syntax.Arguments.Count == 1 && LookupType(syntax.Identifier.Text) is TypeSymbol type)
-            return BindCast(syntax.Arguments[0], type, true);
+            return BindCast(syntax.Arguments[0], type, allowExplicit: true);
 
         var boundArguments = ImmutableArray.CreateBuilder<IR_Expression>();
 
@@ -565,7 +566,7 @@ internal sealed class Binder {
         }
 
         if (!allowExplicit && cast.IsExplicit)
-            diagnostics.ReportCannotConvert(location, expression.Type, type, true);
+            diagnostics.ReportCannotConvert(location, expression.Type, type, reportCastExisits: true);
 
         if (cast.IsIdentity)
             return expression;
@@ -573,12 +574,13 @@ internal sealed class Binder {
         return new IR_CastExpression(type, expression);
     }
 
-    private VariableSymbol BindVariableDeclaration(SyntaxToken identifier, bool mutable, TypeSymbol type) {
+    private VariableSymbol BindVariableDeclaration(SyntaxToken identifier, bool mutable, TypeSymbol type, IR_Constant? constant = null) {
         var name = identifier.Text;
         var exists = !identifier.IsMissing;
 
         var scope = function is null ? VariableScope.Global : VariableScope.Local; 
-        var variable = new VariableSymbol(name, mutable, type, scope);
+        var variable = new VariableSymbol(name, mutable, type, scope, constant);
+        
         if (exists && !this.scope.TryDeclareSymbol(variable))
             diagnostics.ReportVariableRedeclaration(identifier.Location, name);
         

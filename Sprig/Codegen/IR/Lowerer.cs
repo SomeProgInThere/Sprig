@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-
+using Sprig.Codegen.IR.ControlFlow;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
@@ -9,11 +9,14 @@ internal sealed class Lowerer() : IR_TreeRewriter {
 
     public static IR_BlockStatement Lower(FunctionSymbol function, IR_Statement statement) {
         var lowerer = new Lowerer();
-        var result = lowerer.RewriteStatement(statement);
-		return FlattenStatements(function, result);
+        var loweredStatment = lowerer.RewriteStatement(statement);
+		var flattenedStatement = FlattenStatements(function, loweredStatment);
+		var result = RemoveDeadCode(flattenedStatement);
+		
+		return result;
     }
 
-	private static IR_BlockStatement FlattenStatements(FunctionSymbol function, IR_Statement statement) {
+    private static IR_BlockStatement FlattenStatements(FunctionSymbol function, IR_Statement statement) {
 		var builder = ImmutableArray.CreateBuilder<IR_Statement>();
 		var stack = new Stack<IR_Statement>();
 		stack.Push(statement);
@@ -37,6 +40,22 @@ internal sealed class Lowerer() : IR_TreeRewriter {
 		return new IR_BlockStatement(builder.ToImmutable());
 	}
 
+	private static IR_BlockStatement RemoveDeadCode(IR_BlockStatement body) {
+		var controlFlow = ControlFlowGraph.Create(body);
+		var reachableStatements = controlFlow.Blocks
+			.SelectMany(block => block.Statements)
+			.ToHashSet();
+
+		var builder = body.Statements.ToBuilder();
+		
+		for (int index = builder.Count - 1; index >= 0; index--) {
+			if (!reachableStatements.Contains(builder[index]))
+				builder.RemoveAt(index);
+		}
+
+		return new IR_BlockStatement([..builder]);
+	}
+
     private static bool AllowedFallThrough(IR_Statement statement) {
         return statement.Kind != IR_NodeKind.ReturnStatement 
 			&& statement.Kind != IR_NodeKind.GotoStatement;
@@ -51,7 +70,7 @@ internal sealed class Lowerer() : IR_TreeRewriter {
 		if (node.ElseStatement is null) {
 			var endLabel = GenerateLabel();
 
-			var gotoCondition = new IR_ConditionalGotoStatement(endLabel, node.Condition, false);
+			var gotoCondition = new IR_ConditionalGotoStatement(endLabel, node.Condition, jump: false);
 			var endStatement = new IR_LabelStatement(endLabel);
 			var result = new IR_BlockStatement([
 				gotoCondition, 
@@ -65,7 +84,7 @@ internal sealed class Lowerer() : IR_TreeRewriter {
 			var elseLabel = GenerateLabel();
 			var endLabel = GenerateLabel();
 
-			var gotoCondition = new IR_ConditionalGotoStatement(elseLabel, node.Condition, false);
+			var gotoCondition = new IR_ConditionalGotoStatement(elseLabel, node.Condition, jump: false);
 			var gotoStatement = new IR_GotoStatement(endLabel);
 			var elseStatement = new IR_LabelStatement(elseLabel);
 			var endStatement = new IR_LabelStatement(endLabel);
@@ -128,7 +147,13 @@ internal sealed class Lowerer() : IR_TreeRewriter {
         var variableDeclaration = new IR_VariableDeclaration(node.Variable, range.Lower);
         var variable = new IR_VariableExpression(node.Variable);
 
-		var upperSymbol = new VariableSymbol("upper", true, TypeSymbol.Int32, VariableScope.Local);
+		var upperSymbol = new VariableSymbol(
+			"upper", 
+			mutable: true, 
+			TypeSymbol.Int32, 
+			VariableScope.Local, 
+			range.Upper.ConstantValue
+		);
 		var upperDeclaration = new IR_VariableDeclaration(upperSymbol, range.Upper);
 
         var condition = new IR_BinaryExpression(
@@ -166,6 +191,22 @@ internal sealed class Lowerer() : IR_TreeRewriter {
 		]);
  
         return RewriteStatement(result);
+    }
+
+    protected override IR_Statement RewriteConditionalGotoStatement(IR_ConditionalGotoStatement node) {
+		var constantValue = node.Condition.ConstantValue;
+
+		if (constantValue != null) {
+			var condition = (bool)constantValue.Value;
+			condition = node.Jump ? condition : !condition;
+
+			if (condition)
+				return new IR_GotoStatement(node.Label);
+			else
+				return new IR_NopStatement();
+		}
+
+        return base.RewriteConditionalGotoStatement(node);
     }
 
 	private int labelCount;
