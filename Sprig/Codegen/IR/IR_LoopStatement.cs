@@ -31,11 +31,18 @@ internal class IR_DoWhileStatement(IR_Statement body, IR_Expression condition, J
     public override IR_NodeKind Kind => IR_NodeKind.DoWhileStatement;
 }
 
-internal class IR_ForStatement(VariableSymbol variable, IR_Expression range, IR_Statement body, JumpLabel jumpLabel)
+internal class IR_ForStatement(
+    VariableSymbol variable, 
+    IR_Expression lowerBound, 
+    IR_Expression upperBound, 
+    IR_Statement body, 
+    JumpLabel jumpLabel
+)
     : IR_LoopStatement(jumpLabel) {
 
     public VariableSymbol Variable { get; } = variable;
-    public IR_Expression Range { get; } = range;
+    public IR_Expression LowerBound { get; } = lowerBound;
+    public IR_Expression UpperBound { get; } = upperBound;
     public IR_Statement Body { get; } = body;
 
     public override IR_NodeKind Kind => IR_NodeKind.ForStatement;

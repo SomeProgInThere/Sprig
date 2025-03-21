@@ -293,20 +293,25 @@ internal sealed class Binder {
     }
 
     private IR_ForStatement BindForStatement(ForStatement syntax) {
-        var range = BindExpression(syntax.Range);
         scope = new LocalScope(scope);
 
         var variable = BindVariableDeclaration(syntax.Identifier, mutable: true, TypeSymbol.Int32);
+        var lowerBound = BindExpression(syntax.LowerBound);
+        var upperBound = BindExpression(syntax.UpperBound);
+
+        if (lowerBound.Type != TypeSymbol.Int32 && upperBound.Type != TypeSymbol.Int32)
+            diagnostics.ReportCannotConvert(syntax.LowerBound.Location, lowerBound.Type, TypeSymbol.Int32, true);
+
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
 
         if (scope.Parent != null)
             scope = scope.Parent;
 
-        return new IR_ForStatement(variable, range, body, jumpLabel);
+        return new IR_ForStatement(variable, lowerBound, upperBound, body, jumpLabel);
     }
 
     private IR_Statement BindBreakStatement(BreakStatement syntax) {
-        if (loopJumps.Count < 0) {
+        if (loopJumps.Count == 0) {
             diagnostics.ReportInvalidJump(syntax.BreakKeyword.Location, syntax.BreakKeyword.Text);
             return BindErrorStatement();
         }
@@ -316,7 +321,7 @@ internal sealed class Binder {
     }
 
     private IR_Statement BindContinueStatement(ContinueStatement syntax) {
-        if (loopJumps.Count < 0) {
+        if (loopJumps.Count == 0) {
             diagnostics.ReportInvalidJump(syntax.ContinueKeyword.Location, syntax.ContinueKeyword.Text);
             return BindErrorStatement();
         }
@@ -394,7 +399,6 @@ internal sealed class Binder {
             SyntaxKind.AssignmentExpression     => BindAssignmentExpression((AssignmentExpression)syntax),
             SyntaxKind.UnaryExpression          => BindUnaryExpression((UnaryExpression)syntax),
             SyntaxKind.BinaryExpression         => BindBinaryExpression((BinaryExpression)syntax),
-            SyntaxKind.RangeExpression          => BindRangeExpression((RangeExpression)syntax),
             SyntaxKind.ParenthesizedExpression  => BindExpression(((ParenthesizedExpression)syntax).Expression),
             SyntaxKind.CallExpression           => BindCallExpression((CallExpression)syntax),
             
@@ -464,8 +468,11 @@ internal sealed class Binder {
         return new IR_CallExpression(function, boundArguments.ToImmutableArray());
     }
 
-    private static IR_LiteralExpression BindLiteralExpression(LiteralExpression syntax) {
+    private static IR_Expression BindLiteralExpression(LiteralExpression syntax) {
         var value = syntax.Value;
+        if (value is null)
+            return new IR_ErrorExpression();
+
         return new IR_LiteralExpression(value);
     }
 
@@ -533,23 +540,6 @@ internal sealed class Binder {
         }
 
         return new IR_BinaryExpression(left, right, op);
-    }
-
-    private IR_Expression BindRangeExpression(RangeExpression syntax) {
-        var lower = BindExpression(syntax.Lower);
-        var upper = BindExpression(syntax.Upper);
-
-        if (lower.Type.IsError || upper.Type.IsError) {
-            diagnostics.ReportInvalidRange(syntax.RangeToken.Location);
-            return new IR_ErrorExpression();
-        }
-
-        if (lower.Type != TypeSymbol.Int32) {
-            diagnostics.ReportNonIntegerRange(syntax.Lower.Location);
-            return new IR_ErrorExpression();
-        }
-
-        return new IR_RangeExpression(lower, upper);
     }
 
     private IR_Expression BindCast(Expression syntax, TypeSymbol type, bool allowExplicit = false) {

@@ -8,7 +8,6 @@ internal enum IR_NodeKind {
     AssignmentExpression,
     UnaryExpression,
     BinaryExpression,
-    RangeExpression,
     CallExpression,
     CastExpression,
     ErrorExpression,

@@ -88,7 +88,7 @@ internal static class ConstantFolding {
                     return new IR_Constant((double)leftValue / (double)rightValue);
 
                 return new IR_Constant((int)leftValue / (int)rightValue);
-                        
+
             case BinaryOperator.Remainder:
                 if (left.Type == TypeSymbol.Double)
                     return new IR_Constant((double)leftValue % (double)rightValue);

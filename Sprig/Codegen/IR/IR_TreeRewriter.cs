@@ -106,13 +106,14 @@ internal abstract class IR_TreeRewriter {
     }
 
     protected virtual IR_Statement RewriteForStatement(IR_ForStatement node) {
-        var range = RewriteExpression(node.Range);
+        var lowerBound = RewriteExpression(node.LowerBound);
+        var upperBound = RewriteExpression(node.UpperBound);
         var body = RewriteStatement(node.Body);
 
-        if (range == node.Range && body == node.Body)
+        if (lowerBound == node.LowerBound && upperBound == node.UpperBound && body == node.Body)
             return node;
 
-        return new IR_ForStatement(node.Variable, range, body, node.JumpLabel);
+        return new IR_ForStatement(node.Variable, lowerBound, upperBound, body, node.JumpLabel);
     }
 
     protected virtual IR_Statement RewriteVariableDeclarationStatement(IR_VariableDeclaration node) {
@@ -131,7 +132,6 @@ internal abstract class IR_TreeRewriter {
         IR_NodeKind.AssignmentExpression      => RewriteAssignmentExpression((IR_AssignmentExpression)node),
         IR_NodeKind.UnaryExpression           => RewriteUnaryExpression((IR_UnaryExpression)node),
         IR_NodeKind.BinaryExpression          => RewriteBinaryExpression((IR_BinaryExpression)node),
-        IR_NodeKind.RangeExpression           => RewriteRangeExpression((IR_RangeExpression)node),
         IR_NodeKind.CallExpression            => RewriteCallExpression((IR_CallExpression)node),
         IR_NodeKind.CastExpression            => RewriteCastExpression((IR_CastExpression)node),
         
@@ -168,16 +168,6 @@ internal abstract class IR_TreeRewriter {
             return node;
         
         return new IR_BinaryExpression(left, right, node.Operator);
-    }
-
-    protected virtual IR_Expression RewriteRangeExpression(IR_RangeExpression node) {
-        var lower = RewriteExpression(node.Lower);
-        var upper = RewriteExpression(node.Upper);
-
-        if (lower == node.Lower && upper == node.Upper)
-            return node;
-
-        return new IR_RangeExpression(lower, upper);
     }
 
     protected virtual IR_Expression RewriteCallExpression(IR_CallExpression node) {

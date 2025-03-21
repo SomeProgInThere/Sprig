@@ -1,9 +1,25 @@
 
-func main() 
-{
-    for i in 0..10 
-    {
-        let x = rand(1, 100)
-        print(x + i / 2)
+func factorial(num: int): int {
+    var fact = 1
+    for i in 1..num {
+        fact = fact * i
     }
+    return fact
+}
+
+func ncr(n: int, r: int): int {
+    if r > n {
+        print("Invalid input!")
+        return -1
+    }
+
+    return factorial(n) / (factorial(r) * factorial(n - r))
+}
+
+func main() {
+    let n = 11
+    let r = 3
+    let result = ncr(n, r)
+    
+    print(result)
 }

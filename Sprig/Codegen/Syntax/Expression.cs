@@ -74,17 +74,6 @@ internal sealed class ParenthesizedExpression(
     public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
 }
 
-internal sealed class RangeExpression(
-    SyntaxTree syntaxTree, Expression lowerBound, SyntaxToken rangeToken, Expression upperBound
-) : Expression(syntaxTree)
-{
-    public Expression Lower { get; } = lowerBound;
-    public SyntaxToken RangeToken { get; } = rangeToken;
-    public Expression Upper { get; } = upperBound;
-
-    public override SyntaxKind Kind => SyntaxKind.RangeExpression;
-}
-
 internal sealed class CallExpression(
     SyntaxTree syntaxTree, 
     SyntaxToken identifier, 

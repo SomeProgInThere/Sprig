@@ -99,7 +99,13 @@ class Program {
             outputOption
         );
 
-        return await rootCommand.InvokeAsync(args);
+      //return await rootCommand.InvokeAsync(args);
+      return await rootCommand.InvokeAsync([
+        "build",
+        "C:/Users/calla/Dev/Sprig/samples/hello.sg",
+        "--reference", 
+        "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/mscorlib.dll"
+        ]);
     }
 
     private static void PrintError(string message) {

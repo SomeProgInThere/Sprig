@@ -36,10 +36,6 @@ internal static class IRNodeWriter {
                 WriteBinaryExpression((IR_BinaryExpression)node, writer);
                 break;
                 
-            case IR_NodeKind.RangeExpression: 
-                WriteRangeExpression((IR_RangeExpression)node, writer);
-                break;
-                
             case IR_NodeKind.CallExpression: 
                 WriteCallExpression((IR_CallExpression)node, writer);
                 break;
@@ -196,8 +192,6 @@ internal static class IRNodeWriter {
         writer.WriteSpace();
         writer.WriteNestedExpressions(precedence, node.Right);        
     }
-
-    private static void WriteRangeExpression(IR_RangeExpression node, IndentedTextWriter writer) {}
 
     private static void WriteCallExpression(IR_CallExpression node, IndentedTextWriter writer) {
         writer.WriteIdentifier(node.Function.Name);
@@ -356,10 +350,15 @@ internal static class IRNodeWriter {
         writer.WriteKeyword(SyntaxKind.ForKeyword);
         writer.WriteSpace();
         writer.WriteIdentifier(node.Variable.Name);
-
         writer.WriteSpace();
         writer.WriteKeyword(SyntaxKind.InKeyword);
         writer.WriteSpace();
+
+        node.LowerBound.WriteTo(writer);
+        writer.WriteSpace();
+        writer.WritePunctuation(SyntaxKind.DoubleDotToken);
+        writer.WriteSpace();
+        node.UpperBound.WriteTo(writer);
 
         writer.WriteLine();
         writer.WriteNestedStatements(node.Body);

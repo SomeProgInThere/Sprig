@@ -131,7 +131,14 @@ internal sealed class Parser {
         var equalsToken = MatchToken(SyntaxKind.EqualsToken);
 
         var initializer = ParseAssignmentExpression();
-        return new VariableDeclarationStatement(syntaxTree, keyword, identifier, typeClause, equalsToken, initializer);
+        return new VariableDeclarationStatement(
+            syntaxTree, 
+            keyword, 
+            identifier, 
+            typeClause, 
+            equalsToken, 
+            initializer
+        );
     }
 
     private TypeClause? ParseTypeClause() {
@@ -194,11 +201,22 @@ internal sealed class Parser {
         var forKeyword = MatchToken(SyntaxKind.ForKeyword);
         var identifierToken = NextToken();
         var inKeyword = MatchToken(SyntaxKind.InKeyword);
+        var lowerBound = ParseAssignmentExpression();
+        var rangeToken = MatchToken(SyntaxKind.DoubleDotToken);
+        var upperBound = ParseAssignmentExpression();
         
-        var range = ParseRangeExpression();
         var body = ParseStatement();
 
-        return new ForStatement(syntaxTree, forKeyword, identifierToken, inKeyword, range, body);
+        return new ForStatement(
+            syntaxTree, 
+            forKeyword, 
+            identifierToken, 
+            inKeyword, 
+            lowerBound, 
+            rangeToken, 
+            upperBound, 
+            body
+        );
     }
 
     private BreakStatement ParseBreakStatement() {
@@ -360,14 +378,6 @@ internal sealed class Parser {
     private LiteralExpression ParseStringLiteral() {
         var stringToken = MatchToken(SyntaxKind.StringToken);
         return new LiteralExpression(syntaxTree, stringToken);
-    }
-
-    private RangeExpression ParseRangeExpression() {
-        var lower = ParsePrimaryExpression();
-        var rangeToken = MatchToken(SyntaxKind.DoubleDotToken);
-        var upper = ParsePrimaryExpression();
-
-        return new RangeExpression(syntaxTree, lower, rangeToken, upper);
     }
 
     private SyntaxToken Peek(int offset) {

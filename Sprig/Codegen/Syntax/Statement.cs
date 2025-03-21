@@ -100,8 +100,10 @@ public sealed class ForStatement(
     SyntaxTree syntaxTree, 
     SyntaxToken forKeyword, 
     SyntaxToken identifier, 
-    SyntaxToken inKeyword, 
-    Expression range, 
+    SyntaxToken inKeyword,
+    Expression lowerBound,
+    SyntaxToken rangeToken,
+    Expression upperBound,
     Statement body
 ) 
     : Statement(syntaxTree) {
@@ -109,8 +111,9 @@ public sealed class ForStatement(
     public SyntaxToken ForKeyword { get; } = forKeyword;
     public SyntaxToken Identifier { get; } = identifier;
     public SyntaxToken InKeyword { get; } = inKeyword;
-    
-    public Expression Range { get; } = range;
+    public Expression LowerBound { get; } = lowerBound;
+    public SyntaxToken RangeToken { get; } = rangeToken;
+    public Expression UpperBound { get; } = upperBound;
     public Statement Body { get; } = body;
 
     public override SyntaxKind Kind => SyntaxKind.ForStatement;

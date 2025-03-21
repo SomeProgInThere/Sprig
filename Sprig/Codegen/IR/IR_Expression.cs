@@ -72,16 +72,6 @@ internal sealed class IR_BinaryExpression(IR_Expression left, IR_Expression righ
     public override IR_Constant? ConstantValue => ConstantFolding.ComputeConstant(Left, Operator, Right);
 }
 
-internal sealed class IR_RangeExpression(IR_Expression lower, IR_Expression upper)
-    : IR_Expression
-{
-    public IR_Expression Lower { get; } = lower;
-    public IR_Expression Upper { get; } = upper;
-
-    public override IR_NodeKind Kind => IR_NodeKind.RangeExpression;
-    public override TypeSymbol Type => Lower.Type;
-}
-
 internal sealed class IR_CallExpression(FunctionSymbol function, ImmutableArray<IR_Expression> arguments)
     : IR_Expression {
 

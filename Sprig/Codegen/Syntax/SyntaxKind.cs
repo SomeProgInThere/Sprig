@@ -77,7 +77,6 @@ public enum SyntaxKind {
     UnaryExpression,
     BinaryExpression,
     ParenthesizedExpression,
-    RangeExpression,
     CallExpression,
 
     // Members

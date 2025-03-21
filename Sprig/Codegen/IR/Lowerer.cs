@@ -143,18 +143,17 @@ internal sealed class Lowerer() : IR_TreeRewriter {
     }
 
     protected override IR_Statement RewriteForStatement(IR_ForStatement node) {
-        var range = (IR_RangeExpression)node.Range;
-        var variableDeclaration = new IR_VariableDeclaration(node.Variable, range.Lower);
+        var variableDeclaration = new IR_VariableDeclaration(node.Variable, node.LowerBound);
         var variable = new IR_VariableExpression(node.Variable);
 
 		var upperSymbol = new VariableSymbol(
-			"upper", 
+			"upper_bound", 
 			mutable: true, 
 			TypeSymbol.Int32, 
 			VariableScope.Local, 
-			range.Upper.ConstantValue
+			node.UpperBound.ConstantValue
 		);
-		var upperDeclaration = new IR_VariableDeclaration(upperSymbol, range.Upper);
+		var upperDeclaration = new IR_VariableDeclaration(upperSymbol, node.UpperBound);
 
         var condition = new IR_BinaryExpression(
             variable,
