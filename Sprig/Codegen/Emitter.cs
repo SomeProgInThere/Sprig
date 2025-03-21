@@ -3,7 +3,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
-using Sprig.Codegen.IR_Generation;
+using Sprig.Codegen.IR;
 using Sprig.Codegen.Symbols;
 
 namespace Sprig.Codegen;

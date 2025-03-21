@@ -1,16 +1,17 @@
 using System.Collections.Immutable;
 using Sprig.Codegen.Symbols;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal abstract class IR_Expression : IR_Node {
     public abstract TypeSymbol Type { get; }
+    public virtual IR_Constant? ConstantValue { get; }
 }
 
 internal sealed class IR_LiteralExpression(object value)
         : IR_Expression {
 
-    public object Value { get; } = value;
+    public object Value => ConstantValue.Value;
 
     public override IR_NodeKind Kind => IR_NodeKind.LiteralExpression;
     public override TypeSymbol Type { get; } = value switch {
@@ -21,16 +22,20 @@ internal sealed class IR_LiteralExpression(object value)
         
         _ => throw new Exception($"Unexpected literal '{value}' of type '{value.GetType()}'"),
     };
+
+    public override IR_Constant? ConstantValue => new(value);
 }
 
-internal sealed class IR_UnaryExpression(IR_Expression operand, IR_UnaryOperator op)
+internal sealed class IR_UnaryExpression(IR_UnaryOperator op, IR_Expression operand) 
     : IR_Expression {
 
-    public IR_UnaryOperator Operator { get; } = op;
     public IR_Expression Operand { get; } = operand;
+    public IR_UnaryOperator Operator { get; } = op;
 
     public override IR_NodeKind Kind => IR_NodeKind.UnaryExpression;
     public override TypeSymbol Type => Operand.Type;
+
+    public override IR_Constant? ConstantValue => ConstantFolding.ComputeConstant(Operator, Operand);
 }
 
 internal sealed class IR_VariableExpression(VariableSymbol variable)
@@ -52,15 +57,17 @@ internal sealed class IR_AssignmentExpression(VariableSymbol variable, IR_Expres
     public override TypeSymbol Type => Expression.Type;
 }
 
-internal sealed class IR_BinaryExpression(IR_Expression left, IR_Expression right, IRBinaryOperator op) 
+internal sealed class IR_BinaryExpression(IR_Expression left, IR_Expression right, IR_BinaryOperator op) 
     : IR_Expression {
 
-    public IRBinaryOperator Operator { get; } = op;
+    public IR_BinaryOperator Operator { get; } = op;
     public IR_Expression Left { get; } = left;
     public IR_Expression Right { get; } = right;
 
     public override IR_NodeKind Kind => IR_NodeKind.BinaryExpression;
     public override TypeSymbol Type => Operator.Type;
+    
+    public override IR_Constant? ConstantValue => ConstantFolding.ComputeConstant(Left, Operator, Right);
 }
 
 internal sealed class IR_RangeExpression(IR_Expression lower, IR_Expression upper)

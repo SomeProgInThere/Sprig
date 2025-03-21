@@ -3,7 +3,7 @@ using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 using Sprig.IO;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal static class IRNodeWriter {
 

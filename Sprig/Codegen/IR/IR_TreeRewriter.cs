@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal abstract class IR_TreeRewriter {
 

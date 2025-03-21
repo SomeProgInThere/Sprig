@@ -1,7 +1,7 @@
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
-namespace Sprig.Codegen.IR_Generation.ControlFlow;
+namespace Sprig.Codegen.IR.ControlFlow;
 
 internal class GraphBuilder {
 
@@ -126,7 +126,7 @@ internal class GraphBuilder {
             return new IR_LiteralExpression(!value);
         }
 
-        var op = IR_UnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Boolean);
+        var op = UnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Boolean);
         return new IR_UnaryExpression(condition, op);
     }
 

@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal sealed class Lowerer() : IR_TreeRewriter {
 
@@ -134,7 +134,7 @@ internal sealed class Lowerer() : IR_TreeRewriter {
         var condition = new IR_BinaryExpression(
             variable,
             new IR_VariableExpression(upperSymbol),
-            IRBinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int32, TypeSymbol.Int32) 
+            IR_BinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int32, TypeSymbol.Int32) 
                 ?? throw new Exception("Invaild binary operation")
         );
 
@@ -144,7 +144,7 @@ internal sealed class Lowerer() : IR_TreeRewriter {
             new IR_AssignmentExpression(node.Variable, new IR_BinaryExpression(
                     variable,
                     new IR_LiteralExpression(1),
-                    IRBinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int32, TypeSymbol.Int32)
+                    IR_BinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int32, TypeSymbol.Int32)
                         ?? throw new Exception("Invalid binary operation")
                 )
             )

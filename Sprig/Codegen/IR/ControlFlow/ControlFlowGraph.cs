@@ -1,5 +1,5 @@
 
-namespace Sprig.Codegen.IR_Generation.ControlFlow;
+namespace Sprig.Codegen.IR.ControlFlow;
 
 internal class ControlFlowGraph {
 

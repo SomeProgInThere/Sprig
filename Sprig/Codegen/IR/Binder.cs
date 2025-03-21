@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 
-using Sprig.Codegen.IR_Generation.ControlFlow;
+using Sprig.Codegen.IR.ControlFlow;
 using Sprig.Codegen.Text;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal sealed class Binder {
 
@@ -513,7 +513,7 @@ internal sealed class Binder {
             return new IR_ErrorExpression();
         }
 
-        return new IR_UnaryExpression(operand, op);
+        return new IR_UnaryExpression(op, operand);
     }
 
     private IR_Expression BindBinaryExpression(BinaryExpression syntax) {
@@ -524,7 +524,7 @@ internal sealed class Binder {
         if (left.Type.IsError || right.Type.IsError)
             return new IR_ErrorExpression();
 
-        var op = IRBinaryOperator.Bind(token.Kind, left.Type, right.Type);
+        var op = IR_BinaryOperator.Bind(token.Kind, left.Type, right.Type);
         
         if (op == null) {
             diagnostics.ReportUndefinedBinaryOperator(token.Location, token.Text, left.Type, right.Type);

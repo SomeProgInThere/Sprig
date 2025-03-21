@@ -1,7 +1,7 @@
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal enum UnaryOperator {
     Identity,

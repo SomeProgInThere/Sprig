@@ -1,6 +1,6 @@
 using Sprig.Codegen.Symbols;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal sealed class JumpLabel(LabelSymbol brakeLabel, LabelSymbol continueLabel) {
     public LabelSymbol? BrakeLabel { get; } = brakeLabel;

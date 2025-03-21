@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Sprig.Codegen.Symbols;
 
-namespace Sprig.Codegen.IR_Generation;
+namespace Sprig.Codegen.IR;
 
 internal abstract class IR_Statement : IR_Node {}
 
