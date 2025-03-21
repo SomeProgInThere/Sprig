@@ -82,6 +82,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
 
+    public void ReportInvalidRange(TextLocation location) {
+        var message = $"Range expression initialized with invalid expression";
+        Report(location, message);
+    }
+
     public void ReportUndefinedFunction(TextLocation location, string name) {
         var message = $"Function '{name}' does not exist";
         Report(location, message);

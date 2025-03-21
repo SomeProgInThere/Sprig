@@ -128,6 +128,10 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
                 ReadString();
                 break;
 
+            case '_':
+                ReadIdentifierOrKeywordToken();
+                break;
+
             default:
                 if (char.IsDigit(Current))
                     ReadNumberToken();
@@ -149,8 +153,8 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
         }
         
         var length = position - start;
-        var literal = kind.Text() ?? syntaxTree.Source.ToString(start, length);
-        return new SyntaxToken(syntaxTree, kind, start, literal, value);
+        var text = kind.Text() ?? syntaxTree.Source.ToString(start, length);
+        return new SyntaxToken(syntaxTree, kind, start, text, value);
     }
 
     private void SetKind(ref SyntaxKind kind, ref int position, char l1, SyntaxKind k1, SyntaxKind k2) {
@@ -211,7 +215,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
 
     private void ReadNumberToken() {
         var isFloat = false;
-        while (char.IsDigit(Current) || Current == '.') {
+        while (char.IsDigit(Current) || Current == '.' || Current == '_') {
             if (Current == '.') {
                 if (Next == '.') {
                     break;
@@ -221,25 +225,35 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
                     break;
                 isFloat = true;
             }
+
+            if (Current == '_' && (!char.IsDigit(Next) || !char.IsDigit(Peek(-1)))) {
+                var span = new TextSpan(position, 1);
+                var location = new TextLocation(syntaxTree.Source, span);
+                diagnostics.ReportInvalidNumber(location, "_", TypeSymbol.Int32);
+                break;
+            }
+
             position++;
         }
             
         var length = position - start;
-        var literal = syntaxTree.Source.ToString(start, length);
+        var text = syntaxTree.Source.ToString(start, length);
+
+        text = text.Replace("_", "");
 
         if (!isFloat) {
-            if (!int.TryParse(literal, out var intResult)) {
+            if (!int.TryParse(text, out var intResult)) {
                 var span = new TextSpan(start, length);
                 var location = new TextLocation(syntaxTree.Source, span);
-                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Int32);
+                diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Int32);
             }
             value = intResult;
         }
         else {
-            if (!float.TryParse(literal, out var floatResult)) {
+            if (!float.TryParse(text, out var floatResult)) {
                 var span = new TextSpan(start, length);
                 var location = new TextLocation(syntaxTree.Source, span);
-                diagnostics.ReportInvalidNumber(location, literal, TypeSymbol.Double);
+                diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Double);
             }
             value = floatResult;
         }
@@ -248,12 +262,15 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
     }
 
     private void ReadIdentifierOrKeywordToken() {
-        while (char.IsLetter(Current))
+        while (char.IsLetter(Current) || Current == '_')
             position++;
             
+        while (char.IsLetterOrDigit(Current) || Current == '_')
+            position++;
+
         var length = position - start;
-        var literal = syntaxTree.Source.ToString(start, length);
-        kind = literal.KeywordKind();
+        var text = syntaxTree.Source.ToString(start, length);
+        kind = text.KeywordKind();
     }
     
     public Diagnostics Diagnostics => diagnostics;

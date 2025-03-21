@@ -464,7 +464,7 @@ internal sealed class Binder {
         return new IR_CallExpression(function, boundArguments.ToImmutableArray());
     }
 
-    private static IR_Expression BindLiteralExpression(LiteralExpression syntax) {
+    private static IR_LiteralExpression BindLiteralExpression(LiteralExpression syntax) {
         var value = syntax.Value;
         return new IR_LiteralExpression(value);
     }
@@ -539,8 +539,10 @@ internal sealed class Binder {
         var lower = BindExpression(syntax.Lower);
         var upper = BindExpression(syntax.Upper);
 
-        if (lower.Type.IsError || upper.Type.IsError)
+        if (lower.Type.IsError || upper.Type.IsError) {
+            diagnostics.ReportInvalidRange(syntax.RangeToken.Location);
             return new IR_ErrorExpression();
+        }
 
         if (lower.Type != TypeSymbol.Int32) {
             diagnostics.ReportNonIntegerRange(syntax.Lower.Location);
