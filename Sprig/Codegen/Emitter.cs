@@ -257,11 +257,12 @@ internal sealed class Emitter(IR_Program program) {
     } 
 
     private void EmitExpression(ILProcessor processor, IR_Expression node) {
+        if (node.ConstantValue != null) {
+            EmitConstant(processor, node);
+            return;
+        }
+        
         switch (node.Kind) {
-            case IR_NodeKind.LiteralExpression:
-                EmitLiteral(processor, (IR_LiteralExpression)node);
-                break;
-
             case IR_NodeKind.VariableExpression:
                 EmitStoreVariable(processor, (IR_VariableExpression)node);
                 break;
@@ -291,30 +292,30 @@ internal sealed class Emitter(IR_Program program) {
         }
     }
 
-    private static void EmitLiteral(ILProcessor processor, IR_LiteralExpression node) {
+    private static void EmitConstant(ILProcessor processor, IR_Expression node) {
         if (node.Type == TypeSymbol.Boolean) {
-            var value = (bool)node.Value;
+            var value = (bool)node.ConstantValue.Value;
             var instruction = value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
             processor.Emit(instruction);
         }
 
         else if (node.Type == TypeSymbol.Int32) {
-            var value = (int)node.Value;
+            var value = (int)node.ConstantValue.Value;
             processor.Emit(OpCodes.Ldc_I4, value);
         }
 
         else if (node.Type == TypeSymbol.Double) {
-            var value = (double)node.Value;
+            var value = (double)node.ConstantValue.Value;
             processor.Emit(OpCodes.Ldc_R8, value);
         }
 
         else if (node.Type == TypeSymbol.String) {
-            var value = (string)node.Value;
+            var value = (string)node.ConstantValue.Value;
             processor.Emit(OpCodes.Ldstr, value);
         }
 
         else {
-            throw new Exception($"Unexpected literal type: {node.Type}");
+            throw new Exception($"Unexpected constant expression type: {node.Type}");
         }
     }
 

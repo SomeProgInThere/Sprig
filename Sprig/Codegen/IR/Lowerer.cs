@@ -201,9 +201,9 @@ internal sealed class Lowerer() : IR_TreeRewriter {
 			condition = node.Jump ? condition : !condition;
 
 			if (condition)
-				return new IR_GotoStatement(node.Label);
+				return RewriteGotoStatement(new IR_GotoStatement(node.Label));
 			else
-				return new IR_NopStatement();
+				return RewriteNopStatement(new IR_NopStatement());
 		}
 
         return base.RewriteConditionalGotoStatement(node);

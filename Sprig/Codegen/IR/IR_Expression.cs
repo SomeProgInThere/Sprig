@@ -5,7 +5,7 @@ namespace Sprig.Codegen.IR;
 
 internal abstract class IR_Expression : IR_Node {
     public abstract TypeSymbol Type { get; }
-    public virtual IR_Constant? ConstantValue { get; }
+    public virtual IR_Constant? ConstantValue => null;
 }
 
 internal sealed class IR_LiteralExpression(object value)
