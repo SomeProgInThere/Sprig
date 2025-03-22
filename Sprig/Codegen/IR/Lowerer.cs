@@ -143,54 +143,40 @@ internal sealed class Lowerer() : IR_TreeRewriter {
     }
 
     protected override IR_Statement RewriteForStatement(IR_ForStatement node) {
-        var variableDeclaration = new IR_VariableDeclaration(node.Variable, node.LowerBound);
-        var variable = new IR_VariableExpression(node.Variable);
+		var indexVariable = new IR_VariableDeclaration(node.Variable, node.LowerBound);
+		var indexVariableExperssion = new IR_VariableExpression(node.Variable);
 
-		var upperSymbol = new VariableSymbol(
+		var upperBoundSymbol = new VariableSymbol(
 			"upper_bound", 
-			mutable: true, 
+			mutable: false, 
 			TypeSymbol.Int32, 
 			VariableScope.Local, 
 			node.UpperBound.ConstantValue
 		);
-		var upperDeclaration = new IR_VariableDeclaration(upperSymbol, node.UpperBound);
+		var upperBoundVariable = new IR_VariableDeclaration(upperBoundSymbol, node.UpperBound);
 
-        var condition = new IR_BinaryExpression(
-            variable,
-            new IR_VariableExpression(upperSymbol),
-            IR_BinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int32, TypeSymbol.Int32) 
-                ?? throw new Exception("Invaild binary operation")
-        );
+		var condition = new IR_BinaryExpression(
+			indexVariableExperssion,
+			IR_BinaryOperator.Bind(SyntaxKind.RightArrowEqualsToken, TypeSymbol.Int32, TypeSymbol.Int32),
+			new IR_VariableExpression(upperBoundSymbol)
+		);
 
 		var continueLabelStatement = new IR_LabelStatement(node.JumpLabel.ContinueLabel);
+		var incrementStatement = new IR_ExpressionStatement(new IR_AssignmentExpression(
+			node.Variable, new IR_BinaryExpression(
+				indexVariableExperssion,
+				IR_BinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int32, TypeSymbol.Int32),
+				new IR_LiteralExpression(1)
+			)
+		));
 
-        var increment = new IR_ExpressionStatement(
-            new IR_AssignmentExpression(node.Variable, new IR_BinaryExpression(
-                    variable,
-                    new IR_LiteralExpression(1),
-                    IR_BinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int32, TypeSymbol.Int32)
-                        ?? throw new Exception("Invalid binary operation")
-                )
-            )
-        );
-
-        var whileBody = new IR_BlockStatement([
-			node.Body, 
-			continueLabelStatement, 
-			increment
-		]);
-
+		var body = new IR_BlockStatement([node.Body, continueLabelStatement, incrementStatement]);
 		var jumpLabel = new JumpLabel(node.JumpLabel.BrakeLabel, GenerateLabel());
-        var whileStatement = new IR_WhileStatement(condition, whileBody, jumpLabel);
+		var whileStatement = new IR_WhileStatement(condition, body, jumpLabel);
 
-        var result = new IR_BlockStatement([
-			variableDeclaration, 
-			upperDeclaration, 
-			whileStatement
-		]);
- 
-        return RewriteStatement(result);
-    }
+		var result = new IR_BlockStatement([indexVariable, upperBoundVariable, whileStatement]);
+		return RewriteStatement(result);
+	}
 
     protected override IR_Statement RewriteConditionalGotoStatement(IR_ConditionalGotoStatement node) {
 		var constantValue = node.Condition.ConstantValue;

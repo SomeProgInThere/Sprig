@@ -1,9 +1,11 @@
 
 func factorial(num: int): int {
     var fact = 1
+
     for i in 1..num {
         fact = fact * i
     }
+
     return fact
 }
 

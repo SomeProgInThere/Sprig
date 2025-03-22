@@ -167,7 +167,7 @@ internal abstract class IR_TreeRewriter {
         if (left == node.Left && right == node.Right)
             return node;
         
-        return new IR_BinaryExpression(left, right, node.Operator);
+        return new IR_BinaryExpression(left, node.Operator, right);
     }
 
     protected virtual IR_Expression RewriteCallExpression(IR_CallExpression node) {

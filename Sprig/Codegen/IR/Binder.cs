@@ -295,13 +295,13 @@ internal sealed class Binder {
     private IR_ForStatement BindForStatement(ForStatement syntax) {
         scope = new LocalScope(scope);
 
-        var variable = BindVariableDeclaration(syntax.Identifier, mutable: true, TypeSymbol.Int32);
         var lowerBound = BindExpression(syntax.LowerBound);
         var upperBound = BindExpression(syntax.UpperBound);
 
         if (lowerBound.Type != TypeSymbol.Int32 && upperBound.Type != TypeSymbol.Int32)
             diagnostics.ReportCannotConvert(syntax.LowerBound.Location, lowerBound.Type, TypeSymbol.Int32, true);
 
+        var variable = BindVariableDeclaration(syntax.Identifier, mutable: true, TypeSymbol.Int32);
         var body = BindLoopBody(syntax.Body, out var jumpLabel);
 
         if (scope.Parent != null)
@@ -539,7 +539,7 @@ internal sealed class Binder {
             return new IR_ErrorExpression();
         }
 
-        return new IR_BinaryExpression(left, right, op);
+        return new IR_BinaryExpression(left, op, right);
     }
 
     private IR_Expression BindCast(Expression syntax, TypeSymbol type, bool allowExplicit = false) {

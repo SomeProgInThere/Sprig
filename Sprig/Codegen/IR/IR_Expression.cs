@@ -59,11 +59,11 @@ internal sealed class IR_AssignmentExpression(VariableSymbol variable, IR_Expres
     public override TypeSymbol Type => Expression.Type;
 }
 
-internal sealed class IR_BinaryExpression(IR_Expression left, IR_Expression right, IR_BinaryOperator op) 
+internal sealed class IR_BinaryExpression(IR_Expression left, IR_BinaryOperator op, IR_Expression right) 
     : IR_Expression {
 
-    public IR_BinaryOperator Operator { get; } = op;
     public IR_Expression Left { get; } = left;
+    public IR_BinaryOperator Operator { get; } = op;
     public IR_Expression Right { get; } = right;
 
     public override IR_NodeKind Kind => IR_NodeKind.BinaryExpression;

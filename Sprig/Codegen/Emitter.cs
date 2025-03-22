@@ -322,7 +322,7 @@ internal sealed class Emitter(IR_Program program) {
     private void EmitStoreVariable(ILProcessor processor, IR_VariableExpression node) {
         if (node.Variable is ParameterSymbol parameter) {
             processor.Emit(OpCodes.Ldarg, parameter.Index);
-        } 
+        }
         else {
             var variable = locals[node.Variable];
             processor.Emit(OpCodes.Ldloc, variable);
