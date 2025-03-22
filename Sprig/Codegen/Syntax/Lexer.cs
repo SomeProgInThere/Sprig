@@ -22,106 +22,56 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
             case '~': kind = SyntaxKind.TildeToken;             position++; break;
             case ',': kind = SyntaxKind.CommaToken;             position++; break;
             case ':': kind = SyntaxKind.ColonToken;             position++; break;
-
-            case '+':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', '+', 
-                    SyntaxKind.PlusToken, SyntaxKind.PlusEqualsToken, SyntaxKind.DoublePlusToken
-                );
-                break;
-
-            case '-':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', '-', 
-                    SyntaxKind.MinusToken, SyntaxKind.MinusEqualsToken, SyntaxKind.DoubleMinusToken
-                );
-                break;
-
-            case '*':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', '*', 
-                    SyntaxKind.StarToken, SyntaxKind.StarEqualsToken, SyntaxKind.DoubleStarToken
-                );
-                break;
+            case '+': kind = SyntaxKind.PlusToken;              position++; break;
+            case '-': kind = SyntaxKind.MinusToken;             position++; break;
+            case '*': kind = SyntaxKind.StarToken;              position++; break;
+            case '^': kind = SyntaxKind.CircumflexToken;        position++; break;
+            case '%': kind = SyntaxKind.PercentToken;           position++; break;
 
             case '/':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', '/', 
-                    SyntaxKind.SlashToken, SyntaxKind.SlashEqualsToken, SyntaxKind.DoubleSlashToken
-                );
-                break;
+                if (Next == '/')
+                    ReadSinglelineComment();
 
-            case '%':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', 
-                    SyntaxKind.PercentToken, SyntaxKind.PercentEqualsToken
-                );
+                else {
+                    kind = SyntaxKind.SlashToken; 
+                    position++;
+                }
                 break;
 
             case '!':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', SyntaxKind.BangToken, SyntaxKind.BangEqualsToken
-                );
+                SetKind(ref kind, ref position, '=', SyntaxKind.BangToken, SyntaxKind.BangEqualsToken);
                 break;
 
             case '=':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken
-                );
-                break;
-
-            case '^':
-                SetKind(
-                    ref kind, ref position, 
-                    '=', SyntaxKind.CircumflexToken, SyntaxKind.CircumflexEqualsToken
-                );
+                SetKind(ref kind, ref position, '=', SyntaxKind.EqualsToken, SyntaxKind.DoubleEqualsToken);
                 break;
 
             case '<':
                 SetKind(
-                    ref kind, ref position, 
-                    '<', '=', 
+                    ref kind, ref position, '<', '=', 
                     SyntaxKind.RightArrowToken, SyntaxKind.DoubleRightArrowToken, SyntaxKind.RightArrowEqualsToken
                 );
                 break;
 
             case '>':
                 SetKind(
-                    ref kind, ref position, 
-                    '>', '=', 
+                    ref kind, ref position, '>', '=', 
                     SyntaxKind.LeftArrowToken, SyntaxKind.DoubleLeftArrowToken, SyntaxKind.LeftArrowEqualsToken
                 );
                 break;
 
             case '&':
                 SetKind(
-                    ref kind, ref position, 
-                    '&', '=', 
-                    SyntaxKind.AmpersandToken, SyntaxKind.DoubleAmpersandToken, SyntaxKind.AmpersandEqualsToken
+                    ref kind, ref position, '&', SyntaxKind.AmpersandToken, SyntaxKind.DoubleAmpersandToken
                 );
                 break;
             
             case '|':
-                SetKind(
-                    ref kind, ref position, 
-                    '|', '=', 
-                    SyntaxKind.PipeToken, SyntaxKind.DoublePipeToken, SyntaxKind.PipeEqualsToken
-                );
+                SetKind(ref kind, ref position, '|', SyntaxKind.PipeToken, SyntaxKind.DoublePipeToken);
                 break;
 
             case '.':
-                SetKind(
-                    ref kind, ref position,
-                    '.', 
-                    SyntaxKind.DotToken, SyntaxKind.DoubleDotToken
-                );
+                SetKind(ref kind, ref position, '.', SyntaxKind.DotToken, SyntaxKind.DoubleDotToken);
                 break;
 
             case '"':
@@ -149,7 +99,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
                     position++;
                 }
 
-                break;
+            break;
         }
         
         var length = position - start;
@@ -168,6 +118,27 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
         kind = k1; position++;
     }
 
+    private void ReadSinglelineComment() {
+        position += 2;
+        var done = false;
+
+        while (!done) {
+            switch (Current) {
+                case '\r':
+                case '\n':
+                case '\0':
+                    done = true;
+                    break;
+                
+                default:
+                    position++;
+                    break;
+            }
+        }
+
+        kind = SyntaxKind.SinglelineCommentToken;
+    }
+    
     private void ReadString() {
         position++;
         var builder = new StringBuilder();

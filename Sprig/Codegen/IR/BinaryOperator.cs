@@ -60,14 +60,14 @@ internal sealed class IR_BinaryOperator(
         new IR_BinaryOperator(SyntaxKind.MinusToken,       BinaryOperator.Substact,  TypeSymbol.Int32),
         new IR_BinaryOperator(SyntaxKind.StarToken,        BinaryOperator.Multiply,  TypeSymbol.Int32),
         new IR_BinaryOperator(SyntaxKind.SlashToken,       BinaryOperator.Divide,    TypeSymbol.Int32),
-        new IR_BinaryOperator(SyntaxKind.DoubleSlashToken, BinaryOperator.Remainder, TypeSymbol.Int32),
+        new IR_BinaryOperator(SyntaxKind.PercentToken,     BinaryOperator.Remainder, TypeSymbol.Int32),
         
         // Float operations
         new IR_BinaryOperator(SyntaxKind.PlusToken,        BinaryOperator.Add,       TypeSymbol.Double),
         new IR_BinaryOperator(SyntaxKind.MinusToken,       BinaryOperator.Substact,  TypeSymbol.Double),
         new IR_BinaryOperator(SyntaxKind.StarToken,        BinaryOperator.Multiply,  TypeSymbol.Double),
         new IR_BinaryOperator(SyntaxKind.SlashToken,       BinaryOperator.Divide,    TypeSymbol.Double),
-        new IR_BinaryOperator(SyntaxKind.DoubleSlashToken, BinaryOperator.Remainder, TypeSymbol.Double),
+        new IR_BinaryOperator(SyntaxKind.PercentToken,     BinaryOperator.Remainder, TypeSymbol.Double),
 
         // Bitwise operations
         new IR_BinaryOperator(SyntaxKind.AmpersandToken,        BinaryOperator.BitwiseAnd,    TypeSymbol.Int32), 

@@ -8,6 +8,7 @@ public enum SyntaxKind {
     IdentifierToken,
     StringToken,
     NumberToken,
+    SinglelineCommentToken,
 
     // Simple tokens
     PlusToken,
@@ -34,23 +35,11 @@ public enum SyntaxKind {
     // Compound Tokens
     DoubleAmpersandToken,
     DoublePipeToken,
-    DoublePlusToken,
-    DoubleMinusToken,
-    DoubleStarToken,
-    DoubleSlashToken,
     DoubleEqualsToken,
     DoubleLeftArrowToken,
     DoubleRightArrowToken,
     DoubleDotToken,
-    PlusEqualsToken,
-    MinusEqualsToken,
-    StarEqualsToken,
-    SlashEqualsToken,
-    PercentEqualsToken,
     BangEqualsToken,
-    AmpersandEqualsToken,
-    PipeEqualsToken,
-    CircumflexEqualsToken,
     LeftArrowEqualsToken,
     RightArrowEqualsToken,
 

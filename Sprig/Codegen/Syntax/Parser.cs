@@ -9,10 +9,18 @@ internal sealed class Parser {
         var sourceTokens = new List<SyntaxToken>();
         var lexer = new Lexer(sourceSyntaxTree);
         SyntaxToken token;
-           
+        
         do {
             token = lexer.Lex();
-            if (token.Kind != SyntaxKind.WhitespaceToken && token.Kind != SyntaxKind.BadToken)
+
+            var skipToken = token.Kind switch {
+                SyntaxKind.BadToken or 
+                SyntaxKind.WhitespaceToken or
+                SyntaxKind.SinglelineCommentToken => true,
+                _ => false
+            };
+
+            if (!skipToken)
                 sourceTokens.Add(token);    
         } 
         while (token.Kind != SyntaxKind.EndOfFileToken);
@@ -235,21 +243,12 @@ internal sealed class Parser {
     }
 
     private Expression ParseAssignmentExpression() {
-        if (Current.Kind == SyntaxKind.IdentifierToken) {
+        if (Current.Kind == SyntaxKind.IdentifierToken && Next.Kind == SyntaxKind.EqualsToken) {
+            var identifierToken = NextToken();
+            var equalsToken = NextToken();
+            var expression = ParseAssignmentExpression();
 
-            if (Next.Kind == SyntaxKind.EqualsToken) {
-                var identifierToken = NextToken();
-                var operatorToken = NextToken();
-                var right = ParseAssignmentExpression();
-
-                return new AssignmentExpression(syntaxTree, identifierToken, operatorToken, right);
-            }
-
-            if (Next.Kind == SyntaxKind.DoublePlusToken || Next.Kind == SyntaxKind.DoubleMinusToken) {
-                var operand = ParsePrimaryExpression();
-                var operatorToken = NextToken();
-                return new UnaryExpression(syntaxTree, operand, operatorToken);
-            }
+            return new AssignmentExpression(syntaxTree, identifierToken, equalsToken, expression);
         }
 
         return ParseBinaryExpression();

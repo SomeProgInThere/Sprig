@@ -7,9 +7,7 @@ internal static class SyntaxKindExtension {
             SyntaxKind.PlusToken or 
             SyntaxKind.MinusToken or 
             SyntaxKind.BangToken or
-            SyntaxKind.TildeToken or
-            SyntaxKind.DoublePlusToken or
-            SyntaxKind.DoubleMinusToken => 7,
+            SyntaxKind.TildeToken => 7,
             _ => 0,
         };
     }
@@ -19,13 +17,11 @@ internal static class SyntaxKindExtension {
             SyntaxKind.AmpersandToken or
             SyntaxKind.CircumflexToken or
             SyntaxKind.PipeToken or
-            SyntaxKind.DoubleStarToken or
             SyntaxKind.DoubleLeftArrowToken or
             SyntaxKind.DoubleRightArrowToken => 6,
 
             SyntaxKind.StarToken or 
             SyntaxKind.SlashToken or
-            SyntaxKind.DoubleSlashToken or 
             SyntaxKind.PercentToken => 5,
             
             SyntaxKind.PlusToken or 
@@ -88,24 +84,12 @@ internal static class SyntaxKindExtension {
             SyntaxKind.CommaToken               => ",",
             SyntaxKind.ColonToken               => ":",
 
-            SyntaxKind.DoublePlusToken          => "++",
-            SyntaxKind.DoubleMinusToken         => "--",
-            SyntaxKind.DoubleStarToken          => "**",
-            SyntaxKind.DoubleSlashToken         => "//",
-            SyntaxKind.PlusEqualsToken          => "+=",
-            SyntaxKind.MinusEqualsToken         => "-=",
-            SyntaxKind.StarEqualsToken          => "*=",
-            SyntaxKind.SlashEqualsToken         => "/=",
-            SyntaxKind.PercentEqualsToken       => "%=",
             SyntaxKind.BangEqualsToken          => "!=",
             SyntaxKind.DoubleEqualsToken        => "==",
             SyntaxKind.LeftArrowEqualsToken     => ">=",
             SyntaxKind.RightArrowEqualsToken    => "<=",
             SyntaxKind.DoubleAmpersandToken     => "&&",
-            SyntaxKind.AmpersandEqualsToken     => "&=",
             SyntaxKind.DoublePipeToken          => "||",
-            SyntaxKind.PipeEqualsToken          => "|=",
-            SyntaxKind.CircumflexEqualsToken    => "^=",
             SyntaxKind.DoubleLeftArrowToken     => ">>",
             SyntaxKind.DoubleRightArrowToken    => "<<",
             SyntaxKind.DoubleDotToken           => "..", 

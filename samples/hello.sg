@@ -14,11 +14,12 @@ func ncr(n: int, r: int): int {
         print("Invalid input!")
         return -1
     }
-
+    
     return factorial(n) / (factorial(r) * factorial(n - r))
 }
 
 func main() {
+    // This is a comment
     let n = 11
     let r = 3
     let result = ncr(n, r)
