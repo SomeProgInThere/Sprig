@@ -79,7 +79,7 @@ internal sealed class Binder {
                 mainFunction = new FunctionSymbol("$main", [], TypeSymbol.Void);
             }
         }
-
+        
         var diagnostics = binder.Diagnostics.ToImmutableArray();
         if (previous != null)
             diagnostics = diagnostics.InsertRange(0, previous.Diagnostics);

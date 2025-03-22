@@ -26,6 +26,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
 
+    public void ReportUnterminatedComment(TextLocation location) {
+        var message = $"Unterminated comment";
+        Report(location, message);
+    }
+
     public void ReportUnexpectedToken(TextLocation location, SyntaxKind actual, SyntaxKind expected) {
         var actualString = SyntaxKindExtension.Text(actual) is null 
             ? $"<{actual}>" 

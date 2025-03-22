@@ -9,6 +9,7 @@ public enum SyntaxKind {
     StringToken,
     NumberToken,
     SinglelineCommentToken,
+    MultilineCommentToken,
 
     // Simple tokens
     PlusToken,

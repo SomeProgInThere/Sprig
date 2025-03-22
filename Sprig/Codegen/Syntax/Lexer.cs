@@ -31,6 +31,8 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
             case '/':
                 if (Next == '/')
                     ReadSinglelineComment();
+                else if (Next == '*')
+                    ReadMultilineComment();
 
                 else {
                     kind = SyntaxKind.SlashToken; 
@@ -124,12 +126,43 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
 
         while (!done) {
             switch (Current) {
+                case '\0':
                 case '\r':
                 case '\n':
-                case '\0':
                     done = true;
                     break;
                 
+                default:
+                    position++;
+                    break;
+            }
+        }
+
+        kind = SyntaxKind.SinglelineCommentToken;
+    }
+
+    private void ReadMultilineComment() {
+        position += 2;
+        var done = false;
+
+        while (!done) {
+            switch (Current) {
+                case '\0':
+                    var span = new TextSpan(start, 1);
+                    var location = new TextLocation(syntaxTree.Source, span);
+                    diagnostics.ReportUnterminatedComment(location);
+                    done = true;
+                    break;
+                
+                case '*':
+                    if (Next == '/') {
+                        done = true;
+                        position ++;
+                    }
+                    
+                    position++;
+                    break;
+
                 default:
                     position++;
                     break;

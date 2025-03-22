@@ -16,7 +16,8 @@ internal sealed class Parser {
             var skipToken = token.Kind switch {
                 SyntaxKind.BadToken or 
                 SyntaxKind.WhitespaceToken or
-                SyntaxKind.SinglelineCommentToken => true,
+                SyntaxKind.SinglelineCommentToken or 
+                SyntaxKind.MultilineCommentToken => true,
                 _ => false
             };
 
