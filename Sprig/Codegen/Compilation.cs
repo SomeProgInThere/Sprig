@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using Sprig.Codegen.IR;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
-using System.CodeDom.Compiler;
 
 namespace Sprig.Codegen;
 
@@ -74,7 +73,7 @@ public sealed class Compilation {
     }
 
     public Compilation? Previous { get; }
-    public FunctionSymbol MainFunction => GlobalScope.MainFunction;
+    public FunctionSymbol? MainFunction => GlobalScope.MainFunction;
     public ImmutableArray<SyntaxTree> SyntaxTrees { get; }
 
     private IR_GlobalScope? globalScope;

@@ -219,7 +219,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
 
     private void ReadNumberToken() {
         var isFloat = false;
-        while (char.IsDigit(Current) || Current == '.' || Current == '_') {
+        while (char.IsDigit(Current) || Current == '.') {
             if (Current == '.') {
                 if (Next == '.') {
                     break;
@@ -230,20 +230,11 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
                 isFloat = true;
             }
 
-            if (Current == '_' && (!char.IsDigit(Next) || !char.IsDigit(Peek(-1)))) {
-                var span = new TextSpan(position, 1);
-                var location = new TextLocation(syntaxTree.Source, span);
-                diagnostics.ReportInvalidNumber(location, "_", TypeSymbol.Int32);
-                break;
-            }
-
             position++;
         }
             
         var length = position - start;
         var text = syntaxTree.Source.ToString(start, length);
-
-        text = text.Replace("_", "");
 
         if (!isFloat) {
             if (!int.TryParse(text, out var intResult)) {
@@ -268,10 +259,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
     private void ReadIdentifierOrKeywordToken() {
         while (char.IsLetter(Current) || Current == '_')
             position++;
-            
-        while (char.IsLetterOrDigit(Current) || Current == '_')
-            position++;
-
+        
         var length = position - start;
         var text = syntaxTree.Source.ToString(start, length);
         kind = text.KeywordKind();
