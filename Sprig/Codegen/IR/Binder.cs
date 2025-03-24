@@ -504,8 +504,10 @@ internal sealed class Binder {
     private IR_Expression BindNameExpression(NameExpression syntax) {
         var identifier = syntax.Identifier;
 
-        if (identifier.IsMissing())
+        if (identifier.IsMissing()) {
+            diagnostics.ReportMissingIdentifier(identifier.Location);
             return new IR_ErrorExpression();
+        }
         
         var variable = BindVariableReference(identifier.Text, identifier.Location);
         if (variable is null)

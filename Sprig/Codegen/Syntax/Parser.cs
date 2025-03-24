@@ -17,7 +17,7 @@ internal sealed class Parser {
         } 
         while (token.Kind != SyntaxKind.EndOfFileToken);
 
-        Diagnostics = lexer.Diagnostics;
+        diagnostics = lexer.Diagnostics;
         tokens = [..sourceTokens];
         syntaxTree = sourceSyntaxTree;
         source = sourceSyntaxTree.Source;
@@ -28,8 +28,6 @@ internal sealed class Parser {
         var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
         return new CompilationUnit(syntaxTree, members, endOfFileToken);
     }
-
-    public Diagnostics Diagnostics { get; }
 
     private ImmutableArray<Member> ParseMembers() {
         var members = ImmutableArray.CreateBuilder<Member>();
@@ -389,10 +387,13 @@ internal sealed class Parser {
         if (Current.Kind == kind)
             return NextToken();
         
-        Diagnostics.ReportUnexpectedToken(Current.Location, Current.Kind, kind);
+        diagnostics.ReportUnexpectedToken(Current.Location, Current.Kind, kind);
         return new SyntaxToken(syntaxTree, kind, Current.Position, "");
     }
+    
+    public Diagnostics Diagnostics => diagnostics;
 
+    private readonly Diagnostics diagnostics = [];
     private readonly Stack<ElseClause?> orderedClauses = new();
     private readonly ImmutableArray<SyntaxToken> tokens = [];
 

@@ -21,6 +21,11 @@ public sealed class Diagnostics : IEnumerable<DiagnosticMessage> {
         Report(location, message);
     }
 
+    public void ReportMissingIdentifier(TextLocation location) {
+        var message = $"Missing identifier";
+        Report(location, message);
+    }
+
     public void ReportUnterminatedString(TextLocation location) {
         var message = "Unterminated string literal";
         Report(location, message);
