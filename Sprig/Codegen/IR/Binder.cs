@@ -479,7 +479,7 @@ internal sealed class Binder {
     private IR_Expression BindNameExpression(NameExpression syntax) {
         var identifier = syntax.Identifier;
 
-        if (identifier.IsMissing)
+        if (identifier.IsMissing())
             return new IR_ErrorExpression();
         
         var variable = BindVariableReference(identifier.Text, identifier.Location);
@@ -493,7 +493,7 @@ internal sealed class Binder {
         var name = syntax.Identifier.Text;
         var expression = BindExpression(syntax.Expression);
         
-        if (syntax.Identifier.IsMissing)
+        if (syntax.Identifier.IsMissing())
             return expression;
 
         var variable = BindVariableReference(name, syntax.Identifier.Location);
@@ -568,12 +568,10 @@ internal sealed class Binder {
 
     private VariableSymbol BindVariableDeclaration(SyntaxToken identifier, bool mutable, TypeSymbol type, IR_Constant? constant = null) {
         var name = identifier.Text;
-        var exists = !identifier.IsMissing;
-
         var scope = function is null ? VariableScope.Global : VariableScope.Local; 
         var variable = new VariableSymbol(name, mutable, type, scope, constant);
         
-        if (exists && !this.scope.TryDeclareSymbol(variable))
+        if (!identifier.IsMissing() && !this.scope.TryDeclareSymbol(variable))
             diagnostics.ReportVariableRedeclaration(identifier.Location, name);
         
         return variable;

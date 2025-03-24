@@ -1,15 +1,17 @@
 namespace Sprig.Codegen.Syntax;
 
 public enum SyntaxKind {
+    // Trivia
+    BadTokenTrivia,
+    WhitespaceTrivia,
+    SinglelineCommentTrivia,
+    MultilineCommentTrivia,
+
     // Special tokens
-    WhitespaceToken,
     EndOfFileToken,
-    BadToken,
     IdentifierToken,
     StringToken,
     NumberToken,
-    SinglelineCommentToken,
-    MultilineCommentToken,
 
     // Simple tokens
     PlusToken,

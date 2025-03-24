@@ -9,7 +9,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
     public SyntaxToken Lex() {
 
         start = position;
-        kind = SyntaxKind.BadToken;
+        kind = SyntaxKind.BadTokenTrivia;
         value = null;
         
         switch (Current) {
@@ -138,7 +138,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
             }
         }
 
-        kind = SyntaxKind.SinglelineCommentToken;
+        kind = SyntaxKind.SinglelineCommentTrivia;
     }
 
     private void ReadMultilineComment() {
@@ -169,7 +169,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
             }
         }
 
-        kind = SyntaxKind.SinglelineCommentToken;
+        kind = SyntaxKind.MultilineCommentTrivia;
     }
     
     private void ReadString() {
@@ -214,7 +214,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
         while (char.IsWhiteSpace(Current))
             position++;
         
-        kind = SyntaxKind.WhitespaceToken;
+        kind = SyntaxKind.WhitespaceTrivia;
     }
 
     private void ReadNumberToken() {

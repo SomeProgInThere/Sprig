@@ -12,16 +12,7 @@ internal sealed class Parser {
         
         do {
             token = lexer.Lex();
-
-            var skipToken = token.Kind switch {
-                SyntaxKind.BadToken or 
-                SyntaxKind.WhitespaceToken or
-                SyntaxKind.SinglelineCommentToken or 
-                SyntaxKind.MultilineCommentToken => true,
-                _ => false
-            };
-
-            if (!skipToken)
+            if (!token.IsTrivia())
                 sourceTokens.Add(token);    
         } 
         while (token.Kind != SyntaxKind.EndOfFileToken);

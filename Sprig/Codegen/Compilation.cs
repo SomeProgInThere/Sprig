@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using Sprig.Codegen.IR;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
+using System.CodeDom.Compiler;
 
 namespace Sprig.Codegen;
 
@@ -12,10 +13,21 @@ public sealed class Compilation {
         return new Compilation(previous: null, syntaxTrees);
     }
 
-    public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath) {
+    public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath, string dumpPath) {
         var program = GetProgram();
         if (program.Diagnostics.Any())
             return program.Diagnostics;
+        
+        using var writer = new StringWriter();
+        
+        foreach (var (header, body) in program.Functions) {
+            header.WriteTo(writer);
+            body.WriteTo(writer);
+            writer.WriteLine();
+        }
+
+        File.WriteAllText(dumpPath, writer.ToString());
+        writer.Flush();
 
         var emitter = new Emitter(program);
         emitter.LoadReferences(moduleName, references);

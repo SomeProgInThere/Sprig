@@ -230,6 +230,7 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteBlockStatement(IR_BlockStatement node, IndentedTextWriter writer) {
+        writer.WriteSpace();
         writer.WritePunctuation(SyntaxKind.OpenBraceToken);
         writer.WriteLine();
         writer.Indent++;

@@ -19,6 +19,7 @@ internal sealed class BasicBlockBuilder {
                     StartBlock();
                     break;
                 
+                case IR_NodeKind.NopStatement:
                 case IR_NodeKind.VariableDeclaration:
                 case IR_NodeKind.ExpressionStatement:
                     statements.Add(statement);

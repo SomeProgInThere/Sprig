@@ -1,0 +1,35 @@
+func main() {
+    let x = 5
+    print(any(fact_for(x)))
+    print(any(fact_while(x)))
+    return
+}
+
+func fact_for(num: int): int {
+    var fact = 1
+    let i = 1
+    var upper_bound = num
+    goto label1
+label2:
+    fact = fact * i
+continue1:
+    i = i + 1
+label1:
+    goto label2 if i <= upper_bound
+break1:
+    return fact
+}
+
+func fact_while(num: int): int {
+    var fact = 1
+    var i = 1
+    goto continue1
+label1:
+    fact = fact * i
+    i = i + 1
+continue1:
+    goto label1 if i <= num
+break1:
+    return fact
+}
+

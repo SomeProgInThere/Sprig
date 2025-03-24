@@ -36,16 +36,24 @@ class Program {
         );
 
         outputOption.AddAlias("-o");
+        
+        var dumpPathOption = new Option<string>(
+            name: "--dump",
+            description: "Path of the extra outputs of program"
+        );
+        
+        dumpPathOption.AddAlias("-d");
 
         buildCommand.Add(sourcePathsArgument);
         
         buildCommand.Add(referencePathsOption);
         buildCommand.Add(moduleNameOption);
         buildCommand.Add(outputOption);
+        buildCommand.Add(dumpPathOption);
 
         rootCommand.Add(buildCommand);
 
-        buildCommand.SetHandler((sourcePaths, reference, module, output) => {                
+        buildCommand.SetHandler((sourcePaths, reference, module, output, dumpPath) => {                
                 var referencePaths = new List<string>();
                 if (reference != null)
                     referencePaths.Add(reference);
@@ -86,7 +94,7 @@ class Program {
                     return;
 
                 var compilation = Compilation.Create([..syntaxTrees]);
-                var diagnostics = compilation.Emit(moduleName, [..referencePaths], outputPath);
+                var diagnostics = compilation.Emit(moduleName, [..referencePaths], outputPath, dumpPath);
 
                 if (diagnostics.Any()) {
                     Console.Error.WriteDiagnostics(diagnostics);
@@ -96,15 +104,18 @@ class Program {
             sourcePathsArgument,
             referencePathsOption,
             moduleNameOption,
-            outputOption
+            outputOption,
+            dumpPathOption
         );
 
       //return await rootCommand.InvokeAsync(args);
       return await rootCommand.InvokeAsync([
         "build",
         "C:/Users/calla/Dev/Sprig/samples/hello.sg",
-        "--reference", 
-        "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/mscorlib.dll"
+        "-r", 
+        "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/mscorlib.dll",
+        "-d", 
+        "C:/Users/calla/Dev/Sprig/samples/hello.g.sg"
         ]);
     }
 
