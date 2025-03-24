@@ -2,5 +2,13 @@
 func main() {
     print("Enter marks:")
     let marks = input()
-    var grade: int
+    var grade = ""
+
+    if marks == "90" grade = "A"
+    else if marks == "70" grade = "B"
+    else if marks == "50" grade = "C"
+    else if marks == "30" grade = "D"
+    else grade = "F"
+
+    print(grade)
 }

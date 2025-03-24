@@ -28,18 +28,15 @@ public class Casting {
         if (from != TypeSymbol.Void && to == TypeSymbol.Any)
             return Implicit;
 
-        if (from == TypeSymbol.Int32) {
-            if (to == TypeSymbol.Double) {
-                return Implicit;
-            }
-        }
+        if (from == TypeSymbol.Int32 && to == TypeSymbol.Double)
+            return Implicit;
 
         if (from == TypeSymbol.Any && to != TypeSymbol.Void)
             return Explicit;
 
         if (from == TypeSymbol.Boolean && to == TypeSymbol.Int32)
             return Explicit;
-        
+
         if (from == TypeSymbol.Boolean || from == TypeSymbol.Int32 || from == TypeSymbol.Double) {
             if (to == TypeSymbol.String)
                 return Explicit;

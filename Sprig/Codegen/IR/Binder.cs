@@ -292,7 +292,7 @@ internal sealed class Binder {
     }
 
     private IR_IfStatement BindIfStatement(IfStatement syntax) {
-        var condition = BindExpression(syntax.Condition, TypeSymbol.Boolean);
+        var condition = BindExpression(syntax.Condition);
         var body = BindStatement(syntax.Body);
         
         var elseBody = syntax.ElseClause switch {
@@ -579,7 +579,7 @@ internal sealed class Binder {
         
         if (!cast.Exists) {
             if (expression.Type != TypeSymbol.Error && type != TypeSymbol.Error)
-                diagnostics.ReportCannotConvert(location, expression.Type, type);
+                diagnostics.ReportCannotConvert(location, expression.Type, type, reportCastExisits: false);
 
             return new IR_ErrorExpression();
         }
