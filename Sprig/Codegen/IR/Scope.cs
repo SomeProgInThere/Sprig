@@ -3,7 +3,7 @@ using Sprig.Codegen.Symbols;
 
 namespace Sprig.Codegen.IR;
 
-internal sealed class LocalScope(LocalScope? parent = null) {
+internal sealed class IR_LocalScope(IR_LocalScope? parent = null) {
 
     public bool TryDeclareSymbol(Symbol symbol) {
         symbols ??= [];
@@ -23,28 +23,28 @@ internal sealed class LocalScope(LocalScope? parent = null) {
     
     public ImmutableArray<Symbol> Symbols => symbols is null ? [] : [..symbols.Values];
 
-    public LocalScope? Parent { get; } = parent;
+    public IR_LocalScope? Parent { get; } = parent;
     private Dictionary<string, Symbol>? symbols;
 }
 
-internal sealed class GlobalScope(
-    GlobalScope? previous,
+internal sealed class IR_GlobalScope(
+    IR_GlobalScope? previous,
     ImmutableArray<DiagnosticMessage> diagnostics,
-    FunctionSymbol mainFunction,
+    FunctionSymbol? mainFunction,
     ImmutableArray<Symbol> symbols,
     ImmutableArray<IR_Statement> statements
 ) {
-    public GlobalScope? Previous { get; } = previous;
+    public IR_GlobalScope? Previous { get; } = previous;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
-    public FunctionSymbol MainFunction { get; } = mainFunction;
+    public FunctionSymbol? MainFunction { get; } = mainFunction;
     public ImmutableArray<Symbol> Symbols { get; } = symbols;
     public ImmutableArray<IR_Statement> Statements { get; } = statements;
 }
 
 internal sealed class IR_Program(
     IR_Program previous,
-    FunctionSymbol? mainFunction,
     ImmutableArray<DiagnosticMessage> diagnostics,
+    FunctionSymbol? mainFunction,
     ImmutableDictionary<FunctionSymbol, IR_BlockStatement> functions
 ) {
     public IR_Program Previous { get; } = previous;

@@ -9,10 +9,10 @@ namespace Sprig.Codegen.IR;
 
 internal sealed class Binder {
 
-    public Binder(LocalScope? parent, FunctionSymbol? function = null) {
+    private Binder(IR_LocalScope? parent, FunctionSymbol? function = null) {
         this.parent = parent;
         this.function = function;
-        scope = new LocalScope(parent);
+        scope = new IR_LocalScope(parent);
 
         if (function != null) {
             foreach (var parameter in function.Parameters)
@@ -20,10 +20,14 @@ internal sealed class Binder {
         }
     }
 
-    public static GlobalScope BindGlobalScope(GlobalScope? previous, ImmutableArray<SyntaxTree> syntaxTrees) {
+    public static IR_GlobalScope BindGlobalScope(IR_GlobalScope? previous, ImmutableArray<SyntaxTree> syntaxTrees) {
         var parentScope = CreateParentScope(previous);
         var binder = new Binder(parentScope);
         
+        binder.Diagnostics.AddRange(syntaxTrees.SelectMany(trees => trees.Diagnostics));
+        if (binder.Diagnostics.Any())
+            return new IR_GlobalScope(previous, binder.Diagnostics, null, [], []);
+
         var functionHeaders = syntaxTrees
             .SelectMany(tree => tree.Root.Members)
             .OfType<FunctionHeader>();
@@ -52,7 +56,7 @@ internal sealed class Binder {
 
         if (firstGlobalStatementPerTree.Length > 1) {
             foreach (var globalStatement in firstGlobalStatementPerTree)
-                binder.Diagnostics.ReportMultipleGlobalStatements(globalStatement.Location);
+                binder.diagnostics.ReportMultipleGlobalStatements(globalStatement.Location);
         }
 
         var symbols = binder.scope.Symbols;
@@ -65,31 +69,45 @@ internal sealed class Binder {
 
         if (mainFunction != null) {
             if (mainFunction.Type != TypeSymbol.Void || mainFunction.Parameters.Any())
-                binder.Diagnostics.ReportIncorrectMainDefinition(mainFunction.Header.Identifier.Location);
+                binder.diagnostics.ReportIncorrectMainDefinition(mainFunction.Header.Identifier.Location);
         }
 
         if (globalStatements.Any()) {
             if (mainFunction != null) {
-                binder.Diagnostics.ReportMainAlreadyExists(mainFunction.Header.Identifier.Location);
+                binder.diagnostics.ReportMainAlreadyExists(mainFunction.Header.Identifier.Location);
 
                 foreach (var globalStatement in firstGlobalStatementPerTree)
-                    binder.Diagnostics.ReportMainAlreadyExists(globalStatement.Location);                
+                    binder.diagnostics.ReportMainAlreadyExists(globalStatement.Location);                
             }
             else {
                 mainFunction = new FunctionSymbol("$main", [], TypeSymbol.Void);
             }
         }
         
-        var diagnostics = binder.Diagnostics.ToImmutableArray();
+        var diagnostics = binder.Diagnostics;
         if (previous != null)
             diagnostics = diagnostics.InsertRange(0, previous.Diagnostics);
 
-        return new GlobalScope(previous, diagnostics, mainFunction, symbols, statments.ToImmutable());
+        return new IR_GlobalScope(
+            previous, 
+            diagnostics, 
+            mainFunction, 
+            symbols, 
+            statments.ToImmutable()
+        );
     }
 
-    public static IR_Program BindProgram(IR_Program previous, GlobalScope globalScope) {
+    public static IR_Program BindProgram(IR_Program previous, IR_GlobalScope globalScope) {
         var parentScope = CreateParentScope(globalScope);
         
+        if (globalScope.Diagnostics.Any())
+            return new IR_Program(
+                previous, 
+                globalScope.Diagnostics, 
+                null, 
+                ImmutableDictionary<FunctionSymbol, IR_BlockStatement>.Empty
+            );
+
         var functions = ImmutableDictionary.CreateBuilder<FunctionSymbol, IR_BlockStatement>();
         var diagnostics = ImmutableArray<DiagnosticMessage>.Empty;
 
@@ -100,7 +118,9 @@ internal sealed class Binder {
             var body = binder.BindStatement(function.Header.Body);
             var loweredBody = Lowerer.Lower(function, body);
             
-            if (function.Type != TypeSymbol.Void && !ControlFlowGraph.AllPathsReturn(loweredBody))
+            if (function.Type != TypeSymbol.Void 
+                && !ControlFlowGraph.AllPathsReturn(loweredBody)
+            )
                 binder.diagnostics.ReportNotAllPathsReturn(function.Header.Identifier.Location);
 
             functions.Add(function, loweredBody);
@@ -112,14 +132,19 @@ internal sealed class Binder {
             functions.Add(globalScope.MainFunction, body);
         }
 
-        return new IR_Program(previous, globalScope.MainFunction, diagnostics, functions.ToImmutable());
+        return new IR_Program(
+            previous, 
+            diagnostics, 
+            globalScope.MainFunction, 
+            functions.ToImmutable()
+        );
     }
 
-    public Diagnostics Diagnostics => diagnostics;
-    public LocalScope scope;
+    public ImmutableArray<DiagnosticMessage> Diagnostics => [..diagnostics];
+    public IR_LocalScope scope;
 
-    private static LocalScope? CreateParentScope(GlobalScope? previous) {
-        var stack = new Stack<GlobalScope>();
+    private static IR_LocalScope? CreateParentScope(IR_GlobalScope? previous) {
+        var stack = new Stack<IR_GlobalScope>();
 
         while (previous != null) {
             stack.Push(previous);
@@ -130,7 +155,7 @@ internal sealed class Binder {
         
         while (stack.Count > 0) {
             previous = stack.Pop();
-            var scope = new LocalScope(parent);
+            var scope = new IR_LocalScope(parent);
 
             foreach (var symbols in previous.Symbols)
                 scope.TryDeclareSymbol(symbols);
@@ -141,8 +166,8 @@ internal sealed class Binder {
         return parent;
     }
 
-    private static LocalScope? CreateRootScope() {
-        var result = new LocalScope();
+    private static IR_LocalScope? CreateRootScope() {
+        var result = new IR_LocalScope();
     
         foreach (var function in BuiltinFunctions.All())
             result.TryDeclareSymbol(function);
@@ -228,7 +253,7 @@ internal sealed class Binder {
 
     private IR_BlockStatement BindBlockStatement(BlockStatement syntax) {
         var statements = ImmutableArray.CreateBuilder<IR_Statement>();
-        scope = new LocalScope(scope);
+        scope = new IR_LocalScope(scope);
 
         for (var i = 0; i < syntax.Statements.Length; i++) {
             var boundStatement = BindStatement(syntax.Statements[i]);
@@ -241,7 +266,7 @@ internal sealed class Binder {
             statements.Add(boundStatement);
         }
 
-        scope = scope.Parent ?? new LocalScope(parent);
+        scope = scope.Parent ?? new IR_LocalScope(parent);
         return new IR_BlockStatement(statements.ToImmutable());
     }
 
@@ -293,7 +318,7 @@ internal sealed class Binder {
     }
 
     private IR_ForStatement BindForStatement(ForStatement syntax) {
-        scope = new LocalScope(scope);
+        scope = new IR_LocalScope(scope);
 
         var lowerBound = BindExpression(syntax.LowerBound);
         var upperBound = BindExpression(syntax.UpperBound);
@@ -604,7 +629,7 @@ internal sealed class Binder {
     private readonly Diagnostics diagnostics = [];
     private readonly Stack<JumpLabel> loopJumps = [];
 
-    private readonly LocalScope? parent;
+    private readonly IR_LocalScope? parent;
     private readonly FunctionSymbol? function;
     private int labelCounter;
 }

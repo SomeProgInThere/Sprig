@@ -63,7 +63,7 @@ public sealed class Compilation {
         return Binder.BindProgram(previous, GlobalScope);
     }
 
-    internal GlobalScope? GlobalScope {
+    internal IR_GlobalScope? GlobalScope {
         get {
             if (globalScope is null) {
                 var prevGlobalScope = Binder.BindGlobalScope(Previous?.GlobalScope, SyntaxTrees);
@@ -77,5 +77,5 @@ public sealed class Compilation {
     public FunctionSymbol MainFunction => GlobalScope.MainFunction;
     public ImmutableArray<SyntaxTree> SyntaxTrees { get; }
 
-    private GlobalScope? globalScope;
+    private IR_GlobalScope? globalScope;
 }
