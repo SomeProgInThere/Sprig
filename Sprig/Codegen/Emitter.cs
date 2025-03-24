@@ -1,10 +1,12 @@
 using System.Collections.Immutable;
+using System.Text;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
 using Sprig.Codegen.IR;
 using Sprig.Codegen.Symbols;
+using Sprig.Codegen.Syntax;
 
 namespace Sprig.Codegen;
 
@@ -105,8 +107,12 @@ internal sealed class Emitter(IR_Program program) {
 
         resolvedMethods.Add("WriteLine",    ResolveMethod("System.Console", "WriteLine", ["System.Object"]));
         resolvedMethods.Add("ReadLine",     ResolveMethod("System.Console", "ReadLine", []));
-        resolvedMethods.Add("Concat",       ResolveMethod("System.String", "Concat", ["System.String", "System.String"]));
         resolvedMethods.Add("ObjectEquals", ResolveMethod("System.Object", "Equals", ["System.Object", "System.Object"]));
+
+        resolvedMethods.Add("Concat2",     ResolveMethod("System.String", "Concat", ["System.String", "System.String"]));
+        resolvedMethods.Add("Concat3",     ResolveMethod("System.String", "Concat", ["System.String", "System.String", "System.String"]));
+        resolvedMethods.Add("Concat4",     ResolveMethod("System.String", "Concat", ["System.String", "System.String", "System.String", "System.String"]));
+        resolvedMethods.Add("ConcatArray", ResolveMethod("System.String", "Concat", ["System.String[]"]));
         
         resolvedMethods.Add("ConvertToBoolean", ResolveMethod("System.Convert", "ToBoolean", ["System.Object"]));
         resolvedMethods.Add("ConvertToInt32",   ResolveMethod("System.Convert", "ToInt32", ["System.Object"]));
@@ -364,15 +370,22 @@ internal sealed class Emitter(IR_Program program) {
     }
 
     private void EmitBinaryOperation(ILProcessor processor, IR_BinaryExpression node) {
+        
+        // Special case for string concatination
+        if (
+            node.Operator.Kind == BinaryOperator.Add 
+            && node.Left.Type == TypeSymbol.String 
+            && node.Left.Type == TypeSymbol.String
+        ) {
+            EmitStringConcat(processor, node);
+            return;
+        }
+        
         EmitExpression(processor, node.Left);
         EmitExpression(processor, node.Right);
 
         switch (node.Operator.Kind) {
             case BinaryOperator.Add:
-                // string + string
-                if (node.Left.Type == TypeSymbol.String && node.Left.Type == TypeSymbol.String)
-                    processor.Emit(OpCodes.Call, resolvedMethods["Concat"]);
-
                 processor.Emit(OpCodes.Add);
                 break;
                 
@@ -475,6 +488,108 @@ internal sealed class Emitter(IR_Program program) {
         }
     }
 
+    private void EmitStringConcat(ILProcessor processor, IR_BinaryExpression node) {
+        var nodes = FoldConstants(Flatten(node)).ToList();
+
+        switch (nodes.Count) {
+            case 0:
+                processor.Emit(OpCodes.Ldstr, string.Empty);
+                break;
+
+            case 1:
+                EmitExpression(processor, nodes[0]);
+                break;
+
+            case 2:
+                EmitExpression(processor, nodes[0]);
+                EmitExpression(processor, nodes[1]);
+                processor.Emit(OpCodes.Call, resolvedMethods["Concat2"]);
+                break;
+
+            case 3:
+                EmitExpression(processor, nodes[0]);
+                EmitExpression(processor, nodes[1]);
+                EmitExpression(processor, nodes[2]);
+                processor.Emit(OpCodes.Call, resolvedMethods["Concat3"]);
+                break;
+
+            case 4:
+                EmitExpression(processor, nodes[0]);
+                EmitExpression(processor, nodes[1]);
+                EmitExpression(processor, nodes[2]);
+                EmitExpression(processor, nodes[3]);
+                processor.Emit(OpCodes.Call, resolvedMethods["Concat4"]);
+                break;
+
+            default:
+                processor.Emit(OpCodes.Ldc_I4, nodes.Count);
+                processor.Emit(OpCodes.Newarr, knownTypes[TypeSymbol.String]);
+
+                for (var i = 0; i < nodes.Count; i++) {
+                    processor.Emit(OpCodes.Dup);
+                    processor.Emit(OpCodes.Ldc_I4, i);
+                    EmitExpression(processor, nodes[i]);
+                    processor.Emit(OpCodes.Stelem_Ref);
+                }
+
+                processor.Emit(OpCodes.Call, resolvedMethods["ConcatArray"]);
+                break;
+        }
+
+        // (s1 + s2) + (s3 + s4) --> [s1, s2, s3, s4]
+        static IEnumerable<IR_Expression> Flatten(IR_Expression node) {
+            if (node is IR_BinaryExpression binary) {
+                
+                if (
+                    binary.Operator.Kind == BinaryOperator.Add &&
+                    binary.Left.Type == TypeSymbol.String &&
+                    binary.Right.Type == TypeSymbol.String
+                ) {
+                    foreach (var result in Flatten(binary.Left))
+                        yield return result;
+
+                    foreach (var result in Flatten(binary.Right))
+                        yield return result;
+                }
+
+                else {
+                    if (node.Type != TypeSymbol.String)
+                        throw new Exception($"Unexpected node type in string concat: {node.Type}");
+
+                    yield return node;
+                }
+            }
+        }
+
+        // [a, "foo", "bar", b, ""] --> [a, "foobar", b]
+        static IEnumerable<IR_Expression> FoldConstants(IEnumerable<IR_Expression> nodes) {
+            StringBuilder? builder = null;
+
+            foreach (var node in nodes) {
+                if (node.ConstantValue != null) {
+                    var stringValue = (string)node.ConstantValue.Value;
+                    if (string.IsNullOrEmpty(stringValue))
+                        continue;
+
+                    builder ??= new StringBuilder();
+                    builder.Append(stringValue);
+                }
+                
+                else {
+                    if (builder.Length > 0) {
+                        yield return new IR_LiteralExpression(builder.ToString());
+                        builder.Clear();
+                    }
+
+                    yield return node;
+                }
+            }
+
+            if (builder.Length > 0)
+                yield return new IR_LiteralExpression(builder.ToString());
+        }
+    }
+
     private void EmitCall(ILProcessor processor, IR_CallExpression node) {
         if (node.Function == BuiltinFunctions.RandInt) {
             if (randField is null)
@@ -559,7 +674,6 @@ internal sealed class Emitter(IR_Program program) {
     }
 
     public ImmutableArray<DiagnosticMessage> Diagonostics => [..diagnostics];
-
 
     private readonly Diagnostics diagnostics = [];
     private readonly List<AssemblyDefinition> referenceAssemblies = [];
