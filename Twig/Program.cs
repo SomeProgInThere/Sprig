@@ -41,7 +41,7 @@ class Program {
         
         var dumpPathOption = new Option<bool>(
             name: "--dump",
-            description: "Dumps Lowered and ControlFlow representation of the program",
+            description: "Dumps IL and ControlFlow representation of the program",
             getDefaultValue: () => false
         );
         
@@ -71,7 +71,7 @@ class Program {
                 string? dumpPath = null;
 
                 if (dumpEnabled)
-                    dumpPath = Path.ChangeExtension(outputPath, ".gen.sg");
+                    dumpPath = Path.ChangeExtension(outputPath, ".dump.sg");
                 
                 var syntaxTrees = new List<SyntaxTree>();
                 var hasErrors = false;

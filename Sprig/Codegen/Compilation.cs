@@ -18,7 +18,7 @@ public sealed class Compilation {
         if (program.Diagnostics.Any())
             return program.Diagnostics;
 
-        EmitLowered(dumpPath, program);
+        DumpLowered(dumpPath, program);
 
         var emitter = new Emitter(program);
         emitter.LoadReferences(moduleName, references);
@@ -54,9 +54,13 @@ public sealed class Compilation {
         return Binder.BindProgram(previous, GlobalScope);
     }
     
-    private static void EmitLowered(string? dumpPath, IR_Program program) {
+    private static void DumpLowered(string? dumpPath, IR_Program program) {
         if (dumpPath != null) {
             using var writer = new StringWriter();
+
+            writer.WriteLine($"// <generated dump from program: {dumpPath}>");
+            writer.WriteLine("// THIS PROGRAM CANNOT BE COMPILED");
+            writer.WriteLine();
 
             foreach (var (header, body) in program.Functions) {
                 header.WriteTo(writer);

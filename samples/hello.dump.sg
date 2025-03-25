@@ -1,3 +1,6 @@
+// <generated dump from program: ..\samples\hello.dump.sg>
+// THIS PROGRAM CANNOT BE COMPILED
+
 func main() {
     let s = "4.2"
     goto label1 if not decimal(s) > 4
@@ -5,4 +8,3 @@ func main() {
 label1:
     return
 }
-
