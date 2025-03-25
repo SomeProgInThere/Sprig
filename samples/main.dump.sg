@@ -1,0 +1,36 @@
+// <generated dump from source file: ..\samples\main.sg>
+// THIS PROGRAM CANNOT BE COMPILED
+
+func factorial(num: int): int {
+    var fact = 1
+    let i = 1
+    var upper_bound = num
+    goto label1
+label2:
+    fact = fact * i
+continue1:
+    i = i + 1
+label1:
+    if (i <= upper_bound)
+    	goto label2
+break1:
+    return fact
+}
+
+func ncr(n: int, r: int): int {
+    if !(r > n)
+    	goto label1
+    print(any("Invalid input!"))
+    return -1
+label1:
+    return factorial(n) / (factorial(r) * factorial(n - r))
+}
+
+func main() {
+    let n = 11
+    let r = 3
+    let result = ncr(n, r)
+    print(any(result))
+    return
+}
+

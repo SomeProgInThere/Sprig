@@ -1,0 +1,12 @@
+digraph G {
+	N0 [label = "<Start>", shape = box]
+	N1 [label = "if !(r > n)\l	goto label1", shape = box]
+	N2 [label = "print(any(\"Invalid input!\"))\lreturn -1", shape = box]
+	N3 [label = "label1:\lreturn factorial(n) / (factorial(r) * factorial(n - r))", shape = box]
+	N4 [label = "<End>", shape = box]
+	N0 -> N1 [label = ""]
+	N1 -> N3 [label = "!(r > n)"]
+	N1 -> N2 [label = "r > n"]
+	N2 -> N4 [label = ""]
+	N3 -> N4 [label = ""]
+}

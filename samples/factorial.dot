@@ -1,0 +1,16 @@
+digraph G {
+	N0 [label = "<Start>", shape = box]
+	N1 [label = "var fact = 1\llet i = 1\lvar upper_bound = num\lgoto label1", shape = box]
+	N2 [label = "label2:\lfact = fact * i", shape = box]
+	N3 [label = "continue1:\li = i + 1", shape = box]
+	N4 [label = "label1:\lif (i <= upper_bound)\l	goto label2", shape = box]
+	N5 [label = "break1:\lreturn fact", shape = box]
+	N6 [label = "<End>", shape = box]
+	N0 -> N1 [label = ""]
+	N1 -> N4 [label = ""]
+	N2 -> N3 [label = ""]
+	N3 -> N4 [label = ""]
+	N4 -> N2 [label = "i <= upper_bound"]
+	N4 -> N5 [label = "!(i <= upper_bound)"]
+	N5 -> N6 [label = ""]
+}

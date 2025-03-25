@@ -18,7 +18,7 @@ public sealed class Compilation {
         if (program.Diagnostics.Any())
             return program.Diagnostics;
 
-        if (dumpOptions != null) {
+        if (dumpOptions.Length != 0) {
             foreach (var option in dumpOptions) {
 
                 if (option == "lowered")
@@ -30,7 +30,9 @@ public sealed class Compilation {
                 if (option == "symbols")
                     DumpSymbols(program);
             }
-        } else {
+        } 
+        
+        else {
             var emitter = new Emitter(program);
             emitter.LoadReferences(moduleName, references);
             emitter.Emit(outputPath);

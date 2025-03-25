@@ -28,9 +28,7 @@ public static class TextWritterExtension {
     public static void WriteSpace(this TextWriter writer) => writer.Write(" ");
 
     public static void WriteText(this TextWriter writer, string text) {
-        writer.SetForeground(ConsoleColor.Gray);
         writer.Write(text);
-        writer.ResetColor();
     }
 
     public static void WriteError(this TextWriter writer, string text) {
@@ -39,10 +37,8 @@ public static class TextWritterExtension {
         writer.ResetColor();
     } 
 
-    public static void WritePunctuation(this TextWriter writer, SyntaxKind token) {
-        writer.SetForeground(ConsoleColor.Gray);
+    public static void WriteToken(this TextWriter writer, SyntaxKind token) {
         writer.Write(token.Text());
-        writer.ResetColor();
     }
 
     public static void WriteDiagnostics(this TextWriter writer, IEnumerable<DiagnosticMessage> diagnostics) {
