@@ -1,5 +1,5 @@
 func main() {
-    let s = "123.5"
+    let s = "4.2"
     goto label1 if not decimal(s) > 4
     print(any("Hi"))
 label1:

@@ -7,9 +7,9 @@ using Sprig.IO;
 class Program {
 
     static async Task<int> Main(string[] args) {
-        var rootCommand = new RootCommand("Twig: CLI for sprig language");
+        var rootCommand = new RootCommand("Twig: CLI for sprig-lang");
         
-        var buildCommand = new Command("build", "Compiles the given source");
+        var buildCommand = new Command("build", "Builds the given sources");
         var sourcePathsArgument = new Argument<List<string>>(
             name: "source-paths",
             description: "Paths to the source files"
@@ -17,7 +17,9 @@ class Program {
         
         var referencePathsOption = new Option<string>(
             name: "--reference",
-            description: "Path of the assembly to reference"
+            description: "Paths of the .NET assemblies to reference",
+            // Limited to windows
+            getDefaultValue: () => "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/mscorlib.dll"
         );
         
         referencePathsOption.AddAlias("-r");
@@ -32,14 +34,15 @@ class Program {
         
         var outputOption = new Option<string>(
             name: "--output",
-            description: "Output path of the assembly to create"
+            description: "Output path of the program"
         );
 
         outputOption.AddAlias("-o");
         
-        var dumpPathOption = new Option<string>(
+        var dumpPathOption = new Option<bool>(
             name: "--dump",
-            description: "Path of the extra outputs of program"
+            description: "Dumps Lowered and ControlFlow representation of the program",
+            getDefaultValue: () => false
         );
         
         dumpPathOption.AddAlias("-d");
@@ -53,25 +56,29 @@ class Program {
 
         rootCommand.Add(buildCommand);
 
-        buildCommand.SetHandler((sourcePaths, reference, module, output, dumpPath) => {                
+        buildCommand.SetHandler((sourcePaths, reference, module, output, dumpEnabled) => {                
                 var referencePaths = new List<string>();
                 if (reference != null)
                     referencePaths.Add(reference);
                 
                 if (sourcePaths.Count == 0) {
-                    PrintError("no source paths provided");
+                    PrintError("No source paths provided");
                     return;
                 }
 
                 var outputPath = output ?? Path.ChangeExtension(sourcePaths[0], ".exe");
                 var moduleName = module ?? Path.GetFileNameWithoutExtension(outputPath);
+                string? dumpPath = null;
+
+                if (dumpEnabled)
+                    dumpPath = Path.ChangeExtension(outputPath, ".gen.sg");
                 
                 var syntaxTrees = new List<SyntaxTree>();
                 var hasErrors = false;
                 
                 foreach (var path in sourcePaths) {
                     if (!File.Exists(path)) {
-                        PrintError($"source file '{path}' does not exist");
+                        PrintError($"Source file '{path}' does not exist");
                         hasErrors = true;
                         continue;
                     }
@@ -83,7 +90,7 @@ class Program {
                 if (referencePaths.Count != 0) {
                     foreach (var path in referencePaths) {
                         if (!File.Exists(path)) {
-                            PrintError($"reference file '{path}' does not exist");
+                            PrintError($"Reference file '{path}' does not exist");
                             hasErrors = true;
                             continue;
                         }                
@@ -108,15 +115,7 @@ class Program {
             dumpPathOption
         );
 
-      //return await rootCommand.InvokeAsync(args);
-      return await rootCommand.InvokeAsync([
-        "build",
-        "C:/Users/calla/Dev/Sprig/samples/hello.sg",
-        "-r", 
-        "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/mscorlib.dll",
-        "-d", 
-        "C:/Users/calla/Dev/Sprig/samples/hello.g.sg"
-        ]);
+        return await rootCommand.InvokeAsync(args);
     }
 
     private static void PrintError(string message) {
@@ -124,6 +123,7 @@ class Program {
         Console.Error.Write("error: ");
         Console.ForegroundColor = ConsoleColor.Gray;
         Console.Error.Write(message);
+
         Console.ResetColor();
         Console.WriteLine();
     }

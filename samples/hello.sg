@@ -1,6 +1,6 @@
 
 func main() {
-    let s = "123.5"
+    let s = "4.2"
     if decimal(s) > 4.0 {
         print("Hi")
     }

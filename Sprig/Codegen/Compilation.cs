@@ -12,27 +12,19 @@ public sealed class Compilation {
         return new Compilation(previous: null, syntaxTrees);
     }
 
-    public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath, string dumpPath) {
+    public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath, string? dumpPath)
+    {
         var program = GetProgram();
         if (program.Diagnostics.Any())
             return program.Diagnostics;
-        
-        using var writer = new StringWriter();
-        
-        foreach (var (header, body) in program.Functions) {
-            header.WriteTo(writer);
-            body.WriteTo(writer);
-            writer.WriteLine();
-        }
 
-        File.WriteAllText(dumpPath, writer.ToString());
-        writer.Flush();
+        EmitLowered(dumpPath, program);
 
         var emitter = new Emitter(program);
         emitter.LoadReferences(moduleName, references);
         emitter.Emit(outputPath);
 
-        return [..emitter.Diagonostics];
+        return [.. emitter.Diagonostics];
     }
 
     public Compilation ContinueWith(SyntaxTree syntaxTree) => new(this, syntaxTree);
@@ -60,6 +52,21 @@ public sealed class Compilation {
     private IR_Program GetProgram() {
         var previous = Previous?.GetProgram();
         return Binder.BindProgram(previous, GlobalScope);
+    }
+    
+    private static void EmitLowered(string? dumpPath, IR_Program program) {
+        if (dumpPath != null) {
+            using var writer = new StringWriter();
+
+            foreach (var (header, body) in program.Functions) {
+                header.WriteTo(writer);
+                body.WriteTo(writer);
+                writer.WriteLine();
+            }
+
+            File.WriteAllText(dumpPath, writer.ToString());
+            writer.Flush();
+        }
     }
 
     internal IR_GlobalScope? GlobalScope {
