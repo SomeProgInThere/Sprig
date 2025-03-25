@@ -7,7 +7,6 @@ using Sprig.Codegen.Syntax;
 namespace Sprig.IO;
 
 public static class TextWritterExtension {
-
     public static bool IsColorAvailable(this TextWriter writer) {
         if (writer == Console.Out || writer == Console.Error)
             return true;
@@ -28,18 +27,6 @@ public static class TextWritterExtension {
 
     public static void WriteSpace(this TextWriter writer) => writer.Write(" ");
 
-    public static void WriteKeyword(this TextWriter writer, SyntaxKind token) {
-        writer.SetForeground(ConsoleColor.Blue);
-        writer.Write(token.Text());
-        writer.ResetColor();
-    }
-
-    public static void WriteIdentifier(this TextWriter writer, string text) {
-        writer.SetForeground(ConsoleColor.DarkYellow);
-        writer.Write(text);
-        writer.ResetColor();
-    }
-
     public static void WriteText(this TextWriter writer, string text) {
         writer.SetForeground(ConsoleColor.Gray);
         writer.Write(text);
@@ -51,18 +38,6 @@ public static class TextWritterExtension {
         writer.Write(text);
         writer.ResetColor();
     } 
-
-    public static void WriteNumber(this TextWriter writer, string text) {
-        writer.SetForeground(ConsoleColor.DarkCyan);
-        writer.Write(text);
-        writer.ResetColor();
-    }
-
-    public static void WriteString(this TextWriter writer, string text) {
-        writer.SetForeground(ConsoleColor.DarkGreen);
-        writer.Write(text);
-        writer.ResetColor();
-    }
 
     public static void WritePunctuation(this TextWriter writer, SyntaxKind token) {
         writer.SetForeground(ConsoleColor.Gray);

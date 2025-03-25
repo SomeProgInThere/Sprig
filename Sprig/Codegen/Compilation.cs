@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using Sprig.Codegen.IR;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
+using Sprig.Codegen.IR.ControlFlow;
 
 namespace Sprig.Codegen;
 
@@ -12,19 +13,32 @@ public sealed class Compilation {
         return new Compilation(previous: null, syntaxTrees);
     }
 
-    public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath, string? dumpPath)
-    {
+    public ImmutableArray<DiagnosticMessage> Emit(string moduleName, string[] references, string outputPath, string[]? dumpOptions) {
         var program = GetProgram();
         if (program.Diagnostics.Any())
             return program.Diagnostics;
 
-        DumpLowered(dumpPath, program);
+        if (dumpOptions != null) {
+            foreach (var option in dumpOptions) {
 
-        var emitter = new Emitter(program);
-        emitter.LoadReferences(moduleName, references);
-        emitter.Emit(outputPath);
+                if (option == "lowered")
+                    DumpLowered(outputPath, program);
 
-        return [.. emitter.Diagonostics];
+                if (option == "controlflow")
+                    DumpControlflow(outputPath, program);
+
+                if (option == "symbols")
+                    DumpSymbols(program);
+            }
+        } else {
+            var emitter = new Emitter(program);
+            emitter.LoadReferences(moduleName, references);
+            emitter.Emit(outputPath);
+
+            return [..emitter.Diagonostics];
+        }
+
+        return [];
     }
 
     public Compilation ContinueWith(SyntaxTree syntaxTree) => new(this, syntaxTree);
@@ -54,22 +68,44 @@ public sealed class Compilation {
         return Binder.BindProgram(previous, GlobalScope);
     }
     
-    private static void DumpLowered(string? dumpPath, IR_Program program) {
-        if (dumpPath != null) {
-            using var writer = new StringWriter();
+    private static void DumpLowered(string outputPath, IR_Program program) {
+        var dumpPath = Path.ChangeExtension(outputPath, ".dump.sg");
+        using var writer = new StreamWriter(dumpPath);
 
-            writer.WriteLine($"// <generated dump from program: {dumpPath}>");
-            writer.WriteLine("// THIS PROGRAM CANNOT BE COMPILED");
+        writer.WriteLine($"// <generated dump from source file: {Path.ChangeExtension(outputPath, ".sg")}>");
+        writer.WriteLine("// THIS PROGRAM CANNOT BE COMPILED");
+        writer.WriteLine();
+
+        foreach (var (header, body) in program.Functions) {
+            header.WriteTo(writer);
+            body.WriteTo(writer);
             writer.WriteLine();
+        }
+    }
 
-            foreach (var (header, body) in program.Functions) {
-                header.WriteTo(writer);
-                body.WriteTo(writer);
-                writer.WriteLine();
-            }
+    private static void DumpControlflow(string outputPath, IR_Program program) {
+        foreach (var (header, body) in program.Functions) {
+            
+            var controlFlowStatments = !body.Statements.Any() && !program.Functions.IsEmpty
+                ? program.Functions.Last().Value
+                : body;
 
-            File.WriteAllText(dumpPath, writer.ToString());
-            writer.Flush();
+            var dumpPath = Path.ChangeExtension(
+                Path.Join(Path.GetDirectoryName(outputPath), header.Name), 
+                ".dot"
+            );
+
+            var controlFlowGraph = ControlFlowGraph.Create(controlFlowStatments);
+            using var writer = new StreamWriter(dumpPath);
+            
+            controlFlowGraph.WriteTo(writer);            
+        }
+    }
+
+    private static void DumpSymbols(IR_Program program) {
+        foreach (var symbol in program.Symbols) {
+            symbol.WriteTo(Console.Out);
+            Console.WriteLine();
         }
     }
 

@@ -29,33 +29,34 @@ internal static class SymbolWriter {
         }
     }
 
-    private static void WriteTypeSymbol(TypeSymbol symbol, TextWriter writer) => writer.WriteIdentifier(symbol.Name);
+    private static void WriteTypeSymbol(TypeSymbol symbol, TextWriter writer) => writer.Write(symbol.Name);
 
     private static void WriteVariableSymbol(VariableSymbol symbol, TextWriter writer) {
         var scope = symbol.Scope == VariableScope.Local ? "local" : "global";
-        writer.WriteIdentifier($"({scope})");
+        writer.Write($"({scope})");
+        writer.WriteSpace();
 
-        writer.WriteKeyword(symbol.Mutable ? SyntaxKind.VarKeyword : SyntaxKind.LetKeyword);
+        writer.Write(symbol.Mutable ? SyntaxKind.VarKeyword : SyntaxKind.LetKeyword);
         writer.WriteSpace();
         
-        writer.WriteIdentifier(symbol.Name);
+        writer.Write(symbol.Name);
         writer.WritePunctuation(SyntaxKind.ColonToken);
         writer.WriteSpace();
         symbol.Type.WriteTo(writer);
     }
 
     private static void WriteParameterSymbol(ParameterSymbol symbol, TextWriter writer) {
-        writer.WriteIdentifier(symbol.Name);
+        writer.Write(symbol.Name);
         writer.WritePunctuation(SyntaxKind.ColonToken);
         writer.WriteSpace();
         symbol.Type.WriteTo(writer);
     }
 
     private static void WriteFunctionSymbol(FunctionSymbol symbol, TextWriter writer) {
-        writer.WriteKeyword(SyntaxKind.FuncKeyword);
+        writer.Write(SyntaxKind.FuncKeyword);
         writer.WriteSpace();
 
-        writer.WriteIdentifier(symbol.Name);
+        writer.Write(symbol.Name);
         writer.WritePunctuation(SyntaxKind.OpenParenthesisToken);
         
         for (int i = 0; i < symbol.Parameters.Length; i++) {

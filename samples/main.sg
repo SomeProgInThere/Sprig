@@ -1,0 +1,8 @@
+func main() {
+    // This is a comment
+    let n = 11
+    let r = 3
+    let result = ncr(n, r)
+    
+    print(result)
+}

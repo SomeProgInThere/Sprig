@@ -49,20 +49,33 @@ public abstract class SyntaxNode(SyntaxTree syntaxTree) {
         return Children().Last().LastToken();
     }
 
-    public void WriteTo(TextWriter writer) {
-        writer.WriteLine("ParseTree");
-        SyntaxNodeExtension.PrettyPrint(writer, this);
-        writer.WriteLine();
-    }
-
+    public void WriteTo(TextWriter writer) => PrettyPrint(writer, this);
     public TextLocation Location => new(SyntaxTree.Source, Span);
     
-    public SyntaxTree SyntaxTree { get; } = syntaxTree;
-
     public override string ToString() {
         using var writer = new StringWriter();
         WriteTo(writer);
         
         return writer.ToString();
     }
+
+    private static void PrettyPrint(TextWriter writer, SyntaxNode node, string indent = "", bool last = true) {
+        var marker = last ? "└──" : "├──";
+
+        writer.Write(indent);
+        writer.Write(marker);
+        writer.Write(node.Kind);
+
+        if (node is SyntaxToken token && token.Value != null)
+            writer.Write($" ({token.Value})");
+
+        writer.WriteLine();
+        indent += last ? "    " : "│   ";
+
+        var lastChild = node.Children().LastOrDefault();
+        foreach (var child in node.Children())
+            PrettyPrint(writer, child, indent, child == lastChild);
+    }
+
+    public SyntaxTree SyntaxTree { get; } = syntaxTree;
 }

@@ -45,7 +45,7 @@ internal static class IRNodeWriter {
                 break;
                 
             case IR_NodeKind.ErrorExpression: 
-                writer.WriteIdentifier("?");
+                writer.Write("?");
                 break;
                 
             case IR_NodeKind.BlockStatement: 
@@ -144,28 +144,28 @@ internal static class IRNodeWriter {
         var value = node.Value.ToString() ?? "?";
         
         if (node.Type == TypeSymbol.Boolean)
-            writer.WriteIdentifier(value);
+            writer.Write(value);
 
         else if (node.Type == TypeSymbol.Int32)
-            writer.WriteNumber(value);
+            writer.Write(value);
             
         else if (node.Type == TypeSymbol.Double)
-            writer.WriteNumber(value);
+            writer.Write(value);
 
         else if (node.Type == TypeSymbol.String) {
             value = "\"" + value.Replace("\"", "\"\"") + "\"";
-            writer.WriteString(value);
+            writer.Write(value);
         }
 
         else throw new Exception($"Unexpected type: {node.Type}");
     }
 
     private static void WriteVariableExpression(IR_VariableExpression node, IndentedTextWriter writer) {
-        writer.WriteIdentifier(node.Variable.Name);
+        writer.Write(node.Variable.Name);
     }
 
     private static void WriteAssignmentExpression(IR_AssignmentExpression node, IndentedTextWriter writer) {
-        writer.WriteIdentifier(node.Variable.Name);
+        writer.Write(node.Variable.Name);
 
         writer.WriteSpace();
         writer.WritePunctuation(SyntaxKind.EqualsToken);
@@ -194,7 +194,7 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteCallExpression(IR_CallExpression node, IndentedTextWriter writer) {
-        writer.WriteIdentifier(node.Function.Name);
+        writer.Write(node.Function.Name);
         writer.WritePunctuation(SyntaxKind.OpenParenthesisToken);
 
         var isFirst = true;
@@ -213,7 +213,7 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteCastExpression(IR_CastExpression node, IndentedTextWriter writer) {
-        writer.WriteIdentifier(node.Type.Name);
+        writer.Write(node.Type.Name);
         writer.WritePunctuation(SyntaxKind.OpenParenthesisToken);
         node.Expression.WriteTo(writer);
         writer.WritePunctuation(SyntaxKind.ClosedParenthesisToken);
@@ -249,9 +249,9 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteVariableDeclaration(IR_VariableDeclaration node, IndentedTextWriter writer) {
-        writer.WriteKeyword(node.Variable.Mutable ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword);
+        writer.Write(node.Variable.Mutable ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword);
         writer.WriteSpace();
-        writer.WriteIdentifier(node.Variable.Name);
+        writer.Write(node.Variable.Name);
 
         writer.WriteSpace();
         writer.WritePunctuation(SyntaxKind.EqualsToken);
@@ -269,20 +269,22 @@ internal static class IRNodeWriter {
     private static void WriteGotoStatement(IR_GotoStatement node, IndentedTextWriter writer) {
         writer.WriteText("goto");
         writer.WriteSpace();
-        writer.WriteIdentifier(node.Label.Name);
+        writer.Write(node.Label.Name);
         writer.WriteLine();
     }
 
     private static void WriteConditionalGoto(IR_ConditionalGotoStatement node, IndentedTextWriter writer) {
+        writer.Write(node.Jump ? "if " : "if !");
+        writer.WritePunctuation(SyntaxKind.OpenParenthesisToken);
+        node.Condition.WriteTo(writer);
+        writer.WritePunctuation(SyntaxKind.ClosedParenthesisToken);
+
+        writer.WriteLine();
+        writer.Write("\t");
         writer.WriteText("goto");
         writer.WriteSpace();
-        writer.WriteIdentifier(node.Label.Name);
-
-        writer.WriteSpace();
-        writer.WriteText(node.Jump ? "if" : "if not");
-        writer.WriteSpace();
+        writer.Write(node.Label.Name);
         
-        node.Condition.WriteTo(writer);
         writer.WriteLine();
     }
 
@@ -291,7 +293,7 @@ internal static class IRNodeWriter {
         if (unindent)
             writer.Indent--;
         
-        writer.WriteIdentifier(node.Label.Name);
+        writer.Write(node.Label.Name);
         writer.WritePunctuation(SyntaxKind.ColonToken);
 
         if (unindent)
@@ -301,7 +303,7 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteReturnStatement(IR_ReturnStatment node, IndentedTextWriter writer) {
-        writer.WriteKeyword(SyntaxKind.ReturnKeyword);
+        writer.Write(SyntaxKind.ReturnKeyword);
         if (node.Expression != null) {
             writer.WriteSpace();
             node.Expression.WriteTo(writer);
@@ -311,7 +313,7 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteIfStatement(IR_IfStatement node, IndentedTextWriter writer) {
-        writer.WriteKeyword(SyntaxKind.IfKeyword);
+        writer.Write(SyntaxKind.IfKeyword);
         writer.WriteSpace();
 
         node.Condition.WriteTo(writer);
@@ -319,14 +321,14 @@ internal static class IRNodeWriter {
         writer.WriteNestedStatements(node.IfStatement);
 
         if (node.ElseStatement != null) {
-            writer.WriteKeyword(SyntaxKind.ElseKeyword);
+            writer.Write(SyntaxKind.ElseKeyword);
             writer.WriteLine();
             writer.WriteNestedStatements(node.ElseStatement);
         }
     }
 
     private static void WriteWhileStatement(IR_WhileStatement node, IndentedTextWriter writer) {
-        writer.WriteKeyword(SyntaxKind.WhileKeyword);
+        writer.Write(SyntaxKind.WhileKeyword);
         writer.WriteSpace();
 
         node.Condition.WriteTo(writer);
@@ -335,12 +337,12 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteDoWhileStatement(IR_DoWhileStatement node, IndentedTextWriter writer) {
-        writer.WriteKeyword(SyntaxKind.DoKeyword);
+        writer.Write(SyntaxKind.DoKeyword);
         writer.WriteSpace();
         writer.WriteLine();
         writer.WriteNestedStatements(node.Body);
         
-        writer.WriteKeyword(SyntaxKind.WhileKeyword);
+        writer.Write(SyntaxKind.WhileKeyword);
         writer.WriteSpace();
 
         node.Condition.WriteTo(writer);
@@ -348,11 +350,11 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteForStatement(IR_ForStatement node, IndentedTextWriter writer) {
-        writer.WriteKeyword(SyntaxKind.ForKeyword);
+        writer.Write(SyntaxKind.ForKeyword);
         writer.WriteSpace();
-        writer.WriteIdentifier(node.Variable.Name);
+        writer.Write(node.Variable.Name);
         writer.WriteSpace();
-        writer.WriteKeyword(SyntaxKind.InKeyword);
+        writer.Write(SyntaxKind.InKeyword);
         writer.WriteSpace();
 
         node.LowerBound.WriteTo(writer);

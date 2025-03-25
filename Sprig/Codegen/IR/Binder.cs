@@ -105,13 +105,14 @@ internal sealed class Binder {
                 previous, 
                 globalScope.Diagnostics, 
                 null, 
-                ImmutableDictionary<FunctionSymbol, IR_BlockStatement>.Empty
+                ImmutableDictionary<FunctionSymbol, IR_BlockStatement>.Empty,
+                []
             );
 
         var functions = ImmutableDictionary.CreateBuilder<FunctionSymbol, IR_BlockStatement>();
         var diagnostics = ImmutableArray<DiagnosticMessage>.Empty;
 
-        foreach (var symbol in globalScope.Symbols.Where(s => s is FunctionSymbol)) {
+        foreach (var symbol in globalScope.Symbols.Where(symbol => symbol is FunctionSymbol)) {
             var function = symbol as FunctionSymbol;
 
             var binder = new Binder(parentScope, function);
@@ -131,12 +132,13 @@ internal sealed class Binder {
             var body = Lowerer.Lower(globalScope.MainFunction, new IR_BlockStatement(globalScope.Statements));
             functions.Add(globalScope.MainFunction, body);
         }
-
+        
         return new IR_Program(
             previous, 
             diagnostics, 
-            globalScope.MainFunction, 
-            functions.ToImmutable()
+            globalScope.MainFunction,
+            functions.ToImmutable(),
+            [..globalScope.Symbols]
         );
     }
 

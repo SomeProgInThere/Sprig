@@ -45,10 +45,12 @@ internal sealed class IR_Program(
     IR_Program previous,
     ImmutableArray<DiagnosticMessage> diagnostics,
     FunctionSymbol? mainFunction,
-    ImmutableDictionary<FunctionSymbol, IR_BlockStatement> functions
+    ImmutableDictionary<FunctionSymbol, IR_BlockStatement> functions,
+    ImmutableArray<Symbol> symbols
 ) {
     public IR_Program Previous { get; } = previous;
     public FunctionSymbol? MainFunction { get; } = mainFunction;
     public ImmutableArray<DiagnosticMessage> Diagnostics { get; } = diagnostics;
     public ImmutableDictionary<FunctionSymbol, IR_BlockStatement> Functions { get; } = functions;
+    public ImmutableArray<Symbol> Symbols { get; } = symbols;
 }

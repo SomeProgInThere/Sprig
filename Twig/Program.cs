@@ -39,24 +39,30 @@ class Program {
 
         outputOption.AddAlias("-o");
         
-        var dumpPathOption = new Option<bool>(
+        var dumpOption = new Option<string[]>(
             name: "--dump",
-            description: "Dumps IL and ControlFlow representation of the program",
-            getDefaultValue: () => false
+            description: "Outputs internal representations of the program"
+        )
+        .FromAmong(
+            "controlflow",
+            "lowered",
+            "tokens",
+            "symbols"
         );
         
-        dumpPathOption.AddAlias("-d");
+        dumpOption.AddAlias("-d");
+        dumpOption.AllowMultipleArgumentsPerToken = true;
 
         buildCommand.Add(sourcePathsArgument);
         
         buildCommand.Add(referencePathsOption);
         buildCommand.Add(moduleNameOption);
         buildCommand.Add(outputOption);
-        buildCommand.Add(dumpPathOption);
+        buildCommand.Add(dumpOption);
 
         rootCommand.Add(buildCommand);
 
-        buildCommand.SetHandler((sourcePaths, reference, module, output, dumpEnabled) => {                
+        buildCommand.SetHandler((sourcePaths, reference, module, output, dumpOptions) => {                
                 var referencePaths = new List<string>();
                 if (reference != null)
                     referencePaths.Add(reference);
@@ -68,10 +74,6 @@ class Program {
 
                 var outputPath = output ?? Path.ChangeExtension(sourcePaths[0], ".exe");
                 var moduleName = module ?? Path.GetFileNameWithoutExtension(outputPath);
-                string? dumpPath = null;
-
-                if (dumpEnabled)
-                    dumpPath = Path.ChangeExtension(outputPath, ".dump.sg");
                 
                 var syntaxTrees = new List<SyntaxTree>();
                 var hasErrors = false;
@@ -100,9 +102,23 @@ class Program {
                 if (hasErrors)
                     return;
 
-                var compilation = Compilation.Create([..syntaxTrees]);
-                var diagnostics = compilation.Emit(moduleName, [..referencePaths], outputPath, dumpPath);
+                if (dumpOptions.Length != 0) {
+                    if (dumpOptions.Select(option => option == "tokens").First()) {
+                        foreach (var tree in syntaxTrees) {
+                            var dumpPath = Path.ChangeExtension(
+                                Path.Join(Path.GetDirectoryName(outputPath), tree.Source.FileName), 
+                                ".tokens.txt"
+                            );
+                            using var writer = new StreamWriter(dumpPath);
+                            writer.WriteLine($"<generated parse tree from source file: {Path.ChangeExtension(outputPath, ".sg")}>");
+                            tree.Root.WriteTo(writer);
+                        }
+                    }
+                }
 
+                var compilation = Compilation.Create([..syntaxTrees]);
+                var diagnostics = compilation.Emit(moduleName, [..referencePaths], outputPath, dumpOptions);
+                
                 if (diagnostics.Any()) {
                     Console.Error.WriteDiagnostics(diagnostics);
                     return;
@@ -112,7 +128,7 @@ class Program {
             referencePathsOption,
             moduleNameOption,
             outputOption,
-            dumpPathOption
+            dumpOption
         );
 
         return await rootCommand.InvokeAsync(args);
