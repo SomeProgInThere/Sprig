@@ -44,8 +44,9 @@ func main() {
 ```
 
 ## Build Guide
-> ![IMPORTANT]
-> Solution use .NET 9.0 as of writing 
+
+> [!IMPORTANT]
+> Solution uses .NET 9.0 as of writing 
 
 * Solution can be opened with Visual Studio 2022 (with .NET desktop development)
 * Build using dotnet cli:
@@ -75,8 +76,8 @@ Sprig
 ```
 
 ## Status 
-- Support for lists and associated functions
-- switch statement
+- Adding support for lists and associated functions
+- Adding Switch statements
 
 ## Credits
 Special thanks to [terrajobst](https://youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y) for making an amazing compiler series
