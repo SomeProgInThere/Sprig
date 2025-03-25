@@ -1,4 +1,4 @@
-Remove-Item -Path ../Sprig/samples/*.dump.sg
-Remove-Item -Path ../Sprig/samples/*.txt
-Remove-Item -Path ../Sprig/samples/*.dot
-Remove-Item -Path ../Sprig/samples/*.exe
+Remove-Item -Path ../Sprig/Samples/*.dump.sg
+Remove-Item -Path ../Sprig/Samples/*.txt
+Remove-Item -Path ../Sprig/Samples/*.dot
+Remove-Item -Path ../Sprig/Samples/*.exe

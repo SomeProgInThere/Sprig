@@ -1,7 +1,7 @@
 # Sprig: AOT Compiler[![dotnet-build](https://github.com/SomeProgInThere/Sprig/actions/workflows/dotnet.yml/badge.svg)](https://github.com/SomeProgInThere/Sprig/actions/workflows/dotnet.yml)
 
-[!NOTE]
-This project only supports windows based platform.
+> [!NOTE]
+> This project only supports windows based platform.
 
 ### Sprig: Overview
 An Ahead-Of-Time compiler for the Sprig programming language, built with .NET framework.
@@ -44,8 +44,8 @@ func main() {
 ```
 
 ## Build Guide
-![IMPORTANT]
-Solution use .NET 9.0 as of writing 
+> ![IMPORTANT]
+> Solution use .NET 9.0 as of writing 
 
 * Solution can be opened with Visual Studio 2022 (with .NET desktop development)
 * Build using dotnet cli:
