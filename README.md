@@ -1,4 +1,4 @@
-# Sprig: AOT Compiler[![dotnet-build](https://github.com/SomeProgInThere/Sprig/actions/workflows/dotnet.yml/badge.svg)](https://github.com/SomeProgInThere/Sprig/actions/workflows/dotnet.yml)
+# Sprig [![dotnet-build](https://github.com/SomeProgInThere/Sprig/actions/workflows/dotnet.yml/badge.svg)](https://github.com/SomeProgInThere/Sprig/actions/workflows/dotnet.yml)
 
 > [!NOTE]
 > This project only supports windows based platform.
