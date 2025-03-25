@@ -1,29 +1,8 @@
 func main() {
-    print(any("Enter marks:"))
-    let marks = input()
-    var grade = ""
-    goto label1 if not marks == "90"
-    grade = "A"
-    goto label2
+    let s = "123.5"
+    goto label1 if not decimal(s) > 4
+    print(any("Hi"))
 label1:
-    goto label3 if not marks == "70"
-    grade = "B"
-    goto label4
-label3:
-    goto label5 if not marks == "50"
-    grade = "C"
-    goto label6
-label5:
-    goto label7 if not marks == "30"
-    grade = "D"
-    goto label8
-label7:
-    grade = "F"
-label8:
-label6:
-label4:
-label2:
-    print(any(grade))
     return
 }
 

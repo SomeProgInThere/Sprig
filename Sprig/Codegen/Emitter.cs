@@ -6,7 +6,6 @@ using Mono.Cecil.Rocks;
 
 using Sprig.Codegen.IR;
 using Sprig.Codegen.Symbols;
-using Sprig.Codegen.Syntax;
 
 namespace Sprig.Codegen;
 
@@ -29,9 +28,9 @@ internal sealed class Emitter(IR_Program program) {
         var builtinTypes = new List<(TypeSymbol type, string metadataName)>() {
             (TypeSymbol.Any,     "System.Object"),
             (TypeSymbol.Void,    "System.Void"),
-            (TypeSymbol.Boolean,    "System.Boolean"),
-            (TypeSymbol.Int32,     "System.Int32"),
-            (TypeSymbol.Double, "System.Double"),
+            (TypeSymbol.Boolean, "System.Boolean"),
+            (TypeSymbol.Int32,   "System.Int32"),
+            (TypeSymbol.Double,  "System.Double"),
             (TypeSymbol.String,  "System.String"),
         };
 

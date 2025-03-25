@@ -37,6 +37,11 @@ public class Casting {
         if (from == TypeSymbol.Boolean && to == TypeSymbol.Int32)
             return Explicit;
 
+        if (from == TypeSymbol.String) {
+            if (to == TypeSymbol.Int32 ||  to == TypeSymbol.Double || to == TypeSymbol.Boolean)
+                return Explicit;
+        }
+
         if (from == TypeSymbol.Boolean || from == TypeSymbol.Int32 || from == TypeSymbol.Double) {
             if (to == TypeSymbol.String)
                 return Explicit;

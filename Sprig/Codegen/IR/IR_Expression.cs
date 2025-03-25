@@ -17,7 +17,7 @@ internal sealed class IR_LiteralExpression(object value)
     public override TypeSymbol Type { get; } = value switch {
         bool    => TypeSymbol.Boolean,
         int     => TypeSymbol.Int32,
-        float   => TypeSymbol.Double,
+        double  => TypeSymbol.Double,
         string  => TypeSymbol.String,
         
         _ => throw new Exception($"Unexpected literal '{value}' of type '{value.GetType()}'"),

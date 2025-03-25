@@ -218,16 +218,16 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
     }
 
     private void ReadNumberToken() {
-        var isFloat = false;
+        var isDecimal = false;
         while (char.IsDigit(Current) || Current == '.') {
             if (Current == '.') {
                 if (Next == '.') {
                     break;
                 }
 
-                if (isFloat)
+                if (isDecimal)
                     break;
-                isFloat = true;
+                isDecimal = true;
             }
 
             position++;
@@ -236,7 +236,7 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
         var length = position - start;
         var text = syntaxTree.Source.ToString(start, length);
 
-        if (!isFloat) {
+        if (!isDecimal) {
             if (!int.TryParse(text, out var intResult)) {
                 var span = new TextSpan(start, length);
                 var location = new TextLocation(syntaxTree.Source, span);
@@ -245,12 +245,12 @@ internal sealed class Lexer(SyntaxTree syntaxTree) {
             value = intResult;
         }
         else {
-            if (!float.TryParse(text, out var floatResult)) {
+            if (!double.TryParse(text, out var doubleResult)) {
                 var span = new TextSpan(start, length);
                 var location = new TextLocation(syntaxTree.Source, span);
                 diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Double);
             }
-            value = floatResult;
+            value = doubleResult;
         }
 
         kind = SyntaxKind.NumberToken;
