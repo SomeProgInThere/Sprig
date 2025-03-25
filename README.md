@@ -76,6 +76,7 @@ Sprig
 
 ## Status 
 - Support for lists and associated functions
+- switch statement
 
 ## Credits
 Special thanks to [terrajobst](https://youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y) for making an amazing compiler series
