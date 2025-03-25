@@ -3,7 +3,7 @@
 > [!NOTE]
 > This project only supports windows based platform.
 
-### Sprig: Overview
+## Overview
 An Ahead-Of-Time compiler for the Sprig programming language, built with .NET framework.
 
 ## Features
@@ -77,7 +77,7 @@ Sprig
 
 ## Status 
 - Adding support for lists and associated functions
-- Adding Switch statements
+- Adding switch statements
 
 ## Credits
 Special thanks to [terrajobst](https://youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y) for making an amazing compiler series
