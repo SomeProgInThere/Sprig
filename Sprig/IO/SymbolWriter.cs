@@ -1,8 +1,7 @@
-
+using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
-using Sprig.IO;
 
-namespace Sprig.Codegen.Symbols;
+namespace Sprig.IO;
 
 internal static class SymbolWriter {
 

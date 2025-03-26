@@ -1,9 +1,10 @@
 using System.CodeDom.Compiler;
+
+using Sprig.Codegen.IR;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.Syntax;
-using Sprig.IO;
 
-namespace Sprig.Codegen.IR;
+namespace Sprig.IO;
 
 internal static class IRNodeWriter {
 
