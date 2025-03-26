@@ -60,7 +60,7 @@ dotnet build --configuration Release
 
 # Run twig with given example
 cd .\Twig
-dotnet run build ..\samples\main.sg
+dotnet run build ..\Example\main.sg
 
 # (optional) use clean script to clean the generated outputs
 cd ..
@@ -72,12 +72,12 @@ cd ..
 Sprig
 ├── Sprig           # Sprig Compiler
 ├── Twig            # CLI App for Sprig
-└── Samples         # Examples
+└── Example         # Example with outputs
 ```
 
 ## Status 
 - Adding support for lists and associated functions
-- Adding Switch statements
+- Adding switch statements
 
 ## Credits
 Special thanks to [terrajobst](https://youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y) for making an amazing compiler series

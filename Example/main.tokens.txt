@@ -1,0 +1,168 @@
+<generated parse tree from source file: ..\Example\main.sg>
+└──CompilationUnit
+    ├──FunctionHeader
+    │   ├──FuncKeyword
+    │   ├──IdentifierToken
+    │   ├──OpenParenthesisToken
+    │   ├──FunctionParameter
+    │   │   ├──IdentifierToken
+    │   │   └──TypeClause
+    │   │       ├──ColonToken
+    │   │       └──IdentifierToken
+    │   ├──ClosedParenthesisToken
+    │   ├──TypeClause
+    │   │   ├──ColonToken
+    │   │   └──IdentifierToken
+    │   └──BlockStatment
+    │       ├──OpenBraceToken
+    │       ├──VariableDeclaration
+    │       │   ├──VarKeyword
+    │       │   ├──IdentifierToken
+    │       │   ├──EqualsToken
+    │       │   └──LiteralExpression
+    │       │       └──NumberToken (1)
+    │       ├──ForStatement
+    │       │   ├──ForKeyword
+    │       │   ├──IdentifierToken
+    │       │   ├──InKeyword
+    │       │   ├──LiteralExpression
+    │       │   │   └──NumberToken (1)
+    │       │   ├──DoubleDotToken
+    │       │   ├──NameExpression
+    │       │   │   └──IdentifierToken
+    │       │   └──BlockStatment
+    │       │       ├──OpenBraceToken
+    │       │       ├──ExpressionStatement
+    │       │       │   └──AssignmentExpression
+    │       │       │       ├──IdentifierToken
+    │       │       │       ├──EqualsToken
+    │       │       │       └──BinaryExpression
+    │       │       │           ├──NameExpression
+    │       │       │           │   └──IdentifierToken
+    │       │       │           ├──StarToken
+    │       │       │           └──NameExpression
+    │       │       │               └──IdentifierToken
+    │       │       └──ClosedBraceToken
+    │       ├──ReturnStatement
+    │       │   ├──ReturnKeyword
+    │       │   └──NameExpression
+    │       │       └──IdentifierToken
+    │       └──ClosedBraceToken
+    ├──FunctionHeader
+    │   ├──FuncKeyword
+    │   ├──IdentifierToken
+    │   ├──OpenParenthesisToken
+    │   ├──FunctionParameter
+    │   │   ├──IdentifierToken
+    │   │   └──TypeClause
+    │   │       ├──ColonToken
+    │   │       └──IdentifierToken
+    │   ├──CommaToken
+    │   ├──FunctionParameter
+    │   │   ├──IdentifierToken
+    │   │   └──TypeClause
+    │   │       ├──ColonToken
+    │   │       └──IdentifierToken
+    │   ├──ClosedParenthesisToken
+    │   ├──TypeClause
+    │   │   ├──ColonToken
+    │   │   └──IdentifierToken
+    │   └──BlockStatment
+    │       ├──OpenBraceToken
+    │       ├──IfStatement
+    │       │   ├──IfKeyword
+    │       │   ├──BinaryExpression
+    │       │   │   ├──NameExpression
+    │       │   │   │   └──IdentifierToken
+    │       │   │   ├──LeftArrowToken
+    │       │   │   └──NameExpression
+    │       │   │       └──IdentifierToken
+    │       │   └──BlockStatment
+    │       │       ├──OpenBraceToken
+    │       │       ├──ExpressionStatement
+    │       │       │   └──CallExpression
+    │       │       │       ├──IdentifierToken
+    │       │       │       ├──OpenParenthesisToken
+    │       │       │       ├──LiteralExpression
+    │       │       │       │   └──StringToken (Invalid input!)
+    │       │       │       └──ClosedParenthesisToken
+    │       │       ├──ReturnStatement
+    │       │       │   ├──ReturnKeyword
+    │       │       │   └──UnaryExpression
+    │       │       │       ├──LiteralExpression
+    │       │       │       │   └──NumberToken (1)
+    │       │       │       └──MinusToken
+    │       │       └──ClosedBraceToken
+    │       ├──ReturnStatement
+    │       │   ├──ReturnKeyword
+    │       │   └──BinaryExpression
+    │       │       ├──CallExpression
+    │       │       │   ├──IdentifierToken
+    │       │       │   ├──OpenParenthesisToken
+    │       │       │   ├──NameExpression
+    │       │       │   │   └──IdentifierToken
+    │       │       │   └──ClosedParenthesisToken
+    │       │       ├──SlashToken
+    │       │       └──ParenthesizedExpression
+    │       │           ├──OpenParenthesisToken
+    │       │           ├──BinaryExpression
+    │       │           │   ├──CallExpression
+    │       │           │   │   ├──IdentifierToken
+    │       │           │   │   ├──OpenParenthesisToken
+    │       │           │   │   ├──NameExpression
+    │       │           │   │   │   └──IdentifierToken
+    │       │           │   │   └──ClosedParenthesisToken
+    │       │           │   ├──StarToken
+    │       │           │   └──CallExpression
+    │       │           │       ├──IdentifierToken
+    │       │           │       ├──OpenParenthesisToken
+    │       │           │       ├──BinaryExpression
+    │       │           │       │   ├──NameExpression
+    │       │           │       │   │   └──IdentifierToken
+    │       │           │       │   ├──MinusToken
+    │       │           │       │   └──NameExpression
+    │       │           │       │       └──IdentifierToken
+    │       │           │       └──ClosedParenthesisToken
+    │       │           └──ClosedParenthesisToken
+    │       └──ClosedBraceToken
+    ├──FunctionHeader
+    │   ├──FuncKeyword
+    │   ├──IdentifierToken
+    │   ├──OpenParenthesisToken
+    │   ├──ClosedParenthesisToken
+    │   └──BlockStatment
+    │       ├──OpenBraceToken
+    │       ├──VariableDeclaration
+    │       │   ├──LetKeyword
+    │       │   ├──IdentifierToken
+    │       │   ├──EqualsToken
+    │       │   └──LiteralExpression
+    │       │       └──NumberToken (11)
+    │       ├──VariableDeclaration
+    │       │   ├──LetKeyword
+    │       │   ├──IdentifierToken
+    │       │   ├──EqualsToken
+    │       │   └──LiteralExpression
+    │       │       └──NumberToken (3)
+    │       ├──VariableDeclaration
+    │       │   ├──LetKeyword
+    │       │   ├──IdentifierToken
+    │       │   ├──EqualsToken
+    │       │   └──CallExpression
+    │       │       ├──IdentifierToken
+    │       │       ├──OpenParenthesisToken
+    │       │       ├──NameExpression
+    │       │       │   └──IdentifierToken
+    │       │       ├──CommaToken
+    │       │       ├──NameExpression
+    │       │       │   └──IdentifierToken
+    │       │       └──ClosedParenthesisToken
+    │       ├──ExpressionStatement
+    │       │   └──CallExpression
+    │       │       ├──IdentifierToken
+    │       │       ├──OpenParenthesisToken
+    │       │       ├──NameExpression
+    │       │       │   └──IdentifierToken
+    │       │       └──ClosedParenthesisToken
+    │       └──ClosedBraceToken
+    └──EndOfFileToken

@@ -1,4 +1,4 @@
-// <generated dump from source file: ..\samples\main.sg>
+// <generated dump from source file: ..\Example\main.sg>
 // THIS PROGRAM CANNOT BE COMPILED
 
 func factorial(num: int): int {
