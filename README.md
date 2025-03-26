@@ -3,7 +3,7 @@
 > [!NOTE]
 > This project only supports windows based platform.
 
-### Sprig: Overview
+## Overview
 An Ahead-Of-Time compiler for the Sprig programming language, built with .NET framework.
 
 ## Features
