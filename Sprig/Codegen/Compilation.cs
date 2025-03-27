@@ -4,6 +4,7 @@ using Sprig.Codegen.IR;
 using Sprig.Codegen.Syntax;
 using Sprig.Codegen.Symbols;
 using Sprig.Codegen.IR.ControlFlow;
+using Sprig.IO;
 
 namespace Sprig.Codegen;
 

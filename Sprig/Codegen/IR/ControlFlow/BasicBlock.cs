@@ -1,5 +1,6 @@
 
 using System.CodeDom.Compiler;
+using Sprig.IO;
 
 namespace Sprig.Codegen.IR.ControlFlow;
 

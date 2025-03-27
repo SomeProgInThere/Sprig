@@ -1,3 +1,5 @@
+using Sprig.IO;
+
 namespace Sprig.Codegen.Symbols;
 
 public enum SymbolKind {

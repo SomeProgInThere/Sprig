@@ -59,12 +59,10 @@ git clone https://github.com/SomeProgInThere/Sprig.git
 dotnet build --configuration Release
 
 # Run twig with given example
-cd .\Twig
-dotnet run build ..\Example\main.sg
+dotnet run --project Twig build .\Example\main.sg
 
-# (optional) use clean script to clean the generated outputs
-cd ..
-.\clean.ps1
+# (optional) Run script to clean the generated outputs and build
+.\run.ps1
 ```
 
 ## Project Structure
@@ -77,7 +75,8 @@ Sprig
 
 ## Status 
 - Adding support for lists and associated functions
-- Adding switch statements
+- Adding switch and basic match statement
+- Syntax Trivia
 
 ## Credits
 Special thanks to [terrajobst](https://youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y) for making an amazing compiler series

@@ -1,4 +1,6 @@
 
+using Sprig.IO;
+
 namespace Sprig.Codegen.IR;
 
 internal enum IR_NodeKind {
