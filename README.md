@@ -61,8 +61,8 @@ dotnet build --configuration Release
 # Run twig with given example
 dotnet run --project Twig build .\Example\main.sg
 
-# (optional) Run script to clean the generated outputs and build
-.\run.ps1
+# (optional) Run script to clean the generated outputs
+.\clean.ps1
 ```
 
 ## Project Structure

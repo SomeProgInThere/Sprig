@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Diagnostics;
 
 using Sprig.Codegen;
 using Sprig.Codegen.Syntax;
@@ -62,6 +63,7 @@ class Program {
 
         rootCommand.Add(buildCommand);
 
+        var watch = new Stopwatch();
         buildCommand.SetHandler((sourcePaths, reference, module, output, dumpOptions) => {                
                 var referencePaths = new List<string>();
                 if (reference != null)
@@ -77,7 +79,8 @@ class Program {
                 
                 var syntaxTrees = new List<SyntaxTree>();
                 var hasErrors = false;
-                
+
+                watch.Start();
                 foreach (var path in sourcePaths) {
                     if (!File.Exists(path)) {
                         PrintError($"Source file '{path}' does not exist");
@@ -119,6 +122,9 @@ class Program {
                 var compilation = Compilation.Create([..syntaxTrees]);
                 var diagnostics = compilation.Emit(moduleName, [..referencePaths], outputPath, dumpOptions);
                 
+                watch.Stop();
+                Console.WriteLine($"Compilation done in {watch.ElapsedMilliseconds} ms");
+
                 if (diagnostics.Any()) {
                     Console.Error.WriteDiagnostics(diagnostics);
                     return;

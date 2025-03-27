@@ -275,10 +275,14 @@ internal static class IRNodeWriter {
     }
 
     private static void WriteConditionalGoto(IR_ConditionalGotoStatement node, IndentedTextWriter writer) {
-        writer.Write(node.Jump ? "if " : "if !");
-        writer.WriteToken(SyntaxKind.OpenParenthesisToken);
+        writer.Write(node.Jump ? "if " : "if");
+        
+        writer.WriteSpace();
+        writer.Write("not");
+        writer.WriteSpace();
+        
         node.Condition.WriteTo(writer);
-        writer.WriteToken(SyntaxKind.ClosedParenthesisToken);
+        writer.WriteToken(SyntaxKind.ColonToken);
 
         writer.WriteLine();
         writer.Write("\t");
